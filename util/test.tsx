@@ -1,0 +1,32 @@
+//TESTING ONLY
+export function generateMap(): string[][] {
+  const mapArray: string[][] = [];
+  let startingPointSet = false
+  for (let i = 0; i < 50; i++) {
+    const row = [];
+    for (let j = 0; j < 50; j++) {
+        const rand = Math.random();
+      
+        const rand2 = Math.random();
+        if ((rand2 < 0.0005 && !startingPointSet) || (i == 49 && j == 49 && !startingPointSet)) {
+            startingPointSet = true
+            row.push("S"); // Rover starting point
+        } else if (rand < 0.70) {
+            row.push("."); // Passable terrain
+        } else if (rand < 0.85) {
+            row.push("#"); // Obstacles
+        } else if (rand < 0.90) {
+            row.push("B"); // Blue mineral
+        } else if (rand < 0.95) {
+            row.push("Y"); // Yellow mineral
+        } else {
+            row.push("G"); // Green mineral
+        }
+    }
+    mapArray.push(row);
+  }
+  
+  return mapArray;
+}
+//TESTING ONLY
+
