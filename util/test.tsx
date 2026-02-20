@@ -1,14 +1,16 @@
+import { mapConstraints } from "./constants";
+
 //TESTING ONLY
 export function generateMap(): string[][] {
   const mapArray: string[][] = [];
   let startingPointSet = false
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < mapConstraints.height; i++) {
     const row = [];
-    for (let j = 0; j < 50; j++) {
+    for (let j = 0; j < mapConstraints.width; j++) {
         const rand = Math.random();
       
         const rand2 = Math.random();
-        if ((rand2 < 0.0005 && !startingPointSet) || (i == 49 && j == 49 && !startingPointSet)) {
+        if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
             startingPointSet = true
             row.push("S"); // Rover starting point
         } else if (rand < 0.70) {

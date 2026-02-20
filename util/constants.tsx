@@ -3,6 +3,11 @@ enum SPEED {
     MEDIUM = 2,
     FAST = 3,
 }
+export const ores = ["B","Y","G"]
+export const mapConstraints = {
+    width:50,
+    height:50
+}
 
 export const time = {
     day: 16, //A nappal időtartama 16 óra, az éjszaka 8 óra
