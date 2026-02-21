@@ -19,18 +19,14 @@ export function findNearestOre(
   currentX: number,
   currentY: number,
   oreMap: OrePoint[]
-): NearestOre | null {
-  if (oreMap.length === 0) return null;
-
-  let nearest: NearestOre | null = null;
+): NearestOre {
+  let nearest: NearestOre = { x: currentX, y: currentY, distance:0 }; 
   let minDistance = Infinity;
 
   oreMap.forEach((ore) => {
     if (ore.weight === 0) return; // Skip already mined ores
-    
-    const dx = ore.x - currentX;
-    const dy = ore.y - currentY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const distance = Math.sqrt(Math.pow(ore.x - currentX,2) + Math.pow(ore.y - currentY,2));
 
     if (distance < minDistance) {
       minDistance = distance;
@@ -39,34 +35,6 @@ export function findNearestOre(
   });
 
   return nearest;
-}
-
-/**
- * Find K nearest ores from a given position (useful for alternatives)
- */
-export function findKNearestOres(
-  currentX: number,
-  currentY: number,
-  oreMap: OrePoint[],
-  k: number = 5
-): NearestOre[] {
-  if (oreMap.length === 0) return [];
-
-  const distances: NearestOre[] = oreMap
-    .filter((ore) => ore.weight > 0) // Only unmined ores
-    .map((ore) => {
-      const dx = ore.x - currentX;
-      const dy = ore.y - currentY;
-      return {
-        x: ore.x,
-        y: ore.y,
-        distance: Math.sqrt(dx * dx + dy * dy),
-      };
-    })
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, k);
-
-  return distances;
 }
 
 /**
@@ -80,7 +48,6 @@ export function getNextStep(
   toX: number,
   toY: number,
   obstacle_map: (0|1)[][],
-  map: string[][]
 ): { dx: number; dy: number } {
   const directStep = {
     dx: toX === fromX ? 0 : toX > fromX ? 1 : -1,
@@ -90,34 +57,26 @@ export function getNextStep(
   const nextX = fromX + directStep.dx;
   const nextY = fromY + directStep.dy;
   
-  // Check bounds
-  if (nextX < 0 || nextX >= obstacle_map[0].length || 
-      nextY < 0 || nextY >= obstacle_map.length) {
-    return { dx: 0, dy: 0 };
-  }
-  
-  // Check if direct path is walkable (1 = walkable, 0 = obstacle)
-  if (obstacle_map[nextY][nextX] === 1) {
+  // Check if direct path is walkable (0 = walkable, 1 = obstacle)
+  if (obstacle_map[nextY][nextX] === 0) {
     return directStep;
   }
   
   // Path blocked, use A* to find alternative
-  const graphWithWeight = new Graph(map.map(rows => {
-    return rows.map(tile => tile === "#" ? 0 : 1);
-  }), { diagonal: true });
-  
+  const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
+    rows.map((tile,idx) => tile === 1 ? (idy == toY && idx == toX ? 1 : 0) : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
+    { diagonal: true });
   const startNode = graphWithWeight.grid[fromY][fromX];
   const endNode = graphWithWeight.grid[toY][toX];
   const path = astar.search(graphWithWeight, startNode, endNode);
   
   // Extract first step from path
   if (path && path.length > 1) {
-    const nextNode = path[1];
+    const nextNode = path[0];
     return {
-      dx: nextNode.x - fromX,
-      dy: nextNode.y - fromY,
+      dx: nextNode.y - fromX,
+      dy: nextNode.x - fromY,
     };
   }
-  
   return { dx: 0, dy: 0 }; // No path found
 }

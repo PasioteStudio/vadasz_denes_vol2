@@ -1,4 +1,4 @@
-interface WeightPoint {
+export interface WeightPoint {
   x: number;
   y: number;
   weight: number;
@@ -9,12 +9,25 @@ export interface VectorField {
   y: number;
   vector: { dx: number; dy: number };  // direction and magnitude
   magnitude: number;
-  endPoint:{x:number,y:number,relative_x:number,relative_y:number}
+  endPoint:{x?:number,y?:number,relative_x:number,relative_y:number}
   angleRad?: number;
   angleDeg360?: number;
   angleDegSigned?: number;
   angleDegAcute?: number;
 }
+
+// Precompute octant-to-step map once (not per iteration)
+const octantToStep: { [k: number]: { dx: number; dy: number } } = {
+  0: { dx: 1, dy: 0 },
+  1: { dx: 1, dy: -1 },
+  2: { dx: 0, dy: -1 },
+  3: { dx: -1, dy: -1 },
+  4: { dx: -1, dy: 0 },
+  5: { dx: -1, dy: 1 },
+  6: { dx: 0, dy: 1 },
+  7: { dx: 1, dy: 1 },
+};
+
 export function createVectorMapFromWeights(
   width: number,
   height: number,
@@ -23,14 +36,13 @@ export function createVectorMapFromWeights(
   const vectorMap: VectorField[][] = Array(height)
     .fill(null)
     .map(() => Array(width));
-
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let totalInfluence = 0;
-      let totalDx = 0;
-      let totalDy = 0;
       let weightedPosX = 0;
       let weightedPosY = 0;
+      let totalDx = 0;
+      let totalDy = 0;
 
       // Calculate influence from each weight point and accumulate a weighted center
       weightPoints.forEach((point) => {
@@ -47,35 +59,20 @@ export function createVectorMapFromWeights(
         totalInfluence += influence;
       });
 
-      // Compute weighted center (where the vector should point)
-      const centerX = totalInfluence === 0 ? x : weightedPosX / totalInfluence;
-      const centerY = totalInfluence === 0 ? y : weightedPosY / totalInfluence;
+      const inv = totalInfluence === 0 ? 0 : 1 / totalInfluence;
 
-      const dirX = centerX - x;
-      const dirY = centerY - y;
-      const magnitudeFinal = Math.hypot(dirX, dirY);
-      const vx = dirX;
-      const vy = dirY;
+      //const centerX = totalInfluence === 0 ? x : weightedPosX / totalInfluence;
+      //const centerY = totalInfluence === 0 ? y : weightedPosY / totalInfluence;
+
+      const vx = totalDx * inv;
+      const vy = totalDy * inv;
+      const magnitudeFinal = Math.hypot(vx, vy);
 
       // angles: invert vy for screen coords where +y is downward so 0deg = right, 90deg = up
-      const inv = totalInfluence === 0 ? 0 : 1 / totalInfluence;
-      const angleRad = magnitudeFinal === 0 ? 0 : Math.atan2(-totalDy * inv, totalDx * inv); // -PI..PI
-      const angleDegSigned = (angleRad * 180) / Math.PI; // -180..180
-      const angleDeg360 = (angleDegSigned + 360) % 360; // 0..360
+      const angleDeg360 = magnitudeFinal === 0 ? 0 : ((Math.atan2(-vy, vx) * 180) / Math.PI + 360) % 360; // 0..360
 
       // Map angle into 8-direction octants for discrete tile stepping
-      const octant = Math.floor((angleDeg360 + 22.5) / 45) % 8;
-      const octantToStep: { [k: number]: { dx: number; dy: number } } = {
-        0: { dx: 1, dy: 0 },
-        1: { dx: 1, dy: -1 },
-        2: { dx: 0, dy: -1 },
-        3: { dx: -1, dy: -1 },
-        4: { dx: -1, dy: 0 },
-        5: { dx: -1, dy: 1 },
-        6: { dx: 0, dy: 1 },
-        7: { dx: 1, dy: 1 },
-      };
-      const rel = magnitudeFinal === 0 ? { dx: 0, dy: 0 } : octantToStep[octant];
+      const rel = magnitudeFinal === 0 ? { dx: 0, dy: 0 } : octantToStep[Math.floor((angleDeg360 + 22.5) / 45) % 8];
 
       vectorMap[y][x] = {
         x,
@@ -84,14 +81,12 @@ export function createVectorMapFromWeights(
         magnitude: magnitudeFinal,
         endPoint: {
           // endpoint: the tile containing the weighted center (where weights sum to)
-          x: Math.max(0, Math.min(width - 1, Math.round(centerX))),
-          y: Math.max(0, Math.min(height - 1, Math.round(centerY))),
+          //x: Math.max(0, Math.min(width - 1, Math.round(centerX))),
+          //y: Math.max(0, Math.min(height - 1, Math.round(centerY))),
           relative_x: rel.dx,
           relative_y: rel.dy,
         },
-        angleRad,
         angleDeg360,
-        angleDegSigned,
       };
     }
   }

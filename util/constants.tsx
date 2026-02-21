@@ -3,6 +3,9 @@ enum SPEED {
     MEDIUM = 2,
     FAST = 3,
 }
+export const vectorValues={
+    ore:1
+}
 export const ores = ["B","Y","G"]
 export const mapConstraints = {
     width:50,

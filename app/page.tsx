@@ -13,16 +13,18 @@ export default function Home() {
   const [time,setTime] = useState<number>(0) //ms
   useEffect(()=>{
     const fetchMap = async()=>{
-      const start_time = new Date()
       const map = generateMap()
       setMap(map)
-      const {my_path,update_able_vector_map} = makePath(map)
-      console.log(update_able_vector_map)
-      setVectorMap(update_able_vector_map)
+      const start_time = new Date()
+      const {my_path,final_vector_map,initial_vector_map} = makePath(map)
+      const end_time = new Date()
+      console.log("initial_vector_map:",initial_vector_map)
+      console.log("path:",my_path)
+      console.log("final_vector_map:",final_vector_map)
+      setVectorMap(final_vector_map)
       setPath(my_path.map(node=>{
         return node.y * mapConstraints.height + node.x 
       }))
-      const end_time = new Date()
       setTime(end_time.getTime()-start_time.getTime())
     }
     fetchMap()
@@ -50,7 +52,7 @@ export default function Home() {
                   <td><p>{id}</p></td>
                   {row.map((tile,idx)=>{
                     return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${tile == "S" ? "bg-yellow-700" : (path.includes(id * mapConstraints.height + idx)) ? "bg-red-900" : (tile == "." ? "bg-gray-900" : "")}`} key={idx}>
-                      {tile == "." ? <p style={{fontSize:Math.min(vector_map[id][idx].magnitude / 1.25 + 8,14) + "px", rotate:"-"+vector_map[id][idx].angleDeg360+"deg"}}>
+                      {tile == "." ? <p style={{fontSize:Math.min(vector_map[id][idx].magnitude * 7.5 + 6,12) + "px", rotate:"-"+vector_map[id][idx].angleDeg360+"deg"}}>
                         {`->`}
                       </p> : 
                       <p className="w-full h-min text-center aspect-square">{tile == "#" ? "🟥" : (ores.includes(tile) ? "✖️" : (tile == "S" ? "🏳️" : ""))}</p>
