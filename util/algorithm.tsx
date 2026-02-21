@@ -5,7 +5,7 @@
 // Y = sárga ásvány (ritka arany)
 // G = zöld ásvány (ritka ásvány)
 // S = a rover kiindulópontja
-const iteraions = 2000
+const iteraions = 100
 import { Rover, time,ores, vectorValues } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
