@@ -40,7 +40,7 @@ export default function Home() {
       <main className="flex min-h-screen w-full mx-auto flex-col items-center justify-between py-32 px-8 bg-white dark:bg-black sm:items-start">
           <div className="mx-auto flex gap-4 items-center mb-5">
             <h1 className="text-4xl">{time == 0 ? "Calculating..." : "Time:"}</h1>
-            {time != 0 ? <h2 className="text-2xl">{time}ms</h2> : null}
+            {time != 0 ? <h2 className="text-2xl">{time}ms (Path length: {path.length})</h2> : null}
           </div>
           <table className="mx-auto">
             <thead>

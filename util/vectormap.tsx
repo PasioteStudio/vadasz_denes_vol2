@@ -46,6 +46,9 @@ export function createVectorMapFromWeights(
 
       // Calculate influence from each weight point and accumulate a weighted center
       weightPoints.forEach((point) => {
+        //skip non ores
+        if(point.weight == 0) return
+
         const dx = point.x - x;
         const dy = point.y - y;
         const distance = Math.hypot(dx, dy);

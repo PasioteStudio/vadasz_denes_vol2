@@ -16,4 +16,4 @@ Modify the `iterations` variable at the top of the **algorithm.tsx** file (or mo
 
 ## BENCHMARK
 
-85s - 1100 iterations
+9496ms - 994 iterations

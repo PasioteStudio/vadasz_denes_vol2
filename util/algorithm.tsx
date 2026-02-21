@@ -15,14 +15,10 @@ function stuck(
     column:{x:number,y:number},
     update_able_map:WeightPoint[],
     obstacle_map:(0|1)[][]
-):{stillStuck:boolean,next_column_to_go:{x:number,y:number}}{
+):{next_column_to_go:{x:number,y:number}}{
     const nearestOre = findNearestOre(column.x, column.y, update_able_map)
     const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacle_map)
-    if(step.dx ==0 && step.dy == 0){
-        //standing on one
-        return {stillStuck:false,next_column_to_go:column}
-    }
-    return {stillStuck:true,next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
+    return {next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
 }
 
 export function makePath(map:string[][]) {
@@ -71,21 +67,22 @@ export function makePath(map:string[][]) {
         number++
         let next_column = update_able_vector_map[column.y + column.endPoint.relative_y][column.x + column.endPoint.relative_x]
         //not 100% that it's gonna be the next column (but we assume)
-        
-        //check if we stuck
-        if(we_are_stuck || my_path.slice(-4).filter(tile=>tile.x == (next_column.x && tile.y == next_column.y) || (column.x && tile.y == column.y)).length > 1){
+        //check if we're gonna be stuck
+        if(we_are_stuck || my_path.slice(-2).filter(tile=>(tile.x == next_column.x && tile.y == next_column.y) || (column.x == tile.x && tile.y == column.y)).length > 0){
             //we stuck -> search for the nearest ore
-            const {stillStuck,next_column_to_go} = stuck(column,update_able_map,obstacle_map)
-            we_are_stuck=stillStuck
-            if(stillStuck){
-                column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
-                my_path.push({x: column.x, y: column.y})
-                continue
-            }else{
-                //found an ore
-                update_able_vector_map = extractOre(column,update_able_map,update_able_vector_map)
-                next_column = update_able_vector_map[column.y + column.endPoint.relative_y][column.x + column.endPoint.relative_x]
+            const {next_column_to_go} = stuck(column,update_able_map,obstacle_map)
+            
+            column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
+            //console.log(column.y*50+column.x)
+            my_path.push({x: column.x, y: column.y,p:{next_column_to_go}})
+            
+            //update the map if ore found
+            const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
+            if(update_able_map[tile_id].weight != 0){
+                we_are_stuck=false
+                update_able_vector_map = extractOre(tile_id,update_able_map,update_able_vector_map)
             }
+            continue
         }
         //if the next_column is an obstacle, move around it
         if(obstacle_map[next_column.y][next_column.x] == 1){
@@ -97,17 +94,19 @@ export function makePath(map:string[][]) {
 
         //record the moving
         column = next_column
+        //console.log(column.y*50+column.x)
         my_path.push({x:column.x,y:column.y})
                 
         //update the map if ore found
-        if(update_able_map[update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)].weight == 0) continue
-        update_able_vector_map = extractOre(column,update_able_map,update_able_vector_map)
+        const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
+        if(update_able_map[tile_id].weight == 0) continue
+        update_able_vector_map = extractOre(tile_id,update_able_map,update_able_vector_map)
     }
-
+    console.log(update_able_map)
     return {my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
 }
-function extractOre(column:{x:number,y:number}, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
+function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
 :VectorField[][]{
-    update_able_map[update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)].weight = 0
+    update_able_map[tile_id].weight = 0
     return createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,update_able_map)
 }
