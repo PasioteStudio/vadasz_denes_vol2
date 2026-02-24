@@ -2,9 +2,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CycleContext, MapSnapshotsContext, RoverContext } from "@/lib/contexts";
+import { CycleContext, MapSnapshotsContext, RoverContext, UIHelperContext } from "@/lib/contexts";
 import { Item, Log, Position, RoverAction, RoverContextT } from "@/types/RoverContextTypes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapSnapshot } from "@/types/MapTypes";
 
@@ -29,8 +29,12 @@ export default function RootLayout({
 	const [inventory, setInventory] = useState<Item[]>([]);
 	const [logs, setLogs] = useState<Log[]>([]);
 	const [energy, setEnergy] = useState(100);
-	const [currentAction, setCurrentAction] = useState<RoverAction>({action:"wait"});
+	const [currentAction, setCurrentAction] = useState<RoverAction>({ action: "wait" });
 	const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(new Map<Number, MapSnapshot>());
+	const [UIisResting, setUIResting] = useState({
+		isResting: false,
+		lastMove: 0,
+	});
 
 	const [cycle, setCycle] = useState<CycleContextT>({
 		currentTick: 0,
@@ -48,55 +52,76 @@ export default function RootLayout({
 
 		// createAndLoadMapSnapshot(t);
 	};
-
+	const handleMouseMove = (e: React.MouseEvent<HTMLBodyElement>) =>{
+		setUIResting({
+			isResting: false,
+			lastMove: Date.now(),
+		})
+	}
+	useEffect(()=>{
+		const interval = setInterval(()=>{
+			const now = Date.now();
+			if(now - UIisResting.lastMove > 3000){
+				setUIResting(p =>{return {
+					...p,
+					isResting: true,
+				}})
+			}
+		}, 500)
+		return ()=>{clearInterval(interval)}
+	}, [])
 	return (
 		<html lang="hu">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black relative`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black relative min-h-screen w-full`}
+				onMouseMove={(e) => {handleMouseMove(e)}}
 			>
-				<MapSnapshotsContext.Provider value={{
-					snapshots: {
-						get: mapSnapShots,
-						set: (sh: Map<Number, MapSnapshot>) => {setMapSnapshots(sh)}
-					}
+				<UIHelperContext.Provider value={{
+					restingOpacity: 30,
+					resting: UIisResting.isResting
 				}}>
-
-
-					<CycleContext.Provider value={{
-						currentTick: cycle.currentTick,
-						timeOfDay: cycle.timeOfDay,
-						setTick: (t: number) => { cycle.setTick(t) },
+					<MapSnapshotsContext.Provider value={{
+						snapshots: {
+							get: mapSnapShots,
+							set: (sh: Map<Number, MapSnapshot>) => { setMapSnapshots(sh) }
+						}
 					}}>
-						<RoverContext.Provider value={{
-							position: {
-								get: position,
-								set: (pos: Position) => { setPosition(pos) }
-							},
-							inventory: {
-								get: inventory,
-								set: (inv: Item[]) => { setInventory(inv) }
-							},
-							logs: {
-								get: logs,
-								set: (ls: Log[]) => { setLogs(ls) }
-							},
-							startingPosition: {
-								get: startingPosition,
-								set: (pos: Position) => { setStartingPosition(pos) }
-							},
-							energy: {
-								get: energy,
-								set: (e:number) => {setEnergy(e)},
-							},
-							currentAction: {
-								get: currentAction,
-								set: (a: RoverAction) => {setCurrentAction(a)}
-							}
+						<CycleContext.Provider value={{
+							currentTick: cycle.currentTick,
+							timeOfDay: cycle.timeOfDay,
+							setTick: (t: number) => { cycle.setTick(t) },
 						}}>
-							{children}
-						</RoverContext.Provider>
-					</CycleContext.Provider>
-				</MapSnapshotsContext.Provider>
+							<RoverContext.Provider value={{
+								position: {
+									get: position,
+									set: (pos: Position) => { setPosition(pos) }
+								},
+								inventory: {
+									get: inventory,
+									set: (inv: Item[]) => { setInventory(inv) }
+								},
+								logs: {
+									get: logs,
+									set: (ls: Log[]) => { setLogs(ls) }
+								},
+								startingPosition: {
+									get: startingPosition,
+									set: (pos: Position) => { setStartingPosition(pos) }
+								},
+								energy: {
+									get: energy,
+									set: (e: number) => { setEnergy(e) },
+								},
+								currentAction: {
+									get: currentAction,
+									set: (a: RoverAction) => { setCurrentAction(a) }
+								}
+							}}>
+								{children}
+							</RoverContext.Provider>
+						</CycleContext.Provider>
+					</MapSnapshotsContext.Provider>
+				</UIHelperContext.Provider>
 			</body>
 		</html>
 	);

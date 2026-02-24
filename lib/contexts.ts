@@ -3,6 +3,7 @@ import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapSnapshotsContextT } from "@/types/MapSnapshotContextTypes";
 import { MapSnapshot } from "@/types/MapTypes";
 import { RoverAction, RoverContextT } from "@/types/RoverContextTypes";
+import { UIHelperContextT } from "@/types/UIHelperContextTypes";
 import { createContext, useContext } from "react";
 
 export const DefaultRoverContextObject: RoverContextT = {
@@ -45,6 +46,11 @@ export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
     }
 }
 
+export const DefaultUIHelperContextObject: UIHelperContextT = {
+    resting: false,
+    restingOpacity: 30,
+}
+
 export const RoverContext = createContext<RoverContextT>({...DefaultRoverContextObject});
 export const useRover = ():RoverContextT => {
     const ctx = useContext(RoverContext);
@@ -62,6 +68,13 @@ export const useCycle = ():CycleContextT => {
 export const MapSnapshotsContext = createContext<MapSnapshotsContextT>({...DefaultSnapshotsContextObject})
 export const useSnapshots = ():MapSnapshotsContextT => {
     const ctx = useContext(MapSnapshotsContext);
+    if(!ctx) throw new Error("Context needs to be initialized, ya buffoon");
+    return ctx;
+}
+
+export const UIHelperContext = createContext<UIHelperContextT>({...DefaultUIHelperContextObject})
+export const useUIHelper = ():UIHelperContextT => {
+    const ctx = useContext(UIHelperContext);
     if(!ctx) throw new Error("Context needs to be initialized, ya buffoon");
     return ctx;
 }

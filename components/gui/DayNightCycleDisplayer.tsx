@@ -1,5 +1,5 @@
 "use client"
-import { useCycle } from "@/lib/contexts"
+import { useCycle, useUIHelper } from "@/lib/contexts"
 import { useEffect, useRef } from "react";
 
 export default function DayNightCycleDisplayer() {
@@ -7,7 +7,7 @@ export default function DayNightCycleDisplayer() {
     const canvas = useRef<HTMLCanvasElement>(null);
     const percentX = (p: number) => canvas.current!.width * p;
     const percentY = (p: number) => canvas.current!.height * p;
-
+    const { resting, restingOpacity } = useUIHelper();
     const drawBaseArc = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
         ctx.moveTo(percentX(0.07), percentY(0.5));
@@ -24,11 +24,11 @@ export default function DayNightCycleDisplayer() {
         const P0 = { x: percentX(0.07), y: percentY(0.5) };
         const P1 = { x: percentX(0.1), y: percentY(0.9) };
         const P2 = { x: percentX(0.5), y: percentY(0.93) };
-        const t = Math.max(0, Math.min(1, progress)); 
+        const t = Math.max(0, Math.min(1, progress));
 
         ctx.beginPath();
         ctx.moveTo(P0.x, P0.y);
-        let last = [P0.x, P0.y]; 
+        let last = [P0.x, P0.y];
 
         for (let i = 0; i <= t; i += 0.01) {
             const s = Math.min(i, t);
@@ -58,15 +58,18 @@ export default function DayNightCycleDisplayer() {
         drawProgressArc(ctx, getProgress());
     });
 
-    const getProgress = ():number => {
-        const current = currentTick % (24*2)
-        const periodLength = timeOfDay == "day" ? 16*2 : 8*2;
-        const c2 = timeOfDay == "night" ? current - 16*2 : current;
+    const getProgress = (): number => {
+        const current = currentTick % (24 * 2)
+        const periodLength = timeOfDay == "day" ? 16 * 2 : 8 * 2;
+        const c2 = timeOfDay == "night" ? current - 16 * 2 : current;
         return c2 / periodLength;
     }
 
     return (
-        <div className="fixed top-0 right-0 aspect-square h-1/8 flex items-center justify-center">
+        <div className="fixed top-0 right-0 aspect-square h-1/8 flex items-center justify-center"
+            style={{
+                opacity: resting ? restingOpacity / 100 : 1
+            }}>
             <canvas
                 className="absolute h-full w-full top-0 left-0 aspect-square"
                 ref={canvas}
