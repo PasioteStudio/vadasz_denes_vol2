@@ -1,3 +1,5 @@
+import { Field, MapSnapshot } from "./MapTypes"
+
 export type Position = {
     x: number,
     y: number,
@@ -10,7 +12,12 @@ export type Log = {
     postition: Position,
     consumption: number,
     inventory: Item[],
-    message: string
+    message: string,
+}
+export type RoverAction = {
+    action: "mine" | "move" | "wait" ,
+    target?: Field,
+    speed?: number
 }
 export type RoverContextT = {
     position: {
@@ -25,4 +32,16 @@ export type RoverContextT = {
         get: Item[],
         set: (items: Item[]) => void
     }
+    startingPosition: {
+        get: Position,
+        set: (position: Position) => void,
+    },
+    energy: {
+        get: number,
+        set: (e: number) => void
+    }
+    currentAction: {
+        get: RoverAction,
+        set: (position: RoverAction) => void,
+    },
 }
