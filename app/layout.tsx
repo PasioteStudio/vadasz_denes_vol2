@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { DefaultRoverContextObject, RoverContext } from "@/lib/contexts";
+import { RoverContextT } from "@/types/RoverContextTypes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,12 +24,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const roverCtxBase: RoverContextT = {...DefaultRoverContextObject}
   return (
-    <html lang="en">
+    <html lang="hu">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black relative`}
       >
-        {children}
+        <RoverContext.Provider value={roverCtxBase}>
+          {children}
+        </RoverContext.Provider>
       </body>
     </html>
   );
