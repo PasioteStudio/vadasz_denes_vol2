@@ -1,3 +1,4 @@
+import { SPEED } from "@/util/constants"
 import { Field, MapSnapshot } from "./MapTypes"
 
 export type Position = {
@@ -17,7 +18,7 @@ export type Log = {
 export type RoverAction = {
     action: "mine" | "move" | "wait" ,
     target?: Field,
-    speed?: number
+    speed?: SPEED
 }
 export type RoverContextT = {
     position: {

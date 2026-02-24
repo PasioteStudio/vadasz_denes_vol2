@@ -1,7 +1,18 @@
-enum SPEED {
+"use client"
+
+import { useMemo } from "react"
+
+export enum SPEED {
     SLOW= 1,
     MEDIUM = 2,
     FAST = 3,
+}
+export enum Tile { // MAJD EZT HASZNÁLJUK A LENTBBI ores HELYETT
+    "Obstacle",
+    "Empty",
+    "Blue",
+    "Yellow",
+    "Green",
 }
 export const vectorValues={
     ore:1
@@ -13,9 +24,9 @@ export const mapConstraints = {
 }
 
 export const time = {
-    day: 16, //A nappal időtartama 16 óra, az éjszaka 8 óra
-    night : 8,
-    starting:"day",
+    day: 16*2, //A nappal időtartama 16 óra, az éjszaka 8 óra
+    night : 8*2,
+    starting:"day" as "day"|"night",
 }
 export class Rover {
     speed:SPEED
@@ -37,8 +48,13 @@ export class Rover {
         v = a rover sebessége (blokk/fél óra)
         k = 2, állandó
         */
-        const k = 2
-        return k * Math.pow(this.speed,2)
+
+        //valami ilyesmi?
+       let speed = 1;
+        return useMemo(()=>{
+            const k = 2
+            return k * Math.pow(this.speed,2)
+        }, [speed])
     }
     
 

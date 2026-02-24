@@ -1,11 +1,6 @@
+import { Tile } from "@/util/constants"
 import { Position, RoverContextT } from "./RoverContextTypes"
-enum Tile {
-    "Obstacle",
-    "Empty",
-    "Blue",
-    "Yellow",
-    "Green",
-}
+
 export type MapSnapshot = {
     fields: Field[],
     rover: RoverContextT
