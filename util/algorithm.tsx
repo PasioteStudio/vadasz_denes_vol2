@@ -6,7 +6,7 @@
 // G = zöld ásvány (ritka ásvány)
 // S = a rover kiindulópontja
 const iteraions = 100
-import { Rover, time,ores, vectorValues } from "@/util/constants";
+import { Rover, time,ores, vectorValues, Tile } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
 import {findNearestOre, getNextStep} from "@/util/oresearch"
@@ -21,7 +21,7 @@ function stuck(
     return {next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
 }
 
-export function makePath(map:string[][]) {
+export function makePath(map:Tile[][]) {
     //Initialize maps
     const vector_map = createVectorMapFromWeights(map.length,map[0].length,map.flatMap((rows,idx)=>{
         return rows.map((tile,id)=>{
@@ -29,9 +29,9 @@ export function makePath(map:string[][]) {
         })
     }))
     
-    const starting_row = map.findIndex((tile)=>tile.includes("S"))
+    const starting_row = map.findIndex((row)=>row.includes(Tile.Start))
     const start = {
-        x:map[starting_row].findIndex((tile:string)=>tile == "S"),
+        x:map[starting_row].findIndex((tile:Tile)=>tile == Tile.Start),
         y:starting_row
     }
     //METHOD 1: Search for a destination?
@@ -52,12 +52,12 @@ export function makePath(map:string[][]) {
     let column = vector_map[start.y][start.x]
     const obstacle_map = map.map((row)=>{
         return row.map(tile=>{
-            return tile == "#" ? 1 : 0 
+            return tile == Tile.Obstacle ? 1 : 0 
         })
     })
     let update_able_map = map.flatMap((rows,idx)=>{
         return rows.map((tile,id)=>{
-            return {x:id,y:idx ,weight:ores.includes(tile) ? vectorValues.ore : (tile == "#") ? 0 : 0}
+            return {x:id,y:idx ,weight:ores.includes(tile) ? vectorValues.ore : (tile == Tile.Obstacle) ? 0 : 0}
         })
     })
     let update_able_vector_map:VectorField[][] = vector_map

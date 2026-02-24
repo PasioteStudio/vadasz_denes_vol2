@@ -1,8 +1,8 @@
-import { mapConstraints } from "./constants";
+import { mapConstraints, Tile } from "./constants";
 
 //TESTING ONLY
-export function generateMap(): string[][] {
-  const mapArray: string[][] = [];
+export function generateMap(): Tile[][] {
+  const mapArray: Tile[][] = [];
   let startingPointSet = false
   for (let i = 0; i < mapConstraints.height; i++) {
     const row = [];
@@ -12,17 +12,17 @@ export function generateMap(): string[][] {
         const rand2 = Math.random();
         if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
             startingPointSet = true
-            row.push("S"); // Rover starting point
+            row.push(Tile.Start); // Rover starting point
         } else if (rand < 0.70) {
-            row.push("."); // Passable terrain
+            row.push(Tile.Empty); // Passable terrain
         } else if (rand < 0.85) {
-            row.push("#"); // Obstacles
+            row.push(Tile.Obstacle); // Obstacles
         } else if (rand < 0.90) {
-            row.push("B"); // Blue mineral
+            row.push(Tile.Blue); // Blue mineral
         } else if (rand < 0.95) {
-            row.push("Y"); // Yellow mineral
+            row.push(Tile.Yellow); // Yellow mineral
         } else {
-            row.push("G"); // Green mineral
+            row.push(Tile.Green); // Green mineral
         }
     }
     mapArray.push(row);

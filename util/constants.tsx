@@ -7,17 +7,18 @@ export enum SPEED {
     MEDIUM = 2,
     FAST = 3,
 }
-export enum Tile { // MAJD EZT HASZNÁLJUK A LENTBBI ores HELYETT
+export enum Tile {
     "Obstacle",
     "Empty",
     "Blue",
     "Yellow",
     "Green",
+    "Start",
 }
 export const vectorValues={
     ore:1
 }
-export const ores = ["B","Y","G"]
+export const ores = [Tile.Green, Tile.Blue, Tile.Yellow]
 export const mapConstraints = {
     width:50,
     height:50

@@ -16,7 +16,7 @@ export type Log = {
     message: string,
 }
 export type RoverAction = {
-    action: "mine" | "move" | "wait" ,
+    action: "mine" | "move" | "wait",
     target?: Field,
     speed?: SPEED
 }
