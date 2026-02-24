@@ -10,10 +10,10 @@ export default function DayNightCycleDisplayer() {
 
     const drawBaseArc = (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
-        ctx.moveTo(percentX(0), percentY(0.4));
+        ctx.moveTo(percentX(0.07), percentY(0.5));
         ctx.quadraticCurveTo(
-            percentX(0), percentY(1),
-            percentX(0.6), percentY(1)
+            percentX(0.1), percentY(0.9),
+            percentX(0.5), percentY(0.93)
         );
         ctx.strokeStyle = "white";
         ctx.lineWidth = 2;
@@ -21,14 +21,14 @@ export default function DayNightCycleDisplayer() {
     }
 
     const drawProgressArc = (ctx: CanvasRenderingContext2D, progress: number) => {
-        const P0 = { x: percentX(0), y: percentY(0.4) };
-        const P1 = { x: percentX(0), y: percentY(1) };
-        const P2 = { x: percentX(0.6), y: percentY(1) };
-        const t = Math.max(0, Math.min(1, progress)); // Clamp between 0 and 1
+        const P0 = { x: percentX(0.07), y: percentY(0.5) };
+        const P1 = { x: percentX(0.1), y: percentY(0.9) };
+        const P2 = { x: percentX(0.5), y: percentY(0.93) };
+        const t = Math.max(0, Math.min(1, progress)); 
 
         ctx.beginPath();
         ctx.moveTo(P0.x, P0.y);
-        let last = [P0.x, P0.y]; // Initialize with start point
+        let last = [P0.x, P0.y]; 
 
         for (let i = 0; i <= t; i += 0.01) {
             const s = Math.min(i, t);
@@ -37,15 +37,16 @@ export default function DayNightCycleDisplayer() {
             ctx.lineTo(x, y);
             last = [x, y];
         }
-        ctx.strokeStyle = "red";
+        const style = timeOfDay == "day" ? "orange" : "rgb(96 83 207)";
+        ctx.strokeStyle = style;
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Draw circle at end of arc
+
         ctx.beginPath();
         ctx.arc(last[0], last[1], Math.min(percentX(0.04), percentY(0.04)), 0, 2 * Math.PI);
         ctx.closePath();
-        ctx.fillStyle = "red";
+        ctx.fillStyle = style;
         ctx.fill();
     }
 
@@ -54,8 +55,15 @@ export default function DayNightCycleDisplayer() {
         const ctx = canvas.current.getContext("2d")!;
         ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
         drawBaseArc(ctx);
-        drawProgressArc(ctx, 0.6); // Hardcoded 60% progress
+        drawProgressArc(ctx, getProgress());
     });
+
+    const getProgress = ():number => {
+        const current = currentTick % (24*2)
+        const periodLength = timeOfDay == "day" ? 16*2 : 8*2;
+        const c2 = timeOfDay == "night" ? current - 16*2 : current;
+        return c2 / periodLength;
+    }
 
     return (
         <div className="fixed top-0 right-0 aspect-square h-1/8 flex items-center justify-center">
@@ -65,7 +73,7 @@ export default function DayNightCycleDisplayer() {
                 width={300}
                 height={300}
             />
-            <img src={timeOfDay == "day" ? "/cycle/cycle-day.png" : "/cycle/cycle-night.png"} className="w-10/12 h-10/12" />
+            <img src={timeOfDay == "day" ? "/cycle/cycle-day.png" : "/cycle/cycle-night.png"} className="w-9/12 h-9/12" />
         </div>
     );
 }
