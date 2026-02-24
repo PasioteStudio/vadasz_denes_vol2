@@ -40,8 +40,13 @@ export default function RootLayout({
 
 	const setTickTo = (t: number) => {
 		// this will be the function that when called, checks if the tick exists as a key in the Map, then:
-		// A) if it does, reverts there.
-		// B) if it doesn't, calculates and logs, as this is a new action and spanshot
+		// --------- A) if it does, reverts there.
+
+		// loadMapSnaphot(mapSnapShots.get(t));
+
+		// --------- B) if it doesn't, calculates and logs, as this is a new action and spanshot
+
+		// createAndLoadMapSnapshot(t);
 	};
 
 	return (
