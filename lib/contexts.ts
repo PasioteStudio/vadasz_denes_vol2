@@ -1,3 +1,4 @@
+"use client"
 import { RoverContextT } from "@/types/RoverContextTypes";
 import { createContext, useContext } from "react";
 
