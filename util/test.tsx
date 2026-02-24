@@ -31,9 +31,27 @@ export function generateMap(): Tile[][] {
   return mapArray;
 }
 //TESTING ONLY
-
-export async function readMap(URL:string):string[][]{
+const toTile = (char: string): Tile => {
+    switch(char){
+        case "B": return Tile.Blue;
+        case "Y": return Tile.Yellow;
+        case "G": return Tile.Green;
+        case "#": return Tile.Obstacle;
+        case "S": return Tile.Start;
+        default: return Tile.Empty;
+    }
+}
+export async function readMap(URL:string):Promise<Tile[][]>{
+    let lines:string[] = [];
     await fetch(URL).then(res=>res.text()).then(async(data)=>{
-        console.log(data.split("\n"))
+        lines = data.split("\n").filter(line => line.trim() != "");
     })
+    const map: Tile[][] = [];
+    for(let i = 0; i<lines.length; i++){
+        if(lines[i].trim() == "") continue;
+        map.push([]);
+        const currentRow = map[map.length - 1];
+        lines[i].trim().split(',').forEach(t => currentRow.push(toTile(t)))
+    }
+    return map;
 }
