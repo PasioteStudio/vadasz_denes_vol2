@@ -1,6 +1,6 @@
 "use client"
 import { makePath } from "@/util/algorithm";
-import { generateMap } from "@/util/test";
+import { generateMap, readMap } from "@/util/test";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import {mapConstraints, ores, Tile} from "@/util/constants"
@@ -14,7 +14,8 @@ export default function Home() {
   const [time,setTime] = useState<number>(0) //ms
   useEffect(()=>{
     const fetchMap = async()=>{
-      const map = generateMap()
+      //const map = generateMap()
+      const map = await readMap("/mars_map_50x50.csv")
       setMap(map)
       setVectorMap(map.map(row=>row.map(tile=>{return {magnitude:0,angleDeg360:0} as VectorField})))
     }
@@ -23,9 +24,10 @@ export default function Home() {
   useEffect(()=>{
     if(!map || map.length < 1)return
     const start_time = new Date()
-    const {my_path,final_vector_map,initial_vector_map} = makePath(map)
+    const {ore_count,my_path,final_vector_map,initial_vector_map} = makePath(map)
     const end_time = new Date()
     console.log("initial_vector_map:",initial_vector_map)
+    console.log("ores:",ore_count)
     console.log("path:",my_path)
     console.log("final_vector_map:",final_vector_map)
     setVectorMap(final_vector_map)

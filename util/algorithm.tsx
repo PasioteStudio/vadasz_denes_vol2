@@ -6,7 +6,7 @@
 // G = zöld ásvány (ritka ásvány)
 // S = a rover kiindulópontja
 const iteraions = 200
-import { Rover, time,ores, vectorValues, Tile } from "@/util/constants";
+import { Rover, time,ores, vectorValues,Tile } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
 import {findNearestOre, getNextStep} from "@/util/oresearch"
@@ -63,6 +63,7 @@ export function makePath(map:Tile[][]) {
     let update_able_vector_map:VectorField[][] = vector_map
     let number = 0
     let we_are_stuck = false;
+    let ore_count = 0
     while((column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0) && number < iteraions){
         number++
         let next_column = update_able_vector_map[column.y + column.endPoint.relative_y][column.x + column.endPoint.relative_x]
@@ -80,6 +81,7 @@ export function makePath(map:Tile[][]) {
             const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
             if(update_able_map[tile_id].weight != 0){
                 we_are_stuck=false
+                ore_count++
                 update_able_vector_map = extractOre(tile_id,update_able_map,update_able_vector_map)
             }
             continue
@@ -100,10 +102,11 @@ export function makePath(map:Tile[][]) {
         //update the map if ore found
         const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
         if(update_able_map[tile_id].weight == 0) continue
+        ore_count++
         update_able_vector_map = extractOre(tile_id,update_able_map,update_able_vector_map)
     }
     console.log(update_able_map)
-    return {my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
+    return {ore_count,my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
 }
 function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
 :VectorField[][]{

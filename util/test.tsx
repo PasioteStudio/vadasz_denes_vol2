@@ -32,3 +32,8 @@ export function generateMap(): Tile[][] {
 }
 //TESTING ONLY
 
+export async function readMap(URL:string):string[][]{
+    await fetch(URL).then(res=>res.text()).then(async(data)=>{
+        console.log(data.split("\n"))
+    })
+}
