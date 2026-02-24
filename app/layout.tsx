@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CycleContext, MapSnapshotsContext, RoverContext, UIHelperContext } from "@/lib/contexts";
 import { Item, Log, Position, RoverAction, RoverContextT } from "@/types/RoverContextTypes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapSnapshot } from "@/types/MapTypes";
 
@@ -33,8 +33,8 @@ export default function RootLayout({
 	const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(new Map<Number, MapSnapshot>());
 	const [UIisResting, setUIResting] = useState({
 		isResting: false,
-		lastMove: 0,
 	});
+	const lastMoveRef = useRef<number>(Date.now());
 
 	const [cycle, setCycle] = useState<CycleContextT>({
 		currentTick: 0,
@@ -53,19 +53,18 @@ export default function RootLayout({
 		// createAndLoadMapSnapshot(t);
 	};
 	const handleMouseMove = (e: React.MouseEvent<HTMLBodyElement>) =>{
+		lastMoveRef.current = Date.now();
 		setUIResting({
 			isResting: false,
-			lastMove: Date.now(),
 		})
 	}
 	useEffect(()=>{
 		const interval = setInterval(()=>{
 			const now = Date.now();
-			if(now - UIisResting.lastMove > 3000){
-				setUIResting(p =>{return {
-					...p,
+			if(now - lastMoveRef.current > 3000){
+				setUIResting({
 					isResting: true,
-				}})
+				})
 			}
 		}, 500)
 		return ()=>{clearInterval(interval)}
