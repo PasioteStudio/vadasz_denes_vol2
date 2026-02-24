@@ -7,9 +7,9 @@ import TimeControlButtons from "@/components/gui/TimeControlButtons";
 export default function GUI(){
     return <>
     <DayNightCycleDisplayer />
-    <BatteryDisplayer />
+    {/* <BatteryDisplayer />
     <TimeControlButtons />
     <LogDisplayer />
-    <CurrentAction />
+    <CurrentAction /> */}
     </>
 }
