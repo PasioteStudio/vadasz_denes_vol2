@@ -28,7 +28,7 @@ export default function RootLayout({
 	const [startingPosition, setStartingPosition] = useState<Position>({ x: 0, y: 0 });
 	const [inventory, setInventory] = useState<Item[]>([]);
 	const [logs, setLogs] = useState<Log[]>([]);
-	const [energy, setEnergy] = useState(65);
+	const [energy, setEnergy] = useState(100);
 	const [currentAction, setCurrentAction] = useState<RoverAction>({action:"wait"});
 	const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(new Map<Number, MapSnapshot>());
 
