@@ -5,7 +5,9 @@
 // Y = sárga ásvány (ritka arany)
 // G = zöld ásvány (ritka ásvány)
 // S = a rover kiindulópontja
-const iteraions = 200
+
+// TODO iterations helyett time és tickek
+const iterations = 200
 import { Rover, time,ores, vectorValues,Tile } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
@@ -64,7 +66,7 @@ export function makePath(map:Tile[][]) {
     let number = 0
     let we_are_stuck = false;
     let ore_count = 0
-    while((column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0) && number < iteraions){
+    while((column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0) && number < iterations){
         number++
         let next_column = update_able_vector_map[column.y + column.endPoint.relative_y][column.x + column.endPoint.relative_x]
         //not 100% that it's gonna be the next column (but we assume)
