@@ -1,3 +1,5 @@
+import { Point } from "./constants";
+
 export interface WeightPoint {
   x: number;
   y: number;
@@ -27,10 +29,13 @@ const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   6: { dx: 0, dy: 1 },
   7: { dx: 1, dy: 1 },
 };
-
+function isInDistance(point1:Point,point2:Point,distance:number):boolean{
+  return Math.abs(point1.x - point2.x) <= distance && Math.abs(point1.y - point2.y) <= distance
+}
 export function createVectorMapFromWeights(
   width: number,
   height: number,
+  point:Point,
   weightPoints: WeightPoint[]
 ): VectorField[][] {
   const vectorMap: VectorField[][] = Array(height)
@@ -38,6 +43,21 @@ export function createVectorMapFromWeights(
     .map(() => Array(width));
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
+      if(!isInDistance({y:y,x:x},point,1)){
+        vectorMap[y][x] = {
+          x,
+          y,
+          vector: { dx: 0, dy: 0 },
+          magnitude: 0,
+          endPoint: {
+            relative_x: 0,
+            relative_y: 0,
+          },
+          angleDeg360:0,
+        };
+        continue
+      }
+
       let totalInfluence = 0;
       let weightedPosX = 0;
       let weightedPosY = 0;

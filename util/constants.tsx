@@ -2,6 +2,11 @@
 
 import { useMemo } from "react"
 
+export interface Point{
+    x:number,
+    y:number
+}
+
 export enum SPEED {
     SLOW= 1,
     MEDIUM = 2,
@@ -50,12 +55,11 @@ export class Rover {
         k = 2, állandó
         */
 
-        //valami ilyesmi?
-       let speed = 1;
+        //valami ilyesmi? nem
         return useMemo(()=>{
             const k = 2
             return k * Math.pow(this.speed,2)
-        }, [speed])
+        }, [this.speed])
     }
     
 
