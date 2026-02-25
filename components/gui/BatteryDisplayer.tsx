@@ -15,7 +15,7 @@ export default function BatteryDisplayer() {
     }}>
         <img src="/battery.png" className=" h-full mr-2" />
         <div className="h-6/12 grow overflow-hidden flex justify-start gap-2">
-            {Array.from({ length: Math.round(energy.get / 10) }).map((x, i) => <div key={i} className="w-1/10 h-full bg-green-900"></div>)}
+            {Array.from({ length: Math.round(energy / 10) }).map((x, i) => <div key={i} className="w-1/10 h-full bg-green-900"></div>)}
         </div>
         <div className={`hidden group-hover:block absolute top-full left-full px-2 rounded-sm`} style={{
             position: 'fixed',
@@ -23,10 +23,10 @@ export default function BatteryDisplayer() {
             top: `${position.y + 30}px`,
             pointerEvents: 'none',
             transform: 'translate(-50%, -50%)',
-            background: `linear-gradient(90deg, #0d542b ${(energy.get/100)*100}%, transparent)`
+            background: `linear-gradient(90deg, #0d542b ${(energy/100)*100}%, transparent)`
         }}
         >
-            <span>{energy.get}/100</span>
+            <span>{energy}/100</span>
         </div>
     </div>
 }
