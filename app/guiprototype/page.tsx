@@ -8,8 +8,9 @@ export default function GUI(){
     return <>
     <DayNightCycleDisplayer />
     <BatteryDisplayer />
-    {/* <TimeControlButtons />
-    <LogDisplayer />
+    <TimeControlButtons />
+    {/* <LogDisplayer /> */}
+    {/* 
     <CurrentAction /> */}
     </>
 }
