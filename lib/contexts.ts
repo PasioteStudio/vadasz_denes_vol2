@@ -37,7 +37,13 @@ export const DefaultRoverContextObject: RoverContextT = {
 export const DefaultCycleContextObject: CycleContextT = {
     currentTick: 0,
     timeOfDay: "day",
-    setTick: ()=>{}
+    setTick: ()=>{},
+    player: {
+        speed: 1,
+        playing: "paused",
+        setPlaying:()=>{},
+        setSpeed:()=>{}
+    }
 }
 export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
     snapshots: {

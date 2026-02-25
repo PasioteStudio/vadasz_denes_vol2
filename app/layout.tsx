@@ -36,10 +36,14 @@ export default function RootLayout({
 	});
 	const lastMoveRef = useRef<number>(Date.now());
 
-	const [cycle, setCycle] = useState<CycleContextT>({
+	const [cycle, setCycle] = useState<Omit<CycleContextT, "player">>({
 		currentTick: 0,
 		timeOfDay: "day",
-		setTick: (t: number) => { setTickTo(t) }
+		setTick: (t: number) => { setTickTo(t) },
+	});
+	const [player, setPlayer] = useState({
+		speed: 1 as 1|2,
+		playing: "paused" as "paused"|"playing",
 	});
 
 	const setTickTo = (t: number) => {
@@ -89,6 +93,12 @@ export default function RootLayout({
 							currentTick: cycle.currentTick,
 							timeOfDay: cycle.timeOfDay,
 							setTick: (t: number) => { cycle.setTick(t) },
+							player: {
+								playing: player.playing,
+								speed: player.speed,
+								setPlaying: (state) => {setPlayer(p => {return {...p, playing: state}})},
+								setSpeed: (speed) => {setPlayer(p => {return {...p, speed: speed}})}
+							}
 						}}>
 							<RoverContext.Provider value={{
 								position: {
