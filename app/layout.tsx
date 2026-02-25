@@ -42,42 +42,62 @@ export default function RootLayout({
 		setTick: (t: number) => { setTickTo(t) },
 	});
 	const [player, setPlayer] = useState({
-		speed: 1 as 1|2,
-		playing: "paused" as "paused"|"playing",
+		speed: 1 as 1 | 2,
+		playing: "paused" as "paused" | "playing",
 	});
 
 	const setTickTo = (t: number) => {
-		// this will be the function that when called, checks if the tick exists as a key in the Map, then:
-		// --------- A) if it does, reverts there.
-
-		// loadMapSnaphot(mapSnapShots.get(t));
-
-		// --------- B) if it doesn't, calculates and logs, as this is a new action and spanshot
-
-		// createAndLoadMapSnapshot(t);
+		// after we run the algo, we'll generate the snapshots there. now all we need is to load them when requested
+		try { //TODO check if snapshot for tick exists
+			setCycle(p => {
+				return {
+					...p,
+					currentTick: t,
+					timeOfDay: t%48 > 32 ? "night" : "day"
+				}
+			})
+			loadSnapshot(mapSnapShots.get(t)!);
+		} catch {
+			console.log("fuck off, cunt") //TODO handle error or smthng
+		}
 	};
-	const handleMouseMove = (e: React.MouseEvent<HTMLBodyElement>) =>{
+	const handleMouseMove = (e: React.MouseEvent<HTMLBodyElement>) => {
 		lastMoveRef.current = Date.now();
 		setUIResting({
 			isResting: false,
 		})
 	}
-	useEffect(()=>{
-		const interval = setInterval(()=>{
+	const loadSnapshot = (snapshot: MapSnapshot) => {
+		// reflecting state of map happens in the page.tsx, where it will be read from the snapshots context with the tick as the key from the cycle context.
+		// load stuff for the rover
+		const r = snapshot.rover;
+		setPosition(r.position);
+		setInventory(r.inventory);
+		setCurrentAction(r.currentAction);
+		setLogs(r.logs);
+		setEnergy(r.energy);
+	}
+
+	useEffect(() => {
+		const interval = setInterval(() => {
 			const now = Date.now();
-			if(now - lastMoveRef.current > 3000){
+			if (now - lastMoveRef.current > 3000) {
 				setUIResting({
 					isResting: true,
 				})
 			}
 		}, 500)
-		return ()=>{clearInterval(interval)}
+		return () => { clearInterval(interval) }
 	}, [])
+	useEffect( () => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
+		//startAlgorithm(snapshotsSetter:setMapSnapshots);
+	}, [])
+
 	return (
 		<html lang="hu">
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black relative min-h-screen w-full`}
-				onMouseMove={(e) => {handleMouseMove(e)}}
+				onMouseMove={(e) => { handleMouseMove(e) }}
 			>
 				<UIHelperContext.Provider value={{
 					restingOpacity: 30,
@@ -93,8 +113,8 @@ export default function RootLayout({
 							player: {
 								playing: player.playing,
 								speed: player.speed,
-								setPlaying: (state) => {setPlayer(p => {return {...p, playing: state}})},
-								setSpeed: (speed) => {setPlayer(p => {return {...p, speed: speed}})}
+								setPlaying: (state) => { setPlayer(p => { return { ...p, playing: state } }) },
+								setSpeed: (speed) => { setPlayer(p => { return { ...p, speed: speed } }) }
 							}
 						}}>
 							<RoverContext.Provider value={{
