@@ -84,10 +84,7 @@ export default function RootLayout({
 					resting: UIisResting.isResting
 				}}>
 					<MapSnapshotsContext.Provider value={{
-						snapshots: {
-							get: mapSnapShots,
-							set: (sh: Map<Number, MapSnapshot>) => { setMapSnapshots(sh) }
-						}
+						snapshots: mapSnapShots
 					}}>
 						<CycleContext.Provider value={{
 							currentTick: cycle.currentTick,
@@ -101,30 +98,12 @@ export default function RootLayout({
 							}
 						}}>
 							<RoverContext.Provider value={{
-								position: {
-									get: position,
-									set: (pos: Position) => { setPosition(pos) }
-								},
-								inventory: {
-									get: inventory,
-									set: (inv: Item[]) => { setInventory(inv) }
-								},
-								logs: {
-									get: logs,
-									set: (ls: Log[]) => { setLogs(ls) }
-								},
-								startingPosition: {
-									get: startingPosition,
-									set: (pos: Position) => { setStartingPosition(pos) }
-								},
-								energy: {
-									get: energy,
-									set: (e: number) => { setEnergy(e) },
-								},
-								currentAction: {
-									get: currentAction,
-									set: (a: RoverAction) => { setCurrentAction(a) }
-								}
+								position: position,
+								inventory: inventory,
+								logs: logs,
+								startingPosition: startingPosition,
+								energy: energy,
+								currentAction: currentAction,
 							}}>
 								{children}
 							</RoverContext.Provider>

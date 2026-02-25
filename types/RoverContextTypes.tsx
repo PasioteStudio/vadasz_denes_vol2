@@ -21,28 +21,10 @@ export type RoverAction = {
     speed?: SPEED
 }
 export type RoverContextT = {
-    position: {
-        get: Position,
-        set: (position: Position) => void,
-    },
-    logs: {
-        get: Log[],
-        set: (logs: Log[]) => void,
-    },
-    inventory: {
-        get: Item[],
-        set: (items: Item[]) => void
-    }
-    startingPosition: {
-        get: Position,
-        set: (position: Position) => void,
-    },
-    energy: {
-        get: number,
-        set: (e: number) => void
-    }
-    currentAction: {
-        get: RoverAction,
-        set: (position: RoverAction) => void,
-    },
+    position: Position
+    logs: Log[],
+    inventory: Item[],
+    startingPosition: Position
+    energy: number
+    currentAction: RoverAction
 }
