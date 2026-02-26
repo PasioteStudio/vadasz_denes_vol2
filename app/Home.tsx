@@ -71,8 +71,11 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
   };
   const loadSnapshot = (snapshot: MapSnapshot) => {
     
-    
   }
+  useEffect(()=>{ // TODO create and load the first snapshot using the initial parameters.
+    // create snapshot
+    // loadSnapshot(mapSnapShots.get(1)!);
+  },[])
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
 		//startAlgorithm(snapshotsSetter:setMapSnapshots);
 	}, [])
@@ -91,10 +94,6 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
       },
       timeLimit: timeLimit
     }}>
-
-
-
-
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
       }}>
@@ -103,12 +102,6 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
           <Renderer />
         */}
       </MapSnapshotsContext.Provider>
-
-
-
-
-
-
     </CycleContext.Provider>
   );
 }
