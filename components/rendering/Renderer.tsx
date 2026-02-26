@@ -4,21 +4,25 @@ import { makePath } from "@/util/algorithm";
 import { Tile, mapConstraints, ores } from "@/util/constants";
 import { readMap } from "@/util/test";
 import { VectorField } from "@/util/vectormap";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
-    const map2DTiles: Tile[][] = [];
-    for (const field of map!) {
-        const { x, y } = field.position;
+    const map2DTiles: Tile[][] = useMemo(() => {
+        const map2D: Tile[][] = [];
+        for (const field of map!) {
+            const { x, y } = field.position;
 
-        if (!map2DTiles[y]) {
-            map2DTiles[y] = [];
+            if (!map2D[y]) {
+                map2D[y] = [];
+            }
+
+            map2D[y][x] = field.tile;
         }
+        return map2D;
+    }, [map])
 
-        map2DTiles[y][x] = field.tile;
-    }
     const [vmap, setMap] = useState<Tile[][]>(map2DTiles)
     const [vector_map, setVectorMap] = useState<VectorField[][]>([])
     const [path, setPath] = useState<number[]>([])
