@@ -8,10 +8,11 @@ import { VectorField } from "@/util/vectormap";
 import { timeEnd } from "console";
 import { CycleContext, MapSnapshotsContext } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
-import { MapSnapshot } from "@/types/MapTypes";
+import { Field, MapSnapshot } from "@/types/MapTypes";
 import { GUI } from "@/components/gui/GUI";
+import { Position } from "@/types/RoverContextTypes";
 
-export default function Home({timeLimit, initialMap} : {timeLimit: number, initialMap: Tile[]}) {
+export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[] }) {
 
 
 
@@ -43,7 +44,22 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
   //   }))
   //   setTime(end_time.getTime() - start_time.getTime())
   // }, [map])
-  const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(new Map<Number, MapSnapshot>());
+  const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(() =>
+    new Map<Number, MapSnapshot>([
+      [0, {
+        fields: initialMap,
+        rover: {
+          currentAction: {
+            action: "wait",
+          },
+          energy: 100,
+          inventory: [],
+          logs: [],
+          position: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+          startingPosition: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+        }
+      }],
+    ]));
 
   const [cycle, setCycle] = useState<Omit<CycleContextT, "player" | "timeLimit">>({
     currentTick: 0,
@@ -65,21 +81,16 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
           timeOfDay: t % 48 > 32 ? "night" : "day"
         }
       })
-      loadSnapshot(mapSnapShots.get(t)!);
     } catch {
       console.log("fuck off, cunt") //TODO handle error or smthng
     }
   };
   const loadSnapshot = (snapshot: MapSnapshot) => {
-    
+
   }
-  useEffect(()=>{ // TODO create and load the first snapshot using the initial parameters.
-    // create snapshot
-    // loadSnapshot(mapSnapShots.get(1)!);
-  },[])
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
-		//startAlgorithm(snapshotsSetter:setMapSnapshots);
-	}, [])
+    //startAlgorithm(snapshotsSetter:setMapSnapshots);
+  }, [])
 
 
   return (
