@@ -141,5 +141,5 @@ export function makePath(map:Tile[][],iterations:number) {
    
     }
 
-    return {ore_count,my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
+    return
 }
