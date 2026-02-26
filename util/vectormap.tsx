@@ -29,9 +29,24 @@ const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   6: { dx: 0, dy: 1 },
   7: { dx: 1, dy: 1 },
 };
+/**
+ * Returns true if the points are in distance of each other otherwise returns false
+ * @param {Point} point1
+ * @param {Point} point2
+ * @param {number} distance
+ * @returns {boolean} boolean
+ */
 function isInDistance(point1:Point,point2:Point,distance:number):boolean{
   return Math.abs(point1.x - point2.x) <= distance && Math.abs(point1.y - point2.y) <= distance
 }
+/**
+ * Creates a vector map from weights
+ * @param {number} width
+ * @param {number} height
+ * @param {Point} point where we are
+ * @param {WeightPoint[]} weightPoints
+ * @returns {VectorField[][]} vector map (VectorField[][])
+ */
 export function createVectorMapFromWeights(
   width: number,
   height: number,

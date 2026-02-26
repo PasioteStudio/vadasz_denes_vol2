@@ -1,24 +1,22 @@
 import {Graph,astar} from "@/util/astar"
-
-interface OrePoint {
-  x: number;
-  y: number;
-  weight: number;
-}
+import { WeightPoint } from "./vectormap";
 
 interface NearestOre {
   x: number;
   y: number;
   distance: number;
 }
-
 /**
  * Find the nearest ore from a given position using Euclidean distance
+ * @param {number} currentX where we are
+ * @param {number} currentY where we are
+ * @param {WeightPoint[]} oreMap
+ * @returns {NearestOre} {x:number, y:number,distance:number}
  */
 export function findNearestOre(
   currentX: number,
   currentY: number,
-  oreMap: OrePoint[]
+  oreMap: WeightPoint[]
 ): NearestOre {
   let nearest: NearestOre = { x: currentX, y: currentY, distance:0 }; 
   let minDistance = Infinity;
@@ -36,11 +34,15 @@ export function findNearestOre(
 
   return nearest;
 }
-
 /**
  * Get next step toward a target position using grid directions
  * Considers obstacles and uses A* if direct path is blocked
- * Returns { dx, dy } where each is -1, 0, or 1
+ * @param {number} fromX where we are
+ * @param {number} fromY where we are
+ * @param {number} toX where we want to go
+ * @param {number} toY where we want to go
+ * @param {(0|1)[][]} obstacle_map
+ * @returns {{dx:(-1|0|1), dy:(-1|0|1)}} {dx:(-1|0|1), dy:(-1|0|1)}
  */
 export function getNextStep(
   fromX: number,

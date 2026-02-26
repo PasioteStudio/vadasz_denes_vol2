@@ -12,12 +12,21 @@ import { Rover, time,ores, vectorValues,Tile, Point } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
 import {findNearestOre, getNextStep} from "@/util/oresearch"
+import { useSnapshots } from "@/lib/contexts";
 
+/**
+ * A graph memory structure
+ * @param {Point} column where we are
+ * @param {WeightPoint[]} update_able_map
+ * @param {(0|1)[][]} [obstacle_map]
+ * 
+ * @returns {Point} next_column_to_go
+ */
 function stuck(
-    column:{x:number,y:number},
+    column:Point,
     update_able_map:WeightPoint[],
     obstacle_map:(0|1)[][]
-):{next_column_to_go:{x:number,y:number}}{
+):{next_column_to_go:Point}{
     const nearestOre = findNearestOre(column.x, column.y, update_able_map)
     const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacle_map)
     return {next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
@@ -49,7 +58,8 @@ export function makePath(map:Tile[][]) {
     //const resultWithWeight = astar.search(graphWithWeight, startWithWeight, endWithWeight);
     //resultWithWeight is an array containing the shortest path taking into account the weight of a node
     
-    const rover = new Rover()
+    const snap = useSnapshots()
+    let power = 100
     
     //METHOD 2: go with the flow ~
     const my_path = []
@@ -71,6 +81,7 @@ export function makePath(map:Tile[][]) {
     let have_to_go_back = false
     while((have_to_go_back || (column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0)) && number < iterations){
         number++
+        power-=10
         if(have_to_go_back){
             const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
                 rows.map((tile,idx) => tile === 1 ? (idy == start.y && idx == start.x ? 1 : 0) : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
@@ -82,11 +93,11 @@ export function makePath(map:Tile[][]) {
             column=update_able_vector_map[astarpath[0].x][astarpath[0].y]
             my_path.push({x: column.x, y: column.y})
 
-            //ore?
-            const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
+            //ore? we cant grab one ore because then we would be late
+            /*const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
             if(update_able_map[tile_id].weight == 0) continue
             ore_count++
-            extractOre(tile_id,update_able_map,update_able_vector_map)
+            extractOre(tile_id,update_able_map,update_able_vector_map)*/
             continue
         }
         
@@ -101,17 +112,23 @@ export function makePath(map:Tile[][]) {
             column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
             //console.log(column.y*50+column.x)
             my_path.push({x: column.x, y: column.y,p:{next_column_to_go}})
-            const {vector_map,go_back} = TakeAnotherStep(iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
-            update_able_vector_map = vector_map
-            have_to_go_back = go_back
+            let step;
+            
             
             //update the map if ore found
             const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
             if(update_able_map[tile_id].weight != 0){
+                my_path.push({x: column.x, y: column.y,p:{next_column_to_go}})
+                step = TakeAnotherStep(power,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
                 we_are_stuck=false
+                number++
                 ore_count++
                 extractOre(tile_id,update_able_map,update_able_vector_map)
+            }else{
+                step = TakeAnotherStep(power,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
             }
+            update_able_vector_map = step!.vector_map
+            have_to_go_back = step!.go_back
             continue
         }
         //if the next_column is an obstacle, move around it
@@ -126,15 +143,22 @@ export function makePath(map:Tile[][]) {
         column = next_column
         //console.log(column.y*50+column.x)
         my_path.push({x:column.x,y:column.y})
-        const {vector_map,go_back} = TakeAnotherStep(iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
-        update_able_vector_map = vector_map
-        have_to_go_back = go_back
-
+        
         //update the map if ore found
         const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
-        if(update_able_map[tile_id].weight == 0) continue
-        ore_count++
-        extractOre(tile_id,update_able_map,update_able_vector_map)
+        let step;
+        if(update_able_map[tile_id].weight == 0){
+            step = TakeAnotherStep(power,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
+        }else{
+            my_path.push({x: column.x, y: column.y})
+            step = TakeAnotherStep(power,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map)
+            ore_count++
+            number++
+            extractOre(tile_id,update_able_map,update_able_vector_map)
+        } 
+        update_able_vector_map = step!.vector_map
+        have_to_go_back = step!.go_back
+   
     }
     console.log(update_able_map)
     return {ore_count,my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
@@ -145,9 +169,10 @@ function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_ve
     update_able_map[tile_id].weight = 0
     return 
 }
-function TakeAnotherStep(turnback_value:number,obstacle_map:(0|1)[][],start:Point,path:any[],point:Point, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
+function TakeAnotherStep(power:number, turnback_value:number,obstacle_map:(0|1)[][],start:Point,path:any[],point:Point, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
 :{vector_map:VectorField[][],go_back:boolean}
 {
+    
     const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
         rows.map((tile,idx) => tile === 1 ? (idy == start.y && idx == start.x ? 1 : 0) : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
         { diagonal: true });
@@ -156,5 +181,5 @@ function TakeAnotherStep(turnback_value:number,obstacle_map:(0|1)[][],start:Poin
     const astarpath = astar.search(graphWithWeight, startNode, endNode);
 
     const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
-    return {vector_map,go_back:(path.length + astarpath.length) >= turnback_value}
+    return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value)}
 }

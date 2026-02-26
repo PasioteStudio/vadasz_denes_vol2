@@ -31,6 +31,11 @@ export function generateMap(): Tile[][] {
   return mapArray;
 }
 //TESTING ONLY
+/**
+ * Converts a string to an enum
+ * @param {string} char the tile
+ * @returns {Tile} the converted tile (Tile)
+ */
 const toTile = (char: string): Tile => {
     switch(char){
         case "B": return Tile.Blue;
@@ -41,6 +46,11 @@ const toTile = (char: string): Tile => {
         default: return Tile.Empty;
     }
 }
+/**
+ * Creates a map from a file using an URL
+ * @param {string} URL the path to the file
+ * @returns {Promise<Tile[][]>} map (Promise<Tile[][]>)
+ */
 export async function readMap(URL:string):Promise<Tile[][]>{
     let lines:string[] = [];
     await fetch(URL).then(res=>res.text()).then(async(data)=>{
