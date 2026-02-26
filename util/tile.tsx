@@ -1,31 +1,24 @@
 import { Position } from "@/types/RoverContextTypes";
+import { Tile } from "./constants";
+import { octantToStep } from "./path";
+import { WeightPoint } from "./constants";
 
-export interface WeightPoint {
-  x: number;
-  y: number;
-  weight: number;
+/**
+ * Converts a string to an enum
+ * @param {string} char the tile
+ * @returns {Tile} the converted tile (Tile)
+ */
+export const toTile = (char: string): Tile => {
+    switch(char){
+        case "B": return Tile.Blue;
+        case "Y": return Tile.Yellow;
+        case "G": return Tile.Green;
+        case "#": return Tile.Obstacle;
+        case "S": return Tile.Start;
+        default: return Tile.Empty;
+    }
 }
 
-export interface VectorField {
-  x: number;
-  y: number;
-  //vector: { dx: number; dy: number };  // direction and magnitude
-  magnitude: number;
-  endPoint:{relative_x:number,relative_y:number}
-  angleDeg360: number;
-}
-
-// Precompute octant-to-step map once (not per iteration)
-const octantToStep: { [k: number]: { dx: number; dy: number } } = {
-  0: { dx: 1, dy: 0 },
-  1: { dx: 1, dy: -1 },
-  2: { dx: 0, dy: -1 },
-  3: { dx: -1, dy: -1 },
-  4: { dx: -1, dy: 0 },
-  5: { dx: -1, dy: 1 },
-  6: { dx: 0, dy: 1 },
-  7: { dx: 1, dy: 1 },
-};
 /**
  * Returns true if the points are in distance of each other otherwise returns false
  * @param {Position} point1
@@ -33,50 +26,11 @@ const octantToStep: { [k: number]: { dx: number; dy: number } } = {
  * @param {number} distance
  * @returns {boolean} boolean
  */
-function isInDistance(point1:Position,point2:Position,distance:number):boolean{
+export function isInDistance(point1:Position,point2:Position,distance:number):boolean{
   return Math.abs(point1.x - point2.x) <= distance && Math.abs(point1.y - point2.y) <= distance
 }
-/**
- * Creates a vector map from weights
- * @param {number} width
- * @param {number} height
- * @param {Position} point where we are
- * @param {WeightPoint[]} weightPoints
- * @param {number} distance from which the tiles should be calculated. 0 means that only the standing one and the one that it points to
- * @returns {VectorField[][]} vector map (VectorField[][])
- */
-export function createVectorMapFromWeights(
-  width: number,
-  height: number,
-  point:Position,
-  weightPoints: WeightPoint[],
-  distance?:number,
-): VectorField[][] {
-  const vectorMap: VectorField[][] = Array(height)
-    .fill(null)
-    .map(() => Array(width));
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if(!isInDistance({y:y,x:x},point,distance ? distance : 1)){
-        vectorMap[y][x] = {
-          x,
-          y,
-          //vector: { dx: 0, dy: 0 },
-          magnitude: 0,
-          endPoint: {
-            relative_x: 0,
-            relative_y: 0,
-          },
-          angleDeg360:0,
-        };
-        continue
-      }
-      vectorMap[y][x] = calculateTile(weightPoints,x,y)      
-    }
-  }
-  return vectorMap;
-}
-function calculateTile(weightPoints:WeightPoint[],x:number,y:number){
+
+export function calculateTile(weightPoints:WeightPoint[],x:number,y:number){
   let totalInfluence = 0;
   let weightedPosX = 0;
   let weightedPosY = 0;
