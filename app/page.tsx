@@ -1,11 +1,9 @@
 "use client"
 import { makePath } from "@/util/algorithm";
-import { generateMap, readMap } from "@/util/test";
-import Image from "next/image";
+import { generateMap, readMap } from "@/util/map";
 import { useEffect, useState } from "react";
 import {mapConstraints, ores, Tile} from "@/util/constants"
 import { VectorField } from "@/util/vectormap";
-import { timeEnd } from "console";
 
 export default function Home() {
   const [map,setMap] = useState<Tile[][]>([])

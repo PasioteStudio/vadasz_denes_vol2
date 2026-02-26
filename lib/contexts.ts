@@ -19,7 +19,11 @@ export const DefaultRoverContextObject: RoverContextT = {
 export const DefaultCycleContextObject: CycleContextT = {
     currentTick: 0,
     timeOfDay: "day",
-    setTick: () => { },
+    day: 16*2, //A nappal időtartama 16 óra, az éjszaka 8 óra
+    night: 8*2,
+    setTick: () => { 
+        this.currentTick = (this.currentTick + 1) % (this.day + this.night);
+    },
     player: {
         speed: 1,
         playing: "paused",

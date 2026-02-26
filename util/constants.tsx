@@ -2,11 +2,6 @@
 
 import { useMemo } from "react"
 
-export interface Point{
-    x:number,
-    y:number
-}
-
 export enum SPEED {
     SLOW= 1,
     MEDIUM = 2,
@@ -27,12 +22,6 @@ export const ores = [Tile.Green, Tile.Blue, Tile.Yellow]
 export const mapConstraints = {
     width:50,
     height:50
-}
-
-export const time = {
-    day: 16*2, //A nappal időtartama 16 óra, az éjszaka 8 óra
-    night : 8*2,
-    starting:"day" as "day"|"night",
 }
 export class Rover {
     speed:SPEED

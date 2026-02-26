@@ -1,4 +1,4 @@
-import { Point } from "./constants";
+import { Position } from "@/types/RoverContextTypes";
 
 export interface WeightPoint {
   x: number;
@@ -28,26 +28,26 @@ const octantToStep: { [k: number]: { dx: number; dy: number } } = {
 };
 /**
  * Returns true if the points are in distance of each other otherwise returns false
- * @param {Point} point1
- * @param {Point} point2
+ * @param {Position} point1
+ * @param {Position} point2
  * @param {number} distance
  * @returns {boolean} boolean
  */
-function isInDistance(point1:Point,point2:Point,distance:number):boolean{
+function isInDistance(point1:Position,point2:Position,distance:number):boolean{
   return Math.abs(point1.x - point2.x) <= distance && Math.abs(point1.y - point2.y) <= distance
 }
 /**
  * Creates a vector map from weights
  * @param {number} width
  * @param {number} height
- * @param {Point} point where we are
+ * @param {Position} point where we are
  * @param {WeightPoint[]} weightPoints
  * @returns {VectorField[][]} vector map (VectorField[][])
  */
 export function createVectorMapFromWeights(
   width: number,
   height: number,
-  point:Point,
+  point:Position,
   weightPoints: WeightPoint[]
 ): VectorField[][] {
   const vectorMap: VectorField[][] = Array(height)

@@ -8,25 +8,26 @@
 
 // TODO iterations helyett time és tickek
 const iterations = 200
-import { Rover, time,ores, vectorValues,Tile, Point } from "@/util/constants";
+import { Rover, ores, vectorValues,Tile } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
 import {findNearestOre, getNextStep} from "@/util/oresearch"
 import { useSnapshots } from "@/lib/contexts";
+import { Position } from "@/types/RoverContextTypes";
 
 /**
  * A graph memory structure
- * @param {Point} column where we are
+ * @param {Position} column where we are
  * @param {WeightPoint[]} update_able_map
  * @param {(0|1)[][]} [obstacle_map]
  * 
- * @returns {Point} next_column_to_go
+ * @returns {Position} next_column_to_go
  */
 function stuck(
-    column:Point,
+    column:Position,
     update_able_map:WeightPoint[],
     obstacle_map:(0|1)[][]
-):{next_column_to_go:Point}{
+):{next_column_to_go:Position}{
     const nearestOre = findNearestOre(column.x, column.y, update_able_map)
     const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacle_map)
     return {next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
@@ -110,7 +111,6 @@ export function makePath(map:Tile[][]) {
             const {next_column_to_go} = stuck(column,update_able_map,obstacle_map)
             
             column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
-            //console.log(column.y*50+column.x)
             my_path.push({x: column.x, y: column.y,p:{next_column_to_go}})
             let step;
             
@@ -141,7 +141,6 @@ export function makePath(map:Tile[][]) {
 
         //record the moving
         column = next_column
-        //console.log(column.y*50+column.x)
         my_path.push({x:column.x,y:column.y})
         
         //update the map if ore found
@@ -169,7 +168,7 @@ function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_ve
     update_able_map[tile_id].weight = 0
     return 
 }
-function TakeAnotherStep(power:number, turnback_value:number,obstacle_map:(0|1)[][],start:Point,path:any[],point:Point, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
+function TakeAnotherStep(power:number, turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:any[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
 :{vector_map:VectorField[][],go_back:boolean}
 {
     

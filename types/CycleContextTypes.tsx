@@ -1,6 +1,8 @@
 export type CycleContextT = {
     currentTick: number,
     timeOfDay: "day" | "night",
+    day: number,
+    night: number,
     setTick: (tick: number) => void,
     player: {
         playing: "playing" | "paused",
