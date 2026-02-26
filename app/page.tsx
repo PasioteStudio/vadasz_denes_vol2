@@ -1,9 +1,5 @@
 "use client"
-import { makePath } from "@/util/algorithm";
-import { generateMap, readMap } from "@/util/map";
-import { useEffect, useState } from "react";
-import {mapConstraints, ores, Tile} from "@/util/constants"
-import { VectorField } from "@/util/vectormap";
+import { useState } from "react";
 import Home from "./Home";
 import InitialPage from "./InitialPage";
 import { Field } from "@/types/MapTypes";
