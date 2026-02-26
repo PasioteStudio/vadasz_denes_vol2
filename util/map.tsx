@@ -1,9 +1,13 @@
-import { mapConstraints, Tile,WeightPoint,VectorField } from "./constants";
+import { Tile,WeightPoint,VectorField } from "./constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
 
 //TESTING ONLY
 export function generateMap(): Tile[][] {
+  const mapConstraints = {
+    height:50,
+    width:50
+  }
   const mapArray: Tile[][] = [];
   let startingPointSet = false
   for (let i = 0; i < mapConstraints.height; i++) {

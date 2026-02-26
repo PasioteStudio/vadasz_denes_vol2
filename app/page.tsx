@@ -13,4 +13,5 @@ export default function App() {
             : <InitialPage setTimeLimit={setTimeLimit} setInitialMap={setInitialMap} />
         }
     </>
+
 }
