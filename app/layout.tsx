@@ -1,15 +1,8 @@
 "use client"
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CycleContext, MapSnapshotsContext, UIHelperContext } from "@/lib/contexts";
-import { Item, Log, Position, RoverAction, RoverT } from "@/types/RoverContextTypes";
+import { UIHelperContext } from "@/lib/contexts";
 import { useEffect, useState, useRef } from "react";
-import { CycleContextT } from "@/types/CycleContextTypes";
-import { MapSnapshot } from "@/types/MapTypes";
-import { Tile } from "@/util/constants";
-import Home from "./Home";
-import InitialPage from "./InitialPage";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -27,8 +20,7 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const [timeLimit, setTimeLimit] = useState(0);
-	const [initialMap, setInitialMap] = useState<Tile[]>();
+
 
 	const [UIisResting, setUIResting] = useState({
 		isResting: false,
@@ -64,10 +56,7 @@ export default function RootLayout({
 					restingOpacity: 30,
 					resting: UIisResting.isResting
 				}}>
-					{timeLimit != 0 && initialMap != undefined ?
-						<Home initialMap={initialMap} timeLimit={timeLimit} />
-						: <InitialPage setTimeLimit={setTimeLimit} setInitialMap={setInitialMap} />
-					}
+					{children}
 				</UIHelperContext.Provider>
 			</body>
 		</html>

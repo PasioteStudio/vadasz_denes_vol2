@@ -9,6 +9,7 @@ import { timeEnd } from "console";
 import { CycleContext, MapSnapshotsContext } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapSnapshot } from "@/types/MapTypes";
+import { GUI } from "@/components/gui/GUI";
 
 export default function Home({timeLimit, initialMap} : {timeLimit: number, initialMap: Tile[]}) {
 
@@ -97,8 +98,8 @@ export default function Home({timeLimit, initialMap} : {timeLimit: number, initi
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
       }}>
+        <GUI />
         {/* 
-          <GUI />
           <Renderer />
         */}
       </MapSnapshotsContext.Provider>
