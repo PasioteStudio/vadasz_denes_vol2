@@ -3,7 +3,7 @@ import { makePath } from "@/util/algorithm";
 import { generateMap, readMap } from "@/util/map";
 import { useEffect, useState } from "react";
 import {mapConstraints, ores, Tile} from "@/util/constants"
-import { VectorField } from "@/util/vectormap";
+import { VectorField } from "@/util/constants";
 
 export default function Home() {
   const [map,setMap] = useState<Tile[][]>([])
@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(()=>{
     if(!map || map.length < 1)return
     const start_time = new Date()
-    const {ore_count,my_path,final_vector_map,initial_vector_map} = makePath(map)
+    const {ore_count,my_path,final_vector_map,initial_vector_map} = makePath(map,200)
     const end_time = new Date()
     console.log("initial_vector_map:",initial_vector_map)
     console.log("ores:",ore_count)

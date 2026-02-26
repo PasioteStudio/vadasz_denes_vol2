@@ -7,7 +7,6 @@
 // S = a rover kiindulópontja
 
 // TODO iterations helyett time és tickek
-const iterations = 200
 import { ores, vectorValues,Tile,VectorField } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
@@ -17,7 +16,7 @@ import { useSnapshots } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 
 
-export function makePath(map:Tile[][]) {
+export function makePath(map:Tile[][],iterations:number) {
     //Initialize maps
     const starting_row = map.findIndex((row)=>row.includes(Tile.Start))
     const start = {
