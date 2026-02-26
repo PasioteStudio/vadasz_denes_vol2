@@ -11,11 +11,8 @@ export interface VectorField {
   y: number;
   vector: { dx: number; dy: number };  // direction and magnitude
   magnitude: number;
-  endPoint:{x?:number,y?:number,relative_x:number,relative_y:number}
-  angleRad?: number;
-  angleDeg360?: number;
-  angleDegSigned?: number;
-  angleDegAcute?: number;
+  endPoint:{relative_x:number,relative_y:number}
+  angleDeg360: number;
 }
 
 // Precompute octant-to-step map once (not per iteration)
@@ -118,9 +115,6 @@ export function createVectorMapFromWeights(
         vector: { dx: vx, dy: vy },
         magnitude: magnitudeFinal,
         endPoint: {
-          // endpoint: the tile containing the weighted center (where weights sum to)
-          //x: Math.max(0, Math.min(width - 1, Math.round(centerX))),
-          //y: Math.max(0, Math.min(height - 1, Math.round(centerY))),
           relative_x: rel.dx,
           relative_y: rel.dy,
         },
