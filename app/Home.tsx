@@ -11,41 +11,11 @@ import { CycleContextT } from "@/types/CycleContextTypes";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { GUI } from "@/components/gui/GUI";
 import { Position } from "@/types/RoverContextTypes";
+import { Renderer } from "@/components/rendering/Renderer";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[] }) {
-
-
-
-  // const [map, setMap] = useState<Tile[][]>([])
-  // const [vector_map, setVectorMap] = useState<VectorField[][]>([])
-  // const [path, setPath] = useState<number[]>([])
-  // const [time, setTime] = useState<number>(0) //ms
-  // useEffect(() => {
-  //   const fetchMap = async () => {
-  //     //const map = generateMap()
-  //     const map = await readMap("/mars_map_50x50.csv")
-  //     setMap(map)
-  //     setVectorMap(map.map(row => row.map(tile => { return { magnitude: 0, angleDeg360: 0 } as VectorField })))
-  //   }
-  //   fetchMap()
-  // }, [])
-  // useEffect(() => {
-  //   if (!map || map.length < 1) return
-  //   const start_time = new Date()
-  //   const { ore_count, my_path, final_vector_map, initial_vector_map } = makePath(map)
-  //   const end_time = new Date()
-  //   console.log("initial_vector_map:", initial_vector_map)
-  //   console.log("ores:", ore_count)
-  //   console.log("path:", my_path)
-  //   console.log("final_vector_map:", final_vector_map)
-  //   setVectorMap(final_vector_map)
-  //   setPath(my_path.map(node => {
-  //     return node.y * mapConstraints.height + node.x
-  //   }))
-  //   setTime(end_time.getTime() - start_time.getTime())
-  // }, [map])
   const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(() =>
-    new Map<Number, MapSnapshot>([
+    new Map<Number, MapSnapshot>([ // this has to be overwritten by the algo
       [0, {
         fields: initialMap,
         rover: {
@@ -110,9 +80,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         snapshots: mapSnapShots
       }}>
         <GUI />
-        {/* 
-          <Renderer />
-        */}
+        <Renderer /> {/* THIS WILL HAVE THE THREEJS CANVAS LATER ON */}
       </MapSnapshotsContext.Provider>
     </CycleContext.Provider>
   );
