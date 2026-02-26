@@ -1,9 +1,9 @@
 import { Tile } from "@/util/constants"
-import { Position, RoverContextT } from "./RoverContextTypes"
+import { Position, RoverT } from "./RoverContextTypes"
 
 export type MapSnapshot = {
     fields: Field[],
-    rover: RoverContextT
+    rover: RoverT
 }
 export type Field = {
     position: Position,
