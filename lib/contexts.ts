@@ -21,9 +21,7 @@ export const DefaultCycleContextObject: CycleContextT = {
     timeOfDay: "day",
     day: 16*2, //A nappal időtartama 16 óra, az éjszaka 8 óra
     night: 8*2,
-    setTick: () => { 
-        this.currentTick = (this.currentTick + 1) % (this.day + this.night);
-    },
+    setTick: () => { },
     player: {
         speed: 1,
         playing: "paused",
