@@ -1,17 +1,11 @@
 "use client"
-import { makePath } from "@/util/algorithm";
-import { generateMap, readMap } from "@/util/test";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { mapConstraints, ores, Tile } from "@/util/constants"
-import { VectorField } from "@/util/vectormap";
-import { timeEnd } from "console";
 import { CycleContext, MapSnapshotsContext } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { GUI } from "@/components/gui/GUI";
-import { Position } from "@/types/RoverContextTypes";
 import { Renderer } from "@/components/rendering/Renderer";
+import { Tile } from "@/util/constants";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[] }) {
   const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(() =>
@@ -59,7 +53,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   }
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
-    //startAlgorithm(snapshotsSetter:setMapSnapshots);
+    //startAlgorithm(snapshotsSetter:setMapSnapshots); PÁPA
   }, [])
 
 
