@@ -32,11 +32,10 @@ export enum Tile {
 export const vectorValues={
     ore:1
 }
-export const ores = [Tile.Green, Tile.Blue, Tile.Yellow]
-export const mapConstraints = {
-    width:50,
-    height:50
+export function isOre(tile:Tile){
+    return [Tile.Green, Tile.Blue, Tile.Yellow].includes(tile)
 }
+
 export class Rover {
     speed:SPEED
     to_extract_ore = 1 /*Egy ásvány kibányászása fél óráig tart. Eközben az adott blokkon áll a rover.*/

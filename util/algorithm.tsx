@@ -7,7 +7,7 @@
 // S = a rover kiindulópontja
 
 // TODO iterations helyett time és tickek
-import { ores, vectorValues,Tile,VectorField } from "@/util/constants";
+import { isOre, vectorValues,Tile,VectorField } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
 import { getNextStep, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
@@ -26,7 +26,7 @@ export function makePath(map:Tile[][],iterations:number) {
 
     const vector_map = createVectorMapFromWeights(map.length,map[0].length,{x:start.x,y:start.y}, map.flatMap((rows,idx)=>{
         return rows.map((tile,id)=>{
-            return {x:id,y:idx ,weight:ores.includes(tile) ? 1 : 0}
+            return {x:id,y:idx ,weight:isOre(tile) ? 1 : 0}
         })
     }))
     
@@ -55,7 +55,7 @@ export function makePath(map:Tile[][],iterations:number) {
     })
     let update_able_map = map.flatMap((rows,idx)=>{
         return rows.map((tile,id)=>{
-            return {x:id,y:idx ,weight:ores.includes(tile) ? vectorValues.ore : (tile == Tile.Obstacle) ? 0 : 0}
+            return {x:id,y:idx ,weight:isOre(tile) ? vectorValues.ore : (tile == Tile.Obstacle) ? 0 : 0}
         })
     })
     let update_able_vector_map:VectorField[][] = vector_map

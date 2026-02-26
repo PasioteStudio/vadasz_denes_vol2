@@ -2,7 +2,7 @@
 import { makePath } from "@/util/algorithm";
 import { generateMap, readMap } from "@/util/map";
 import { useEffect, useState } from "react";
-import {mapConstraints, ores, Tile} from "@/util/constants"
+import { isOre, Tile} from "@/util/constants"
 import { VectorField } from "@/util/constants";
 
 export default function Home() {
@@ -30,7 +30,7 @@ export default function Home() {
     console.log("final_vector_map:",final_vector_map)
     setVectorMap(final_vector_map)
     setPath(my_path.map(node=>{
-      return node.y * mapConstraints.height + node.x 
+      return node.y * map.length + node.x 
     }))
     setTime(end_time.getTime()-start_time.getTime())
   },[map])
@@ -56,11 +56,11 @@ export default function Home() {
                 return <tr key={id}>
                   <td><p>{id}</p></td>
                   {row.map((tile,idx)=>{
-                    return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${tile == Tile.Start ? "bg-yellow-700" : (path.includes(id * mapConstraints.height + idx)) ? "bg-red-900" : (tile == Tile.Empty ? "bg-gray-900" : "")}`} key={idx}>
+                    return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${tile == Tile.Start ? "bg-yellow-700" : (path.includes(id * map.length + idx)) ? "bg-red-900" : (tile == Tile.Empty ? "bg-gray-900" : "")}`} key={idx}>
                       {tile == Tile.Empty ? <p style={{fontSize:vector_map[id][idx].magnitude == 0 ? 0 : Math.min(vector_map[id][idx].magnitude * 7.5 + 6,12) + "px", rotate:"-"+vector_map[id][idx].angleDeg360+"deg"}}>
                         {`->`}
                       </p> : 
-                      <p className="w-full h-min text-center aspect-square">{tile == Tile.Obstacle ? "🟥" : (ores.includes(tile) ? "❤" : (tile == Tile.Start ? "🏳️" : ""))}</p>
+                      <p className="w-full h-min text-center aspect-square">{tile == Tile.Obstacle ? "🟥" : (isOre(tile) ? "❤" : (tile == Tile.Start ? "🏳️" : ""))}</p>
                       }
                     </td>
                   })}
