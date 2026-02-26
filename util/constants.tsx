@@ -7,6 +7,20 @@ export enum SPEED {
     MEDIUM = 2,
     FAST = 3,
 }
+export interface WeightPoint {
+  x: number;
+  y: number;
+  weight: number;
+}
+
+export interface VectorField {
+  x: number;
+  y: number;
+  //vector: { dx: number; dy: number };  // direction and magnitude
+  magnitude: number;
+  endPoint:{relative_x:number,relative_y:number}
+  angleDeg360: number;
+}
 export enum Tile {
     "Obstacle",
     "Empty",

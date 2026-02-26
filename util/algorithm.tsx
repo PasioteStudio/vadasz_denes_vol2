@@ -8,34 +8,14 @@
 
 // TODO iterations helyett time és tickek
 const iterations = 200
-import { Rover, ores, vectorValues,Tile } from "@/util/constants";
+import { ores, vectorValues,Tile,VectorField } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
-import {createVectorMapFromWeights, VectorField, WeightPoint} from "@/util/vectormap"
-import {findNearestOre, getNextStep} from "@/util/oresearch"
+import {createVectorMapFromWeights} from "@/util/map"
+import { getNextStep, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
+import { extractOre } from "./ore";
 import { useSnapshots } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 
-/**
- * A graph memory structure
- * @param {Position} column where we are
- * @param {WeightPoint[]} update_able_map
- * @param {(0|1)[][]} [obstacle_map]
- * 
- * @returns {Position} next_column_to_go
- */
-function stuck(
-    column:Position,
-    update_able_map:WeightPoint[],
-    obstacle_map:(0|1)[][]
-):{next_column_to_go:Position}{
-    const nearestOre = findNearestOre(column.x, column.y, update_able_map)
-    const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacle_map)
-    return {next_column_to_go:{x:column.x + step.dx,y:column.y + step.dy}}
-}
-
-function isThereAWay(column:VectorField){
-    return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
-}
 
 export function makePath(map:Tile[][]) {
     //Initialize maps
@@ -94,7 +74,6 @@ export function makePath(map:Tile[][]) {
             const startNode = graphWithWeight.grid[column.y][column.x];
             const endNode = graphWithWeight.grid[start.y][start.x];
             const astarpath = astar.search(graphWithWeight, startNode, endNode);
-            console.log(astarpath.length)
             if(astarpath.length < 1) break //we arrived
             column=update_able_vector_map[astarpath[0].x][astarpath[0].y]
             my_path.push({x: column.x, y: column.y})
@@ -162,30 +141,6 @@ export function makePath(map:Tile[][]) {
         have_to_go_back = step!.go_back
    
     }
-    console.log(update_able_map)
-    return {ore_count,my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
-}
-function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
-//:VectorField[][]
-{
-    update_able_map[tile_id].weight = 0
-    return 
-}
-function TookAnotherStep(power:number, turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
-:{vector_map:VectorField[][],go_back:boolean}
-{
-    
-    const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
-        rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
-        { diagonal: true });
-    const startNode = graphWithWeight.grid[point.y][point.x];
-    const endNode = graphWithWeight.grid[start.y][start.x];
-    const astarpath = astar.search(graphWithWeight, startNode, endNode);
 
-    const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
-    
-    //go back even if there's no ore left
-    const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
-    const next_column = update_able_vector_map[last_element.y][last_element.x]
-    return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
+    return {ore_count,my_path,final_vector_map:update_able_vector_map,initial_vector_map:vector_map}
 }

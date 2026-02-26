@@ -1,4 +1,6 @@
-import { mapConstraints, Tile } from "./constants";
+import { mapConstraints, Tile,WeightPoint,VectorField } from "./constants";
+import { Position } from "@/types/RoverContextTypes";
+import { calculateTile, isInDistance, toTile } from "./tile";
 
 //TESTING ONLY
 export function generateMap(): Tile[][] {
@@ -31,21 +33,7 @@ export function generateMap(): Tile[][] {
   return mapArray;
 }
 //TESTING ONLY
-/**
- * Converts a string to an enum
- * @param {string} char the tile
- * @returns {Tile} the converted tile (Tile)
- */
-const toTile = (char: string): Tile => {
-    switch(char){
-        case "B": return Tile.Blue;
-        case "Y": return Tile.Yellow;
-        case "G": return Tile.Green;
-        case "#": return Tile.Obstacle;
-        case "S": return Tile.Start;
-        default: return Tile.Empty;
-    }
-}
+
 /**
  * Creates a map from a file using an URL
  * @param {string} URL the path to the file
@@ -64,4 +52,45 @@ export async function readMap(URL:string):Promise<Tile[][]>{
         lines[i].trim().split(',').forEach(t => currentRow.push(toTile(t)))
     }
     return map;
+}
+
+/**
+ * Creates a vector map from weights
+ * @param {number} width
+ * @param {number} height
+ * @param {Position} point where we are
+ * @param {WeightPoint[]} weightPoints
+ * @param {number} distance from which the tiles should be calculated. 0 means that only the standing one and the one that it points to
+ * @returns {VectorField[][]} vector map (VectorField[][])
+ */
+export function createVectorMapFromWeights(
+  width: number,
+  height: number,
+  point:Position,
+  weightPoints: WeightPoint[],
+  distance?:number,
+): VectorField[][] {
+  const vectorMap: VectorField[][] = Array(height)
+    .fill(null)
+    .map(() => Array(width));
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if(!isInDistance({y:y,x:x},point,distance ? distance : 1)){
+        vectorMap[y][x] = {
+          x,
+          y,
+          //vector: { dx: 0, dy: 0 },
+          magnitude: 0,
+          endPoint: {
+            relative_x: 0,
+            relative_y: 0,
+          },
+          angleDeg360:0,
+        };
+        continue
+      }
+      vectorMap[y][x] = calculateTile(weightPoints,x,y)      
+    }
+  }
+  return vectorMap;
 }
