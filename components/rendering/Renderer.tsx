@@ -5,15 +5,26 @@ import { NormalTile } from "@/Prefabs/NormalTile";
 import { Field } from "@/types/MapTypes";
 import { Position } from "@/types/RoverContextTypes";
 import { Tile, isOre } from "@/util/constants";
+import { PerspectiveCamera } from "@react-three/drei";
+import { useWASD } from "@/util/controlls";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from 'three';
+import { rotate } from "three/tsl";
 
 
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
+    const [direction,setDirection] = useState<Position>({x:0,y:0})
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
+    useWASD((dir) => {
+  
+      setDirection({
+        x: direction.x + dir.x,
+        y: direction.y + dir.z
+      })
+    });
     
     // return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">
     //       <table className="mx-auto">
@@ -43,12 +54,18 @@ export const Renderer = () => {
     // </div>
 
     return <>
-      <Canvas style={{ width: '100vw', height: '100vh' }} camera={{ position: [0, 70, 50], fov: 50 }}>
+      <Canvas style={{ width: "100vw", height: "100vh" }}>
+          <PerspectiveCamera
+            makeDefault
+            position={[direction.x, 70, direction.y+100]}
+            rotation={[-0.5, 0, 0]}
+            fov={50}  />
+
             <ambientLight intensity={1.3} />
             <spotLight position={[0, 64, 32]} />
             
             <MarsRover moveForward={10}/>
-      
+
           <NormalTile/>
           <BarrierTile/>
       </Canvas>
