@@ -39,7 +39,7 @@ export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(prev.size,{
-        fields: map,
+        fields: JSON.parse(JSON.stringify(map)),
         rover: {
           currentAction: {
             action: "mine" as ("mine"),
