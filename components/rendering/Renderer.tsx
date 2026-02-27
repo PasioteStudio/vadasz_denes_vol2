@@ -2,50 +2,15 @@ import { useCycle, useSnapshots } from "@/lib/contexts"
 import { Field } from "@/types/MapTypes";
 import { Position } from "@/types/RoverContextTypes";
 import { Tile, isOre } from "@/util/constants";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from 'three';
+
 
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
-
-
-    useEffect(()=>{
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(
-        50,window.innerWidth / window.innerHeight,
-        1,
-        1000
-      );
-      camera.position.z = 96;
-
-      const canvas = document.getElementById("canvas")!;
-      const renderer = new THREE.WebGLRenderer({
-        canvas: canvas,
-        antialias: true,
-      });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      ambientLight.castShadow = true;
-      scene.add(ambientLight);
-
-      const boxGeometry = new THREE.BoxGeometry(16,16,16);
-      const boxMaterial = new THREE.MeshNormalMaterial();
-      const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-      scene.add(boxMesh) 
-
-      const animate = () => {
-        boxMesh.rotation.x += 0.01;
-        boxMesh.rotation.y += 0.01;
-
-        renderer.render(scene, camera)
-        window.requestAnimationFrame(animate);
-      }
-      animate()
-    },[])
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     
     // return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">
     //       <table className="mx-auto">
@@ -75,6 +40,6 @@ export const Renderer = () => {
     // </div>
 
     return <>
-      <canvas id="canvas"></canvas>
+      <canvas ref={canvasRef}></canvas>
     </>
 }
