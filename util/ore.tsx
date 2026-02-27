@@ -31,10 +31,10 @@ export function findNearestOre(
 
   return nearest;
 }
-export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
+export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
 //:VectorField[][]
 {
-    map[tile_id].tile = Tile.Empty
+    map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
     update_able_map[tile_id].weight = 0
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
@@ -47,7 +47,7 @@ export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_
           energy: 100,
           inventory: [],
           logs: [],
-          position: map[tile_id].position,
+          position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
           startingPosition: previousSnap!.rover.startingPosition,
         }
       })
