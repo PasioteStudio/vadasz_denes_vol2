@@ -97,7 +97,7 @@ export function makePath(iterations:number,mapSnapShots:Field[][],snapshotsSette
             if(update_able_map[tile_id].weight != 0){
                 number++
                 my_path.push({x: column.x, y: column.y})
-                extractOre(tile_id,update_able_map,update_able_vector_map,map,snapshotsSetter)
+                extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShots,snapshotsSetter)
                 ore_count++
                 we_are_stuck=false
             }else{}
@@ -125,7 +125,7 @@ export function makePath(iterations:number,mapSnapShots:Field[][],snapshotsSette
         }else{
             number++
             my_path.push({x: column.x, y: column.y})
-            extractOre(tile_id,update_able_map,update_able_vector_map,map,snapshotsSetter)
+            extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShots,snapshotsSetter)
             ore_count++
         } 
         const step = TookAnotherStep(map,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
@@ -134,5 +134,5 @@ export function makePath(iterations:number,mapSnapShots:Field[][],snapshotsSette
    
     }
 
-    return
+    return {path:my_path}
 }

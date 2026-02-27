@@ -1,13 +1,12 @@
 import { useCycle, useSnapshots } from "@/lib/contexts"
 import { Field } from "@/types/MapTypes";
-import { makePath } from "@/util/algorithm";
+import { Position } from "@/types/RoverContextTypes";
 import { Tile, isOre } from "@/util/constants";
-import { readMap } from "@/util/map";
-import { VectorField } from "@/util/constants";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Renderer = () => {
     const { currentTick } = useCycle();
+    const [path,setPath] = useState<number[]>([])
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
     
     return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">

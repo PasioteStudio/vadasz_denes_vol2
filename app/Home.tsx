@@ -80,12 +80,12 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
           return prev
         })
         const start = new Date()
-        
-        makePath(200,newSnap.fields,setMapSnapshots);
+        const {path} = makePath(200,newSnap.fields,setMapSnapshots);
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())
         console.log("path length: ",mapSnapShots.size,mapSnapShots)
+        console.log("path:",path)
     }
     fetchMap()
   }, [])
