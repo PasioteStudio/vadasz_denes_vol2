@@ -26,10 +26,6 @@ export const Renderer = () => {
     useEffect(()=>{
       console.log("changed")
     },[map2DTiles])
-
-    const [vmap, setMap] = useState<Tile[][]>(map2DTiles)
-    const [vector_map, setVectorMap] = useState<VectorField[][]>([])
-    const [path, setPath] = useState<number[]>([])
     
     return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">
           <table className="mx-auto">
@@ -46,7 +42,7 @@ export const Renderer = () => {
                 return <tr key={id}>
                   <td><p>{id}</p></td>
                   {row.map((tile,idx)=>{
-                    return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${tile == Tile.Start ? "bg-yellow-700" : (path.includes(id * vmap.length + idx)) ? "bg-red-900" : (tile == Tile.Empty ? "bg-gray-900" : "")}`} key={idx}>
+                    return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${tile == Tile.Start ? "bg-yellow-700" : (tile == Tile.Empty ? "bg-gray-900" : "")}`} key={idx}>
 
                       <p className="w-full h-min text-center aspect-square">{tile == Tile.Obstacle ? "🟥" : (isOre(tile) ? "❤" : (tile == Tile.Start ? "🏳️" : ""))}</p>
                       
