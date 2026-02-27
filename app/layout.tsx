@@ -51,6 +51,7 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black relative min-h-screen w-full`}
 				onMouseMove={(e) => { handleMouseMove(e) }}
+				onClick={(e) => { handleMouseMove(e) }}
 			>
 				<UIHelperContext.Provider value={{
 					restingOpacity: 30,
