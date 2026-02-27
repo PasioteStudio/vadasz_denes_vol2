@@ -39,7 +39,7 @@ export const Renderer = () => {
     useEffect(() => {
         if (!vmap || vmap.length < 1) return
         const start_time = new Date()
-        makePath(vmap,200 * 10)
+        makePath(vmap,200 * 10) // what now????
         const end_time = new Date()
         setTime(end_time.getTime()-start_time.getTime())
     }, [vmap])
