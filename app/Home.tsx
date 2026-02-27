@@ -80,7 +80,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
           return prev
         })
         const start = new Date()
-        const {path} = makePath(200,newSnap.fields,setMapSnapshots);
+        const {path} = makePath(200,JSON.parse(JSON.stringify(newSnap)).fields,setMapSnapshots);
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())
