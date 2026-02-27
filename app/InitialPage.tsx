@@ -12,7 +12,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
 
     const [selectedMapOption, setMapOption] = useState<"upload" | "default">();
     const [loadedMap, setLoadedMap] = useState<Field[][]>();
-    const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(48);
+    const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(0);
     const [validInputs, setValidInputs] = useState(false);
     const [currentPanel, setPanel] = useState<"map" | "time">("map");
 
@@ -59,8 +59,6 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
                 <h1 className="text-center text-[5.5vw] bg-linear-to-r from-buttonicon to-misc1 bg-clip-text text-transparent">The Rover v1.0</h1>
-
-
                 <div className="w-9/12 grow py-[3vh]">
                     {panels[currentPanel]}
                 </div>
@@ -82,6 +80,10 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                         disabled={!validInputs} onClick={finalizeInputs}>
                         <span className="group-disabled:opacity-40">Indítás</span>
                     </button>
+                    <div className="ml-[1vw]">
+                        <p className={`${loadedMap != undefined ? "text-green-500": "text-white"} font-medium text-[1vw]`}>1. Térkép</p>
+                        <p className={`${selectedTimeLimit >= 48 ? "text-green-500": "text-white"} font-medium text-[1vw]`}>2. Idő</p>
+                    </div>
                 </div>
             </div>
         </div>
