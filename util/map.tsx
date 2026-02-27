@@ -55,7 +55,7 @@ export async function readMap(URL:string):Promise<Field[][]>{
         map.push([]);
         const currentRow = map[map.length - 1];
         const fields = lines[i].trim().split(',').map((s,_i): Field => {return {
-          position: { x:i , y:_i},
+          position: { x:_i , y:i},
           tile: toTile(s),
         }})
         fields.forEach(f => currentRow.push(f));

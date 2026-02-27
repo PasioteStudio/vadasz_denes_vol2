@@ -96,7 +96,7 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
-export function TookAnotherStep(map:Field[], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
+export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
 :{vector_map:VectorField[][],go_back:boolean}
 {
     
