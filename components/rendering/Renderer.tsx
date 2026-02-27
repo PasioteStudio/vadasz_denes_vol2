@@ -23,6 +23,10 @@ export const Renderer = () => {
         return map2D;
     }, [map])
 
+    useEffect(()=>{
+      console.log("changed")
+    },[map2DTiles])
+
     const [vmap, setMap] = useState<Tile[][]>(map2DTiles)
     const [vector_map, setVectorMap] = useState<VectorField[][]>([])
     const [path, setPath] = useState<number[]>([])
@@ -32,13 +36,13 @@ export const Renderer = () => {
             <thead>
               <tr>
                 <th></th>
-                {path && vmap.map((row:Tile[],id:number)=>{
+                {map2DTiles.map((row:Tile[],id:number)=>{
                   return <th key={id} className="text-xs">{id}</th>
                 })}
               </tr>
             </thead>
             <tbody>
-              {vector_map && path && vmap.map((row:Tile[],id:number)=>{
+              {map2DTiles.map((row:Tile[],id:number)=>{
                 return <tr key={id}>
                   <td><p>{id}</p></td>
                   {row.map((tile,idx)=>{

@@ -1,6 +1,7 @@
 import { Position } from "@/types/RoverContextTypes";
 import { Tile, VectorField, WeightPoint } from "./constants";
-import { Field } from "@/types/MapTypes";
+import { Field, MapSnapshot } from "@/types/MapTypes";
+import { Dispatch, SetStateAction } from "react";
 
 /**
  * Find the nearest ore from a given position using Euclidean distance
@@ -30,10 +31,27 @@ export function findNearestOre(
 
   return nearest;
 }
-export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[])
+export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
 //:VectorField[][]
 {
     map[tile_id].tile = Tile.Empty
     update_able_map[tile_id].weight = 0
+    snapshotsSetter(prev=>{
+      const previousSnap = prev.get(prev.size - 1)
+      prev.set(prev.size,{
+        fields: map,
+        rover: {
+          currentAction: {
+            action: "mine" as ("mine"),
+          },
+          energy: 100,
+          inventory: [],
+          logs: [],
+          position: map[tile_id].position,
+          startingPosition: previousSnap!.rover.startingPosition,
+        }
+      })
+      return prev
+    })
     return 
 }

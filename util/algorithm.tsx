@@ -73,7 +73,7 @@ export function makePath(iterations:number,mapSnapShots:Field[],snapshotsSetter:
             if(astarpath.length < 1) break //we arrived
             column=update_able_vector_map[astarpath[0].x][astarpath[0].y]
             my_path.push({x: column.x, y: column.y})
-
+            TookAnotherStep(map,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
             //ore? we cant grab one ore because then we would be late
             /*const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
             if(update_able_map[tile_id].weight == 0) continue
@@ -97,7 +97,7 @@ export function makePath(iterations:number,mapSnapShots:Field[],snapshotsSetter:
             if(update_able_map[tile_id].weight != 0){
                 number++
                 my_path.push({x: column.x, y: column.y})
-                extractOre(tile_id,update_able_map,update_able_vector_map,map)
+                extractOre(tile_id,update_able_map,update_able_vector_map,map,snapshotsSetter)
                 ore_count++
                 we_are_stuck=false
             }else{}
@@ -125,7 +125,7 @@ export function makePath(iterations:number,mapSnapShots:Field[],snapshotsSetter:
         }else{
             number++
             my_path.push({x: column.x, y: column.y})
-            extractOre(tile_id,update_able_map,update_able_vector_map,map)
+            extractOre(tile_id,update_able_map,update_able_vector_map,map,snapshotsSetter)
             ore_count++
         } 
         const step = TookAnotherStep(map,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)

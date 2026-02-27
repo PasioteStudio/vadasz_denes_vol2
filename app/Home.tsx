@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-import { CycleContext, MapSnapshotsContext } from "@/lib/contexts";
+import { CycleContext, MapSnapshotsContext, useSnapshots } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { GUI } from "@/components/gui/GUI";
@@ -88,6 +88,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())
+        console.log("path length: ",mapSnapShots.size,mapSnapShots)
     }
     fetchMap()
   }, [])
