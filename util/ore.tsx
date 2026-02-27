@@ -1,5 +1,6 @@
 import { Position } from "@/types/RoverContextTypes";
-import { VectorField, WeightPoint } from "./constants";
+import { Tile, VectorField, WeightPoint } from "./constants";
+import { Field } from "@/types/MapTypes";
 
 /**
  * Find the nearest ore from a given position using Euclidean distance
@@ -29,9 +30,10 @@ export function findNearestOre(
 
   return nearest;
 }
-export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
+export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[])
 //:VectorField[][]
 {
+    map[tile_id].tile = Tile.Empty
     update_able_map[tile_id].weight = 0
     return 
 }

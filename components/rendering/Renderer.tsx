@@ -26,30 +26,8 @@ export const Renderer = () => {
     const [vmap, setMap] = useState<Tile[][]>(map2DTiles)
     const [vector_map, setVectorMap] = useState<VectorField[][]>([])
     const [path, setPath] = useState<number[]>([])
-    const [time, setTime] = useState<number>(0) //ms
-    useEffect(() => {
-        const fetchMap = async () => {
-            //const map = generateMap()
-            const map = await readMap("/mars_map_50x50.csv")
-            setMap(map)
-            
-        }
-        fetchMap()
-    }, [])
-    useEffect(() => {
-        if (!vmap || vmap.length < 1) return
-        const start_time = new Date()
-        makePath(vmap,200 * 10) // what now????
-        const end_time = new Date()
-        setTime(end_time.getTime()-start_time.getTime())
-    }, [vmap])
-
-
+    
     return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">
-        <div className="mx-auto flex gap-4 items-center mb-5">
-            <h1 className="text-4xl">{time == 0 ? "Calculating..." : "Time:"}</h1>
-            {time != 0 ? <h2 className="text-2xl">{time}ms (Path length: {path.length})</h2> : null}
-          </div>
           <table className="mx-auto">
             <thead>
               <tr>

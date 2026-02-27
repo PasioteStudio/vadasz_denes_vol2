@@ -6,10 +6,13 @@ import { Field, MapSnapshot } from "@/types/MapTypes";
 import { GUI } from "@/components/gui/GUI";
 import { Renderer } from "@/components/rendering/Renderer";
 import { Tile } from "@/util/constants";
+import { makePath } from "@/util/algorithm";
+import { readMap } from "@/util/map";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[] }) {
+  const [time, setTime] = useState<number>(0) //ms
   const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(() =>
-    new Map<Number, MapSnapshot>([ // this has to be overwritten by the algo
+    new Map<Number, MapSnapshot>([ // this has to be overwritten by the algorithm
       [0, {
         fields: initialMap,
         rover: {
@@ -38,7 +41,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   });
 
   const setTickTo = (t: number) => {
-    // after we run the algo, we'll generate the snapshots there. now all we need is to load them when requested
+    // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try { //TODO check if snapshot for tick exists
       setCycle(p => {
         return {
@@ -48,14 +51,45 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         }
       })
     } catch {
-      console.log("fuck off, cunt") //TODO handle error or smthng
+      console.log("Gálati's gay") //TODO handle error or smth
     }
   };
   const loadSnapshot = (snapshot: MapSnapshot) => {
 
   }
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
-    //startAlgorithm(snapshotsSetter:setMapSnapshots); PÁPA
+    const fetchMap = async () => {
+        //const map = generateMap()
+        const initialMap = (await readMap("/mars_map_50x50.csv")).flatMap((row,idy,all)=>{
+          return row.map((tile,idx)=>{
+            return {position:{x:idx,y:idy},tile}
+          })
+        })
+        const newSnap = {
+          fields: initialMap,
+          rover: {
+            currentAction: {
+              action: "move" as ("move" | "wait" | "mine")
+            },
+            energy: 100,
+            inventory: [],
+            logs: [],
+            position: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+            startingPosition: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+          }
+        }
+        setMapSnapshots(prev=>{
+          prev.set(0,newSnap)
+          return prev
+        })
+        const start = new Date()
+        
+        makePath(200,newSnap.fields,setMapSnapshots);
+        const end = new Date()
+        setTime(end.getTime()-start.getTime())
+        console.log("time: ",end.getTime()-start.getTime())
+    }
+    fetchMap()
   }, [])
 
 

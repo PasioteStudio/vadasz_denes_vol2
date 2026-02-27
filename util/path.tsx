@@ -3,6 +3,9 @@ import { Position } from "@/types/RoverContextTypes";
 import { createVectorMapFromWeights } from "./map";
 import {VectorField,WeightPoint} from "./constants"
 import { findNearestOre } from "./ore";
+import { useSnapshots } from "@/lib/contexts";
+import { Field, MapSnapshot } from "@/types/MapTypes";
+import { Dispatch, SetStateAction } from "react";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -93,7 +96,7 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
-export function TookAnotherStep(power:number, turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][])
+export function TookAnotherStep(map:Field[], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
 :{vector_map:VectorField[][],go_back:boolean}
 {
     
@@ -109,5 +112,23 @@ export function TookAnotherStep(power:number, turnback_value:number,obstacle_map
     //go back even if there's no ore left
     const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
     const next_column = update_able_vector_map[last_element.y][last_element.x]
+    
+    snapshotsSetter(prev=>{
+      const previousSnap = prev.get(prev.size - 1)
+      prev.set(prev.size,{
+        fields: map,
+        rover: {
+          currentAction: {
+            action: "move" as ("move"),
+          },
+          energy: 100,
+          inventory: [],
+          logs: [],
+          position: point,
+          startingPosition: previousSnap!.rover.startingPosition,
+        }
+      })
+      return prev
+    })
     return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
 }
