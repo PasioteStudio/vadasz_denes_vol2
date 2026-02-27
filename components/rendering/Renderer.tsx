@@ -1,10 +1,6 @@
 import { useCycle, useSnapshots } from "@/lib/contexts"
 import { Field } from "@/types/MapTypes";
-import { makePath } from "@/util/algorithm";
 import { Tile, isOre } from "@/util/constants";
-import { readMap } from "@/util/map";
-import { VectorField } from "@/util/constants";
-import { useState, useEffect, useMemo } from "react";
 
 export const Renderer = () => {
     const { currentTick } = useCycle();
