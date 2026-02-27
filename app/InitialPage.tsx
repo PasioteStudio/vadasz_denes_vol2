@@ -39,7 +39,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     useEffect(() => {
         const TO = setTimeout(() => {
             setDelayDone(true);
-        }, 2000)
+        }, 1000)
 
         return () => { clearTimeout(TO) }
     }, [])
@@ -56,15 +56,15 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
 
             <StaticRover rotation={new Euler(0.5, 10, 0)} position={[1.5, 0, -4]} scale={0.6} />
         </Canvas>
-        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999">
+        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
-                <h1 className="text-center text-[5.5vw] bg-linear-to-r from-buttonicon to-misc1 bg-clip-text text-transparent">The Rover v1.0</h1>
-                <div className="w-9/12 grow py-[3vh]">
+                <h1 className={`text-center text-[5.5vw] bg-linear-to-r from-buttonicon to-misc1 bg-clip-text text-transparent translate-y-[200%] duration-500 ${delayDone && "translate-y-0!"}`}>The Rover v1.0</h1>
+                <div className={`w-9/12 grow py-[3vh] duration-500 opacity-0 translate-y-3/12 ${delayDone && "opacity-100 translate-y-0!"}`}>
                     {panels[currentPanel]}
                 </div>
 
 
-                <div className="flex items-center gap-[1vw] justify-start w-9/12">
+                <div className={`flex items-center gap-[1vw] justify-start w-9/12 duration-500 opacity-0 translate-y-full ${delayDone && "opacity-100 translate-y-0!"}`}>
 
                     <button className={`cursor-pointer disabled:cursor-no-drop bg-buttonbg px-[3vw] py-[1.2vw] group rounded-md`}
                         disabled={currentPanel == "map"} onClick={() => { setPanel("map") }}>
