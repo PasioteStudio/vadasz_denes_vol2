@@ -61,6 +61,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     const fetchMap = async () => {
         //const map = generateMap()
         const initialMap: Field[][] = (await readMap("/mars_map_50x50.csv"))
+        console.log(initialMap)
         const newSnap = {
           fields: initialMap,
           rover: {
