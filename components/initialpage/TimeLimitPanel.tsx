@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 
 export default function TimeLimitPanel({current, setter}: {current: number, setter: (ticks: number) => void}) {
-    const [inputValue, setInpVal] = useState<number | "">(0);
+    const [inputValue, setInpVal] = useState<number | "">(current/2);
 
     useEffect(()=>{
         setter(inputValue == "" ? 0 : inputValue*2)

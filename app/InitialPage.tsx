@@ -12,7 +12,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
 
     const [selectedMapOption, setMapOption] = useState<"upload" | "default">();
     const [loadedMap, setLoadedMap] = useState<Field[][]>();
-    const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(0);
+    const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(48);
     const [validInputs, setValidInputs] = useState(false);
     const [currentPanel, setPanel] = useState<"map" | "time">("map");
 
