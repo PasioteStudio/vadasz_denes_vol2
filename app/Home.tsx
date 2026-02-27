@@ -109,8 +109,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
       }}>
-        <GUI />
         <Renderer /> {/* THIS WILL HAVE THE THREEJS CANVAS LATER ON */}
+        <GUI />
       </MapSnapshotsContext.Provider>
     </CycleContext.Provider>
   );
