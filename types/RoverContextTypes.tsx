@@ -20,7 +20,7 @@ export type RoverAction = {
     target?: Field,
     speed?: SPEED
 }
-export type RoverContextT = {
+export type RoverT = {
     position: Position
     logs: Log[],
     inventory: Item[],

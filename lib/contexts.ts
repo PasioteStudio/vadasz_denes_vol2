@@ -2,11 +2,11 @@
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapSnapshotsContextT } from "@/types/MapSnapshotContextTypes";
 import { MapSnapshot } from "@/types/MapTypes";
-import { RoverAction, RoverContextT } from "@/types/RoverContextTypes";
+import { RoverAction, RoverT } from "@/types/RoverContextTypes";
 import { UIHelperContextT } from "@/types/UIHelperContextTypes";
 import { createContext, useContext } from "react";
 
-export const DefaultRoverContextObject: RoverContextT = {
+export const DefaultRoverContextObject: RoverT = {
     position: { x: 0, y: 0 },
     logs: [],
     inventory: [],
@@ -26,8 +26,9 @@ export const DefaultCycleContextObject: CycleContextT = {
         speed: 1,
         playing: "paused",
         setPlaying: () => { },
-        setSpeed: () => { }
-    }
+        setSpeed: () => { },
+    },
+    timeLimit: 48
 }
 export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
     snapshots: new Map<Number, MapSnapshot>()
@@ -36,13 +37,6 @@ export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
 export const DefaultUIHelperContextObject: UIHelperContextT = {
     resting: false,
     restingOpacity: 30,
-}
-
-export const RoverContext = createContext<RoverContextT>({ ...DefaultRoverContextObject });
-export const useRover = (): RoverContextT => {
-    const ctx = useContext(RoverContext);
-    if (!ctx) throw new Error("Context needs to be initialized, ya buffoon");
-    return ctx;
 }
 
 export const CycleContext = createContext<CycleContextT>({ ...DefaultCycleContextObject })

@@ -4,11 +4,11 @@ import DayNightCycleDisplayer from "@/components/gui/DayNightCycleDisplayer";
 import LogDisplayer from "@/components/gui/LogDisplayer";
 import TimeControlButtons from "@/components/gui/TimeControlButtons";
 
-export default function GUI(){
+export function GUI(){
     return <>
     <DayNightCycleDisplayer />
     <BatteryDisplayer />
-    <TimeControlButtons />
+    {/* <TimeControlButtons /> */}
     {/* <LogDisplayer /> */}
     {/* 
     <CurrentAction /> */}

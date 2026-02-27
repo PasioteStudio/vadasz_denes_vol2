@@ -10,4 +10,5 @@ export type CycleContextT = {
         speed: 1|2,
         setSpeed: (s: 1|2) => void
     }
+    timeLimit: number,
 }
