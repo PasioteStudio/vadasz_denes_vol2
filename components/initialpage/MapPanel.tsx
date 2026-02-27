@@ -37,6 +37,7 @@ export default function MapPanel(
             return;
         }
         setter("upload", loadedMap);
+        e.target.value = "";
     };
 
     useEffect(()=>{
