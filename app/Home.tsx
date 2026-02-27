@@ -9,7 +9,7 @@ import { Tile } from "@/util/constants";
 import { makePath } from "@/util/algorithm";
 import { readMap } from "@/util/map";
 
-export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[] }) {
+export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[][] }) {
   const [time, setTime] = useState<number>(0) //ms
   const [mapSnapShots, setMapSnapshots] = useState<Map<Number, MapSnapshot>>(() =>
     new Map<Number, MapSnapshot>([ // this has to be overwritten by the algorithm
@@ -22,8 +22,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
           energy: 100,
           inventory: [],
           logs: [],
-          position: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
-          startingPosition: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+          position: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+          startingPosition: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
         }
       }],
     ]));
@@ -60,11 +60,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     const fetchMap = async () => {
         //const map = generateMap()
-        const initialMap = (await readMap("/mars_map_50x50.csv")).flatMap((row,idy,all)=>{
-          return row.map((tile,idx)=>{
-            return {position:{x:idx,y:idy},tile}
-          })
-        })
+        const initialMap: Field[][] = (await readMap("/mars_map_50x50.csv"))
         const newSnap = {
           fields: initialMap,
           rover: {
@@ -74,8 +70,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
             energy: 100,
             inventory: [],
             logs: [],
-            position: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
-            startingPosition: initialMap.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+            position: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
+            startingPosition: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
           }
         }
         setMapSnapshots(prev=>{

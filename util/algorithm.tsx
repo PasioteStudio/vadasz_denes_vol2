@@ -18,9 +18,9 @@ import { Dispatch, SetStateAction } from "react";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 
 
-export function makePath(iterations:number,mapSnapShots:Field[],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>) {
+export function makePath(iterations:number,mapSnapShots:Field[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>) {
     //Initialize maps
-    const map = mapSnapShots
+    const map = mapSnapShots.flat();
     let start:Position = {x:0,y:0};
     let mapConstraints:{width:number,height:number} = {width:0,height:0};
     map.forEach(field=>{

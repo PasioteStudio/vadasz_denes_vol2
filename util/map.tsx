@@ -1,6 +1,7 @@
 import { Tile,WeightPoint,VectorField } from "./constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
+import { Field } from "@/types/MapTypes";
 
 //TESTING ONLY
 export function generateMap(): Tile[][] {
@@ -43,17 +44,20 @@ export function generateMap(): Tile[][] {
  * @param {string} URL the path to the file
  * @returns {Promise<Tile[][]>} map (Promise<Tile[][]>)
  */
-export async function readMap(URL:string):Promise<Tile[][]>{
+export async function readMap(URL:string):Promise<Field[][]>{
     let lines:string[] = [];
     await fetch(URL).then(res=>res.text()).then(async(data)=>{
         lines = data.split("\n").filter(line => line.trim() != "");
     })
-    const map: Tile[][] = [];
+    const map: Field[][] = [];
     for(let i = 0; i<lines.length; i++){
         if(lines[i].trim() == "") continue;
         map.push([]);
         const currentRow = map[map.length - 1];
-        lines[i].trim().split(',').forEach(t => currentRow.push(toTile(t)))
+        lines[i].trim().split(',').map((s,_i): Field => {return {
+          position: { x:i , y:_i},
+          tile: toTile(s),
+        }})
     }
     return map;
 }
