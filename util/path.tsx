@@ -96,6 +96,16 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
+function deepCopy<T>(array: T[]): T[] {
+  return array.map(item => 
+    typeof item === 'object' && item !== null && !Array.isArray(item)
+      ? { ...item }
+      : Array.isArray(item)
+      ? deepCopy(item as unknown as T[])
+      : item
+  ) as T[];
+}
+
 export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
 :{vector_map:VectorField[][],go_back:boolean}
 {
@@ -103,7 +113,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(path.length,{
-        fields: JSON.parse(JSON.stringify(map)), //TODO 2 differen map perhaps
+        fields: deepCopy(map), //TODO 2 differen map perhaps
         rover: {
           currentAction: {
             action: "move" as ("move"),
@@ -125,7 +135,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
         const previousSnap = prev.get(prev.size - 1)
         previousSnap!.rover.inventory.push({name:"Ore",amount:1})
         prev.set(path.length,{
-          fields: JSON.parse(JSON.stringify(map)), //TODO change it, dont parse it (time consuming)
+          fields: deepCopy(map),
           rover: {
             currentAction: {
               action: "mine" as ("mine"),
