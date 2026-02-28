@@ -1,29 +1,36 @@
-import { useEffect } from "react";
-import { Vector3 } from "three";
+import { useEffect, useRef } from "react";
 
- export function useWASD(onMove: (direction: Vector3) => void) {
+export function useKeyboard() {
+  const keys = useRef({
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+  });
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key.toLowerCase()) {
-        case "w":
-          onMove(new Vector3(0, 0, -1));
-          break;
-        case "s":
-          onMove(new Vector3(0, 0, 1));
-          break;
-        case "a":
-          onMove(new Vector3(-1, 0, 0));
-          break;
-        case "d":
-          onMove(new Vector3(1, 0, 0));
-          break;
+    const down = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key in keys.current) {
+        keys.current[key as keyof typeof keys.current] = true;
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+    const up = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key in keys.current) {
+        keys.current[key as keyof typeof keys.current] = false;
+      }
     };
-  }, [onMove]);
+
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, []);
+
+  return keys;
 }
