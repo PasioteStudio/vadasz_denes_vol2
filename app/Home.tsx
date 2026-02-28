@@ -8,6 +8,7 @@ import { Renderer } from "@/components/rendering/Renderer";
 import { Tile } from "@/util/constants";
 import { makePath } from "@/util/algorithm";
 import { readMap } from "@/util/map";
+import { deepCopy } from "@/util/path";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Field[][] }) {
   const [time, setTime] = useState<number>(0) //ms
@@ -60,17 +61,18 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   }
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
+    if(mapSnapShots.size > 1) return //dont run it twice
     const start = async () => {
         const start = new Date()
-        const {path} = makePath(timeLimit,JSON.parse(JSON.stringify(mapSnapShots.get(0)!.fields)),setMapSnapshots);
+        const {path} = makePath(timeLimit,deepCopy(mapSnapShots.get(0)!.fields),setMapSnapshots);
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())
-        console.log("path length: ",mapSnapShots.size,mapSnapShots)
+        console.log("snapshots: ",mapSnapShots)
         console.log("path:",path)
     }
     start()
-  }, [])
+  }, [mapSnapShots])
 
 
   return (

@@ -95,7 +95,7 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
-function deepCopy<T>(array: T[]): T[] {
+export function deepCopy<T>(array: T[]): T[] {
   return array.map(item => 
     typeof item === 'object' && item !== null && !Array.isArray(item)
       ? { ...item }
