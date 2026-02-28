@@ -57,7 +57,7 @@ export const Renderer = () => {
     return <>
       <Canvas style={{ width: "100vw", height: "100vh" }}>
           {/* setting camera position based on rover position and direction */}
-          <Controls/>
+          
           <PerspectiveCamera
             makeDefault
             position={[
