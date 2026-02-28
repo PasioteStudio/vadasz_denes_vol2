@@ -10,6 +10,8 @@ import { PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer, TILE_GAP } from "./TileRenderer";
+import { InstancedTileGroup } from "./InstancedTileGroup";
+import { groupTilesByType } from "@/util/tileGrouping";
 import { Controls } from "../gui/Controls";
 import InventoryPopup from "../gui/InventoryPopup";
 import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
@@ -70,6 +72,12 @@ export const Renderer = () => {
     const maxCol = clampNum(camTile.x + radiusCols, 0, cols - 1);
     return { minRow, maxRow, minCol, maxCol };
   }, [camTile]);
+
+  // Group tiles by type for instancing
+  const tileGroups = useMemo(() => {
+    if (!map || !bounds) return null;
+    return groupTilesByType(map, bounds);
+  }, [map, bounds]);
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>({ x: 0, y: 130 });
@@ -136,21 +144,17 @@ export const Renderer = () => {
       <directionalLight intensity={timeOfDay == "day" ? 1 : 0} position={[-2, 2, -1]} color={0xffffff} />
       <directionalLight intensity={timeOfDay == "night" ? 1 : 0} position={[-2, 2, -1]} color={0x0000ff} />
 
-      {map && bounds &&
-        map.map((row: Field[], rowIndex: number) => {
-          if (rowIndex < bounds.minRow || rowIndex > bounds.maxRow) return null;
-          return row.map((field, colIndex) => {
-            if (colIndex < bounds.minCol || colIndex > bounds.maxCol) return null;
-            return (
-              <TileRenderer
-                key={`${rowIndex}-${colIndex}`}
-                tile={field.tile}
-                x={colIndex}
-                y={rowIndex}
-              />
-            );
-          });
-        })}
+      {map && bounds && tileGroups &&
+        Array.from(tileGroups.values()).map((group) => (
+          <InstancedTileGroup
+            key={`tile-group-${group.tileType}`}
+            tileType={group.tileType}
+            positions={group.positions}
+            castShadow
+            receiveShadow
+            tileGap={GAP}
+          />
+        ))}
       <MarsRover targetPos={{ x: rover!.position.x, y: rover!.position.y }} />
     </Canvas>
     {isInventoryOpen && <InventoryPopup />}
