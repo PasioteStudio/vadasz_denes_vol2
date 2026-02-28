@@ -15,7 +15,7 @@ export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
     //key input
-    const [direction,setDirection] = useState<Position>({x:0,y:0})
+    const [direction,setDirection] = useState<Position>({x:10,y:100})
     //scroll input
     const [fov,setFov] = useState<number>(10)
 

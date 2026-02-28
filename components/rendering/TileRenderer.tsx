@@ -5,7 +5,7 @@ import { GoldTile } from "@/Prefabs/GoldTile";
 import { WaterTile } from "@/Prefabs/WaterTile";
 
 import { RareTile } from "@/Prefabs/RareTile";
-
+import { BaseTile } from "@/Prefabs/BaseTile";
 //here is the tile
 interface TileRendererProps {
   tile: Tile
@@ -29,7 +29,7 @@ export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
       return <GoldTile position={position} />
 
     case Tile.Start:
-      return <NormalTile position={position} />
+      return <BaseTile position={position} />
 
     default:
       return <NormalTile position={position} />

@@ -22,7 +22,7 @@ export function NormalTile(props: ThreeElements['group']) {
     useGLTF('/Modells/normalmarssurface.glb') as unknown as GLTFResult
 
   return (
-    //méretét felvettem
+    //méret
     <group {...props} dispose={null} scale={[1, 1, 1]}>
       <mesh
         geometry={nodes.Plane.geometry}
