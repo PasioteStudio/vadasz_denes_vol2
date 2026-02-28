@@ -57,7 +57,6 @@ export const Renderer = () => {
     const cols = map[0]?.length || 0;
     const camX = Math.floor(clampNum(camXraw, rxOffset, cols - 1 - rxOffset));
     const camY = Math.floor(clampNum(camYraw, ryOffset, rows - 1 - ryOffset));
-    console.log(camY);
     return { x: camX, y: camY };
   }, [direction, rover]);
 
