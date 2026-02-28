@@ -6,6 +6,9 @@ import TimeControlButtons from "@/components/gui/TimeControlButtons";
 
 export function GUI(){
     return <>
+    <div className="pointer-events-none absolute w-full h-full top-0 left-0 bg-radial from-transparent from-20% to-85% to-black/80"> {/*vignette*/}
+
+    </div>
     <DayNightCycleDisplayer />
     <BatteryDisplayer />
     <TimeControlButtons />
