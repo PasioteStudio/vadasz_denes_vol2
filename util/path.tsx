@@ -116,7 +116,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(path.length,{
-        fields: map,
+        fields: JSON.parse(JSON.stringify(map)), //TODO 2 differen map perhaps
         rover: {
           currentAction: {
             action: "move" as ("move"),
