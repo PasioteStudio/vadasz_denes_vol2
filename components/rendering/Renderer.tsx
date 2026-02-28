@@ -121,8 +121,9 @@ export const Renderer = () => {
             rotation={[-0.5, 0, 0]}
             fov={fov}  />
 
-            <ambientLight intensity={1.3} color={timeOfDay ? 0xffffff : 0xaaaaaa} />
-            <directionalLight intensity={1} position={[-2,2,-1]} color={0xffffff} />
+            <ambientLight intensity={timeOfDay == "day" ? 1 : 0.5} color={0xffaaaa} />
+            <directionalLight intensity={timeOfDay == "day" ? 1 : 0} position={[-2,2,-1]} color={0xffffff} />
+            <directionalLight intensity={timeOfDay == "night" ? 1 : 0} position={[-2,2,-1]} color={0x0000ff} />
 
             {map && bounds &&
               map.map((row: Field[], rowIndex: number) => {
