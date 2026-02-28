@@ -44,7 +44,7 @@ export const Renderer = () => {
   // Compute camera tile based on direction + rover position
   const camTile = useMemo(() => {
     const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
-    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.77 * (2.5/GAP);
+    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.75 * (2.5/GAP);
 
     if (!map) return { x: camXraw, y: camYraw };
 
