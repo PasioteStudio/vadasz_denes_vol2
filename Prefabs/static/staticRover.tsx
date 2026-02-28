@@ -47,34 +47,6 @@ type GLTFResult = GLTF & {
 export function StaticRover(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/marsrover-highres.glb') as unknown as GLTFResult
-  useEffect(() => {
-    const fixGeometry = (geo: THREE.BufferGeometry) => {
-      if (!geo.attributes.normal) return
-
-      const normals = geo.attributes.normal
-
-      // 🔴 invert normals
-      for (let i = 0; i < normals.count; i++) {
-        normals.setXYZ(
-          i,
-          -normals.getX(i),
-          -normals.getY(i),
-          -normals.getZ(i)
-        )
-      }
-
-      normals.needsUpdate = true
-
-      // recompute (optional but helps)
-      geo.computeVertexNormals()
-    }
-
-    Object.values(nodes).forEach((node: any) => {
-      if (node.isSkinnedMesh && node.geometry) {
-        fixGeometry(node.geometry)
-      }
-    })
-  }, [nodes])
 
 
   return (

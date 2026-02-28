@@ -59,7 +59,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                 <meshStandardMaterial color={'orange'} />
             </mesh> */}
 
-            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.2, 0.3, 0]} scale={0.7} castShadow />
+            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.6, 0, 0]} scale={0.6} castShadow />
             {/* Terrain betétele */}
             <Terrain receiveShadow castShadow />
         </Canvas>
