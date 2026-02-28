@@ -11,6 +11,7 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer } from "./TileRenderer";
 import { clamp } from "three/tsl";
+import { Controls } from "../gui/Controls";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -56,6 +57,7 @@ export const Renderer = () => {
     return <>
       <Canvas style={{ width: "100vw", height: "100vh" }}>
           {/* setting camera position based on rover position and direction */}
+          <Controls/>
           <PerspectiveCamera
             makeDefault
             position={[
