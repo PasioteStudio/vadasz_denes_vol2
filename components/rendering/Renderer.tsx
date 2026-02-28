@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer } from "./TileRenderer";
 import { clamp } from "three/tsl";
 import { Controls } from "../gui/Controls";
+import InventoryPopup from "../gui/InventoryPopup";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -23,6 +24,12 @@ export const Renderer = () => {
 
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
     const rover = useSnapshots().snapshots.get(currentTick)?.rover;
+    //opening inventory on click
+        const [isInventoryOpen, setInventoryOpen] = useState(false);
+    const showInventory = () => {
+    console.log("Inventory opened" + isInventoryOpen);
+    setInventoryOpen(!isInventoryOpen);
+  }
 
     //converting keyboard actions into direction changes
     const keys = useKeyboard();
@@ -81,9 +88,8 @@ export const Renderer = () => {
               />
             ))
           )}
-            <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}}/>
-
-
+            {isInventoryOpen && <InventoryPopup />}
+            <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}} onSelect={showInventory}/>
       </Canvas>
     </>
 }

@@ -34,6 +34,7 @@ type GLTFResult = GLTF & {
 
 type MarsRoverProps = ThreeElements['group'] & {
   targetPos?: {x:number, y: number}
+  onSelect?: () => void
 }
 
 export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
@@ -56,7 +57,8 @@ export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
   })
   //modell dolgok
   return (
-    <group ref={group} {...props} dispose={null} scale={0.5}>
+    //modell megnyomásakkor meghívjuk a invenotry megjelnítőt
+    <group ref={group} {...props} dispose={null} scale={0.5} onClick={(e) => {e.stopPropagation(); props.onSelect?.();}} >
       <group position={[1.069, 3, -0.226]}>
         <primitive object={nodes.Bone} />
         <primitive object={nodes.Bone007} />
