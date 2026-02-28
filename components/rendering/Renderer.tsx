@@ -9,8 +9,7 @@ import { useKeyboard } from "@/util/controlls";
 import { PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TileRenderer } from "./TileRenderer";
-import { clamp } from "three/tsl";
+import { TileRenderer, TILE_GAP } from "./TileRenderer";
 import { Controls } from "../gui/Controls";
 import InventoryPopup from "../gui/InventoryPopup";
 import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
@@ -32,7 +31,46 @@ export const Renderer = () => {
     setInventoryOpen(!isInventoryOpen);
   }
 
-    //converting keyboard actions into direction changes
+
+    const GAP = TILE_GAP; // ennél mindeképp a const-ot használjuk a másik componentben pls
+
+    const VISIBLE_ROWS = 37;
+    const VISIBLE_COLS = 30;
+    const radiusRows = Math.floor(VISIBLE_ROWS / 2); 
+    const radiusCols = Math.floor(VISIBLE_COLS / 2);
+    const rxOffset = radiusCols/2;
+    const ryOffset = radiusRows/2;
+
+    function clampNum(v: number, min: number, max: number) {
+        return Math.min(max, Math.max(min, v));
+    }
+
+    const camTile = useMemo(() => {
+        const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
+
+        // ha a közeljövőben mégegyszer egy offset miatt cseszek el egy teljes órát, csak mert nem jutott eszembe, akkor egy bizonyos osztrák festő nyomdokaiba lépek.
+        const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - 50;
+        if (!map) return { x: camXraw, y: camYraw };
+
+        const rows = map.length;
+        const cols = map[0]?.length || 0;
+        const camX = clampNum(camXraw, rxOffset, cols - 1 - rxOffset);
+        const camY = clampNum(camYraw, ryOffset, rows - 1 - ryOffset);
+
+        return { x: camX, y: camY };
+    }, [direction, rover]);
+
+    const bounds = useMemo(() => {
+        if (!map) return null;
+        const rows = map.length;
+        const cols = map[0]?.length || 0;
+        const minRow = clampNum(camTile.y - radiusRows, 0, rows - 1);
+        const maxRow = clampNum(camTile.y + radiusRows, 0, rows - 1);
+        const minCol = clampNum(camTile.x - radiusCols, 0, cols - 1);
+        const maxCol = clampNum(camTile.x + radiusCols, 0, cols - 1);
+        return { minRow, maxRow, minCol, maxCol };
+    }, [map, camTile]);
+
     const keys = useKeyboard();
     useEffect(() => {
       if(isInventoryOpen) return;
@@ -41,20 +79,26 @@ export const Renderer = () => {
         const loop = () => {
           
             setDirection(prev => {
-                const next = { ...prev };
-                if (keys.current.w) next.y -= speed;
-                if (keys.current.s) next.y += speed;
-                if (keys.current.a) next.x -= speed;
-                if (keys.current.d) next.x += speed;
-                return next;
+                let dx = 0;
+                let dy = 0;
+                if (keys.current.w) dy -= speed;
+                if (keys.current.s) dy += speed;
+                if (keys.current.a) dx -= speed;
+                if (keys.current.d) dx += speed;
+                if (dx === 0 && dy === 0) {
+                    return prev;
+                }
+                return { x: prev.x + dx, y: prev.y + dy };
             });
             animFrameId = requestAnimationFrame(loop);
         };
 
         animFrameId = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(animFrameId);
+
     }, [keys, isInventoryOpen]);
     //converting scroll input into fov changes
+
     useEffect(() => {
         const handleScroll = (e: WheelEvent) => {
             setFov(prev => Math.max(10, Math.min(13, prev + e.deltaY * 0.01)));
@@ -67,8 +111,6 @@ export const Renderer = () => {
 
     return <>
       <Canvas style={{ width: "100vw", height: "100vh" }}>
-          {/* setting camera position based on rover position and direction */}
-          
           <PerspectiveCamera
             makeDefault
             position={[
@@ -81,18 +123,23 @@ export const Renderer = () => {
 
             <ambientLight intensity={1.3} color={timeOfDay ? 0xffffff : 0xaaaaaa} />
             <directionalLight intensity={1} position={[-2,2,-1]} color={0xffffff} />
-            {map!.map((row: Field[], rowIndex: number) =>
-            row.map((field, colIndex) => (
-              <TileRenderer
-                key={`${rowIndex}-${colIndex}`}
-                tile={field.tile}
-                x={colIndex}
-                y={rowIndex}
-              />
-            ))
-          )}
-            
-            <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}} onSelect={showInventory}/>
+
+            {map && bounds &&
+              map.map((row: Field[], rowIndex: number) => {
+                if (rowIndex < bounds.minRow || rowIndex > bounds.maxRow) return null;
+                return row.map((field, colIndex) => {
+                  if (colIndex < bounds.minCol || colIndex > bounds.maxCol) return null;
+                  return (
+                    <TileRenderer
+                      key={`${rowIndex}-${colIndex}`}
+                      tile={field.tile}
+                      x={colIndex}
+                      y={rowIndex}
+                    />
+                  );
+                });
+              })}
+            <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}}/>
       </Canvas>
       {isInventoryOpen && <InventoryPopup />}
     </>

@@ -6,6 +6,8 @@ import { WaterTile } from "@/Prefabs/WaterTile";
 
 import { RareTile } from "@/Prefabs/RareTile";
 import { BaseTile } from "@/Prefabs/BaseTile";
+
+export const TILE_GAP = 2.5; // tile spacing constant that can be imported elsewhere
 //here is the tile
 interface TileRendererProps {
   tile: Tile
@@ -14,8 +16,8 @@ interface TileRendererProps {
 }
 
 export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
-  const gap = 2.5; // Adjust this value to increase/decrease the gap between tiles
-  const position: [number, number, number] = [x*gap, 0, y*gap ]
+  const gap = TILE_GAP;
+  const position: [number, number, number] = [x * gap, 0, y * gap ];
 //switch that determines wich tile to use
   switch (tile) {
     case Tile.Obstacle:
