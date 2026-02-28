@@ -11,6 +11,7 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer, TILE_GAP } from "./TileRenderer";
 import { Controls } from "../gui/Controls";
+import InventoryPopup from "../gui/InventoryPopup";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -22,6 +23,12 @@ export const Renderer = () => {
 
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
     const rover = useSnapshots().snapshots.get(currentTick)?.rover;
+    //opening inventory on click
+        const [isInventoryOpen, setInventoryOpen] = useState(false);
+    const showInventory = () => {
+    console.log("Inventory opened" + isInventoryOpen);
+    setInventoryOpen(!isInventoryOpen);
+  }
 
 
     const GAP = TILE_GAP; // ennél mindeképp a const-ot használjuk a másik componentben pls
