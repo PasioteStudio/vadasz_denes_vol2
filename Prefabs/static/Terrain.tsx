@@ -26,11 +26,12 @@ type GLTFResult = GLTF & {
   }
 }
 
-export function NormalTile(props: ThreeElements['group']) {
+export function Terrain(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/terrain.glb') as unknown as GLTFResult
   return (
-    <group {...props} dispose={null}>
+    //méretét felvettem meg pozícionálás.
+    <group {...props} dispose={null} position={[0,-2,-80]}  scale={10}>
       <mesh
         castShadow
         receiveShadow

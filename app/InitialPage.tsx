@@ -6,7 +6,7 @@ import { Field } from "@/types/MapTypes";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Euler, Vector3 } from "three";
-
+import { Terrain } from "@/Prefabs/static/Terrain";
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Field[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
@@ -53,8 +53,10 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
 
             <ambientLight intensity={1.3} />
             <spotLight position={[0, 64, 32]} />
-
+            
             <StaticRover rotation={new Euler(0.5, 10, 0)} position={[1.5, 0, -4]} scale={0.6} />
+            {/* Terrain betétele */}
+            <Terrain/>
         </Canvas>
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
