@@ -14,6 +14,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(48);
     const [validInputs, setValidInputs] = useState(false);
     const [currentPanel, setPanel] = useState<"map" | "time">("map");
+    const [visitedTimePanel, setVisitedTimePanel] = useState(false);
 
     const panels = {
         "map": <MapPanel current={{
@@ -27,8 +28,8 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     };
 
     useEffect(() => {
-        setValidInputs(loadedMap != undefined && loadedMap.length > 0 && selectedTimeLimit >= 48)
-    }, [loadedMap, selectedTimeLimit])
+        setValidInputs(loadedMap != undefined && loadedMap.length > 0 && selectedTimeLimit >= 48 && visitedTimePanel)
+    }, [loadedMap, selectedTimeLimit, visitedTimePanel])
 
     const finalizeInputs = () => {
         setTimeLimit(selectedTimeLimit);
@@ -79,7 +80,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                     </button>
 
                     <button className={`cursor-pointer disabled:cursor-no-drop bg-buttonbg px-[3vw] py-[1.2vw] group rounded-md`}
-                        disabled={currentPanel == "time"} onClick={() => { setPanel("time") }}>
+                        disabled={currentPanel == "time"} onClick={() => { setPanel("time"); setVisitedTimePanel(true) }}>
                         <img src={"/ui/arrow.svg"} alt="<-" className="origin-center group-disabled:opacity-40 w-[1.5vw] aspect-square" />
                     </button>
 
