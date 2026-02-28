@@ -50,7 +50,7 @@ export const Renderer = () => {
     const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
 
     // ha a közeljövőben mégegyszer egy offset miatt cseszek el egy teljes órát, csak mert nem jutott eszembe, akkor egy bizonyos osztrák festő nyomdokaiba lépek.
-    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - camHeight*0.78;
+    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - camHeight*0.77;
     if (!map) return { x: camXraw, y: camYraw };
 
     const rows = map.length;
