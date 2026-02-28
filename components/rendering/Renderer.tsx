@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { InstancedTileGroup } from './InstancedTileGroup';
 import { groupTilesByType } from '@/util/tileGrouping';
 import InventoryPopup from '../gui/InventoryPopup';
+import { TILE_GAP } from './TileRenderer';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -35,7 +36,7 @@ export const Renderer = () => {
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
 
-  const GAP = 2.5; // keep this local; TILE_GAP is defined in TileRenderer
+  const GAP = TILE_GAP; // keep this local; TILE_GAP is defined in TileRenderer
 
   const rxOffset = RADIUS_COLS / 2;
   const ryOffset = RADIUS_ROWS / 2;
@@ -43,7 +44,7 @@ export const Renderer = () => {
   // Compute camera tile based on direction + rover position
   const camTile = useMemo(() => {
     const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
-    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.77;
+    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.77 * (2.5/GAP);
 
     if (!map) return { x: camXraw, y: camYraw };
 
@@ -134,7 +135,7 @@ export const Renderer = () => {
       <Canvas style={{ width: '100vw', height: '100vh' }}>
         <PerspectiveCamera
           makeDefault
-          position={[direction.x + (rover?.position.x ?? 0) * 2.5, CAM_HEIGHT, direction.y + (rover?.position.y ?? 0) * 2.5]}
+          position={[direction.x + (rover?.position.x ?? 0) * GAP, CAM_HEIGHT, direction.y + (rover?.position.y ?? 0) * GAP]}
           rotation={[-0.5, 0, 0]}
           fov={fov}
         />

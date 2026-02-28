@@ -7,7 +7,7 @@ import { WaterTile } from "@/Prefabs/WaterTile";
 import { RareTile } from "@/Prefabs/RareTile";
 import { BaseTile } from "@/Prefabs/BaseTile";
 
-export const TILE_GAP = 2.5; // tile spacing constant that can be imported elsewhere
+export const TILE_GAP = 2.2; // tile spacing constant that can be imported elsewhere
 //here is the tile
 interface TileRendererProps {
   tile: Tile

@@ -4,6 +4,7 @@ import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeElements } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
+import { TILE_GAP } from '@/components/rendering/TileRenderer'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -50,7 +51,7 @@ export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
     if (!group.current) return
     //smoothan mozgatjuk
 
-    const gap = 2.5; // Adjust this value to increase/decrease the gap between tiles
+    const gap = TILE_GAP; // Adjust this value to increase/decrease the gap between tiles
     const position = [targetPos.x*gap, targetPos.y*gap ]
     group.current.position.x = position[0];
     group.current.position.z = position[1];
