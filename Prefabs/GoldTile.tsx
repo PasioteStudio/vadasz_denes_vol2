@@ -4,6 +4,10 @@ import { useGLTF } from '@react-three/drei'
 import type { GLTF } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
 
+interface TileProps {
+  position: [number, number, number]
+}
+
 type GLTFResult = GLTF & {
   nodes: {
     Plane002: THREE.Mesh
@@ -15,11 +19,11 @@ type GLTFResult = GLTF & {
   }
 }
 
-export function WaterTile(props: ThreeElements['group']) {
+export function GoldTile(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/arany.glb') as unknown as GLTFResult
   return (
-    <group {...props} dispose={null} scale={[3, 3, 3]}>
+    <group {...props} dispose={null} scale={[1, 1, 1]}>
       <mesh
         castShadow
         receiveShadow

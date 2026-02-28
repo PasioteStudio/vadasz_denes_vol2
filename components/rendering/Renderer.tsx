@@ -1,73 +1,86 @@
 import { useCycle, useSnapshots } from "@/lib/contexts"
-import { BarrierTile } from "@/Prefabs/BarrierTile";
+
 import { MarsRover } from "@/Prefabs/MarsRover";
-import { NormalTile } from "@/Prefabs/NormalTile";
+
 import { Field } from "@/types/MapTypes";
 import { Position } from "@/types/RoverContextTypes";
 import { Tile, isOre } from "@/util/constants";
+import { useKeyboard } from "@/util/controlls";
 import { PerspectiveCamera } from "@react-three/drei";
-import { useWASD } from "@/util/controlls";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from 'three';
-import { rotate } from "three/tsl";
-
-
+import { TileRenderer } from "./TileRenderer";
+import { clamp } from "three/tsl";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
-    const [direction,setDirection] = useState<Position>({x:0,y:0})
-    const map = useSnapshots().snapshots.get(currentTick)?.fields;
-    useWASD((dir) => {
-  
-      setDirection({
-        x: direction.x + dir.x,
-        y: direction.y + dir.z
-      })
-    });
-    
-    // return <div className="w-full h-full flex flex-col items-center justify-center py-100 ">
-    //       <table className="mx-auto">
-    //         <thead>
-    //           <tr>
-    //             <th></th>
-    //             {map!.map((row:Field[],id:number)=>{
-    //               return <th key={id} className="text-xs">{id}</th>
-    //             })}
-    //           </tr>
-    //         </thead>
-    //         <tbody>
-    //           {map!.map((row:Field[],id:number)=>{
-    //             return <tr key={id}>
-    //               <td><p>{id}</p></td>
-    //               {row.map((field,idx)=>{
-    //                 return <td aria-valuemin={idx} aria-valuemax={id} className={`w-5 border border-collapse ${field.tile == Tile.Start ? "bg-yellow-700" : (field.tile == Tile.Empty ? "bg-gray-900" : "")}`} key={idx}>
+    //key input
+    const [direction,setDirection] = useState<Position>({x:10,y:100})
+    //scroll input
+    const [fov,setFov] = useState<number>(10)
 
-    //                   <p className="w-full h-min text-center aspect-square">{field.tile == Tile.Obstacle ? "🟥" : (isOre(field.tile) ? "❤" : (field.tile == Tile.Start ? "🏳️" : ""))}</p>
-                      
-    //                 </td>
-    //               })}
-    //             </tr>
-    //           })}
-    //         </tbody>
-    //       </table>
-    // </div>
+    const map = useSnapshots().snapshots.get(currentTick)?.fields;
+    const rover = useSnapshots().snapshots.get(currentTick)?.rover;
+
+    //converting keyboard actions into direction changes
+    const keys = useKeyboard();
+    useEffect(() => {
+        const speed = 1;
+        let animFrameId: number;
+        const loop = () => {
+            setDirection(prev => {
+                const next = { ...prev };
+                if (keys.current.w) next.y -= speed;
+                if (keys.current.s) next.y += speed;
+                if (keys.current.a) next.x -= speed;
+                if (keys.current.d) next.x += speed;
+                return next;
+            });
+            animFrameId = requestAnimationFrame(loop);
+        };
+
+        animFrameId = requestAnimationFrame(loop);
+        return () => cancelAnimationFrame(animFrameId);
+    }, [keys]);
+    //converting scroll input into fov changes
+    useEffect(() => {
+        const handleScroll = (e: WheelEvent) => {
+            setFov(prev => Math.max(10, Math.min(13, prev + e.deltaY * 0.01)));
+            
+        }
+        window.addEventListener("wheel", handleScroll);
+        return () => window.removeEventListener("wheel", handleScroll);
+    }, []);
+
 
     return <>
       <Canvas style={{ width: "100vw", height: "100vh" }}>
+          {/* setting camera position based on rover position and direction */}
           <PerspectiveCamera
             makeDefault
-            position={[direction.x, 70, direction.y+100]}
+            position={[
+              direction.x + (rover?.position.x ?? 0),
+              70,
+              direction.y + (rover?.position.y ?? 0)
+            ]}
             rotation={[-0.5, 0, 0]}
-            fov={50}  />
+            fov={fov}  />
 
             <ambientLight intensity={1.3} />
             <spotLight position={[0, 64, 32]} />
-            
-            <MarsRover moveForward={10}/>
+            {map!.map((row: Field[], rowIndex: number) =>
+            row.map((field, colIndex) => (
+              <TileRenderer
+                key={`${rowIndex}-${colIndex}`}
+                tile={field.tile}
+                x={colIndex}
+                y={rowIndex}
+              />
+            ))
+          )}
+            <MarsRover moveForward={10} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
 
-          <NormalTile/>
-          <BarrierTile/>
+
       </Canvas>
     </>
 }
