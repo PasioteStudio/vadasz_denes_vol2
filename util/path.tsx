@@ -3,7 +3,6 @@ import { Position } from "@/types/RoverContextTypes";
 import { createVectorMapFromWeights } from "./map";
 import {Tile, VectorField,WeightPoint} from "./constants"
 import { findNearestOre } from "./ore";
-import { useSnapshots } from "@/lib/contexts";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { Dispatch, SetStateAction } from "react";
 
@@ -107,13 +106,13 @@ function deepCopy<T>(array: T[]): T[] {
 }
 
 export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
-:{vector_map:VectorField[][],go_back:boolean}
+:{map:Field[][],vector_map:VectorField[][],go_back:boolean}
 {
     path.push(point)
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(path.length,{
-        fields: deepCopy(map), //TODO 2 differen map perhaps
+        fields: map,
         rover: {
           currentAction: {
             action: "move" as ("move"),
@@ -128,6 +127,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
       return prev
     })
     if(tile_id){
+      map = deepCopy(map)
       path.push(point)
       map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
       update_able_map[tile_id].weight = 0
@@ -135,7 +135,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
         const previousSnap = prev.get(prev.size - 1)
         previousSnap!.rover.inventory.push({name:"Ore",amount:1})
         prev.set(path.length,{
-          fields: deepCopy(map),
+          fields: map,
           rover: {
             currentAction: {
               action: "mine" as ("mine"),
@@ -164,5 +164,5 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
     const next_column = update_able_vector_map[last_element.y][last_element.x]
     
-    return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
+    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
 }

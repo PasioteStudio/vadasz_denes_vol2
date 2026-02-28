@@ -88,6 +88,7 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             }
             const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter,tile_id)
             update_able_vector_map = step.vector_map
+            mapSnapShot = step.map
             have_to_go_back = step.go_back
             continue
         }
@@ -106,6 +107,7 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
         const tile_id_temp = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
         const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter,tile_id)
+        mapSnapShot = step.map
         update_able_vector_map = step.vector_map
         have_to_go_back = step.go_back
    
