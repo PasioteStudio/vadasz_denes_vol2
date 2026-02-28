@@ -7,7 +7,7 @@
 // S = a rover kiindulópontja
 
 // TODO iterations helyett time és tickek
-import { isOre, vectorValues,Tile,VectorField } from "@/util/constants";
+import { isOre, vectorValues,Tile,VectorField, WeightPoint } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
 import { getNextStep, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
@@ -22,21 +22,24 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
     //Initialize maps
     let start:Position = {x:0,y:0};
     let mapConstraints:{width:number,height:number} = {width:0,height:0};
+    const obstacle_map:(0|1)[][] = []
+    let update_able_map:WeightPoint[] = []
     mapSnapShot.forEach((row)=>{
         row.forEach((field)=>{
+            //start
             if(field.tile == Tile.Start) start = field.position
+            //constraints
             if(field.position.x + 1 > mapConstraints.width) mapConstraints.width = field.position.x + 1
             if(field.position.y + 1 > mapConstraints.height) mapConstraints.height = field.position.y + 1
+            //obstacles
+            if(obstacle_map.length < field.position.y + 1) obstacle_map.push([field.tile == Tile.Obstacle ? 1 : 0 ])
+            else obstacle_map[field.position.y].push(field.tile == Tile.Obstacle ? 1 : 0 )
+            //update_able_map
+            update_able_map.push({x:field.position.x,y:field.position.y,weight:isOre(field.tile) ? vectorValues.ore : 0})
         })
     })
     
-    const vector_map = createVectorMapFromWeights(mapConstraints.height,mapConstraints.width,{x:start.x,y:start.y}, 
-        mapSnapShot.flatMap(row=>{
-            return row.map((field)=>{
-                return {x:field.position.x,y:field.position.y,weight:isOre(field.tile) ? 1 : 0}
-            })
-        })
-    )
+    let update_able_vector_map = createVectorMapFromWeights(mapConstraints.height,mapConstraints.width,{x:start.x,y:start.y}, update_able_map)
     
     //METHOD 1: Search for a destination?
     //
@@ -51,26 +54,10 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
     
     //METHOD 2: go with the flow ~
     const my_path:Position[] = []
-    let column = vector_map[start.y][start.x]
-    const obstacle_map:(0|1)[][] = []
-    mapSnapShot.forEach((row)=>{
-        row.forEach(field=>{
-            if(obstacle_map.length < field.position.y + 1) obstacle_map.push([field.tile == Tile.Obstacle ? 1 : 0 ])
-            else obstacle_map[field.position.y].push(field.tile == Tile.Obstacle ? 1 : 0 )
-        })
-    })
-    let update_able_map = mapSnapShot.flatMap((row)=>{
-        return row.map(field=>{
-            return {x:field.position.x,y:field.position.y,weight:isOre(field.tile) ? vectorValues.ore : (field.tile == Tile.Obstacle) ? 0 : 0}
-        })
-    })
-    let update_able_vector_map:VectorField[][] = vector_map
-    let number = 0
+    let column = update_able_vector_map[start.y][start.x]
     let we_are_stuck = false;
-    let ore_count = 0
     let have_to_go_back = false
-    while((have_to_go_back || isThereAWay(column)) && number < iterations){
-        number++
+    while((have_to_go_back || isThereAWay(column)) && my_path.length < iterations){
         if(have_to_go_back){
             const graphWithWeight = new Graph(obstacle_map.map((rows) => 
                 rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
@@ -94,17 +81,15 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             const {next_column_to_go} = stuck(column,update_able_map,obstacle_map)
             
             column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
-            my_path.push({x: column.x, y: column.y})
             
             //update the map if ore found
             const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
             if(update_able_map[tile_id].weight != 0){
-                number++
                 my_path.push({x: column.x, y: column.y})
-                extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter)
-                ore_count++
+                extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter,my_path)
                 we_are_stuck=false
             }else{}
+            my_path.push({x: column.x, y: column.y})
             const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
             update_able_vector_map = step.vector_map
             have_to_go_back = step.go_back
@@ -120,18 +105,14 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
 
         //record the moving
         column = next_column
-        my_path.push({x:column.x,y:column.y})
         
         //update the map if ore found
         const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
-        if(update_able_map[tile_id].weight == 0){
-
-        }else{
-            number++
+        if(update_able_map[tile_id].weight != 0){
             my_path.push({x: column.x, y: column.y})
-            extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter)
-            ore_count++
+            extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter,my_path)
         } 
+        my_path.push({x:column.x,y:column.y})
         const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
         update_able_vector_map = step.vector_map
         have_to_go_back = step.go_back

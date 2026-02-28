@@ -115,7 +115,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
-      prev.set(prev.size,{
+      prev.set(path.length,{
         fields: map,
         rover: {
           currentAction: {
