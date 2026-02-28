@@ -12,9 +12,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer, TILE_GAP } from "./TileRenderer";
 import { InstancedTileGroup } from "./InstancedTileGroup";
 import { groupTilesByType } from "@/util/tileGrouping";
-import { Controls } from "../gui/Controls";
 import InventoryPopup from "../gui/InventoryPopup";
-import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
+
 export const Renderer = () => {
   const { currentTick } = useCycle();
   const [path, setPath] = useState<number[]>([])
@@ -37,7 +36,7 @@ export const Renderer = () => {
   const GAP = TILE_GAP; // ennél mindeképp a const-ot használjuk a másik componentben pls
   const camHeight = 60;
   const VISIBLE_ROWS = 26;
-  const VISIBLE_COLS = 20;
+  const VISIBLE_COLS = 27;
   const radiusRows = Math.floor(VISIBLE_ROWS / 2);
   const radiusCols = Math.floor(VISIBLE_COLS / 2);
   const rxOffset = radiusCols / 2;
@@ -56,9 +55,9 @@ export const Renderer = () => {
 
     const rows = map.length;
     const cols = map[0]?.length || 0;
-    const camX = clampNum(camXraw, rxOffset, cols - 1 - rxOffset);
-    const camY = clampNum(camYraw, ryOffset, rows - 1 - ryOffset);
-
+    const camX = Math.floor(clampNum(camXraw, rxOffset, cols - 1 - rxOffset));
+    const camY = Math.floor(clampNum(camYraw, ryOffset, rows - 1 - ryOffset));
+    console.log(camY);
     return { x: camX, y: camY };
   }, [direction, rover]);
 
@@ -145,16 +144,18 @@ export const Renderer = () => {
       <directionalLight intensity={timeOfDay == "night" ? 1 : 0} position={[-2, 2, -1]} color={0x0000ff} />
 
       {map && bounds && tileGroups &&
-        Array.from(tileGroups.values()).map((group) => (
-          <InstancedTileGroup
-            key={`tile-group-${group.tileType}`}
-            tileType={group.tileType}
-            positions={group.positions}
-            castShadow
-            receiveShadow
-            tileGap={GAP}
-          />
-        ))}
+        Array.from(tileGroups.values())
+          .filter((group) => group.positions.length > 0)
+          .map((group) => (
+            <InstancedTileGroup
+              key={`tile-group-${group.tileType}`}
+              tileType={group.tileType}
+              positions={group.positions}
+              castShadow
+              receiveShadow
+              tileGap={GAP}
+            />
+          ))}
       <MarsRover targetPos={{ x: rover!.position.x, y: rover!.position.y }} />
     </Canvas>
     {isInventoryOpen && <InventoryPopup />}

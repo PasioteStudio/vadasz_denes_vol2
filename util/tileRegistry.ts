@@ -18,7 +18,11 @@ export const TILE_REGISTRY: Record<Tile, string> = {
  * Get the GLTF path for a given tile type
  */
 export function getTileModelPath(tileType: Tile): string {
-  return TILE_REGISTRY[tileType];
+  const path = TILE_REGISTRY[tileType];
+  if (!path) {
+    console.error(`No model registered for tile type: ${tileType}`);
+  }
+  return path;
 }
 
 /**

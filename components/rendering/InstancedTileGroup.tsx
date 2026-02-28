@@ -82,6 +82,9 @@ export const InstancedTileGroup = ({
 
   // Update matrices when positions change
   useLayoutEffect(() => {
+    // Early exit if no positions
+    if (positions.length === 0) return;
+
     const matrix = new THREE.Matrix4();
     meshRefs.current.forEach((mesh) => {
       if (!mesh) return;
@@ -99,6 +102,11 @@ export const InstancedTileGroup = ({
       mesh.instanceMatrix.needsUpdate = true;
     });
   }, [positions, tileGap]);
+
+  // Render only if we have valid data
+  if (instancedData.length === 0 || positions.length === 0) {
+    return null;
+  }
 
   return (
     <>
