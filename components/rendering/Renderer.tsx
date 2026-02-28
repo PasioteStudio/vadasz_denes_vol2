@@ -86,7 +86,7 @@ export const Renderer = () => {
 
   useEffect(() => {
     if (isInventoryOpen) return;
-    const speed = 25; // units per second
+    const  speed = 25; // units per second
     let lastTime = Date.now();
     let animFrameId: number;
 
@@ -98,10 +98,12 @@ export const Renderer = () => {
       setDirection(prev => {
         let dx = 0;
         let dy = 0;
-        if (keys.current.w) dy -= speed * deltaTime;
-        if (keys.current.s) dy += speed * deltaTime;
-        if (keys.current.a) dx -= speed * deltaTime;
-        if (keys.current.d) dx += speed * deltaTime;
+        let actualSpeed = speed;
+        if(keys.current.shift) actualSpeed *= 2;
+        if (keys.current.w) dy -= actualSpeed * deltaTime;
+        if (keys.current.s) dy += actualSpeed * deltaTime;
+        if (keys.current.a) dx -= actualSpeed * deltaTime;
+        if (keys.current.d) dx += actualSpeed * deltaTime;
         if (dx === 0 && dy === 0) {
           return prev;
         }

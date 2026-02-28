@@ -6,6 +6,7 @@ export function useKeyboard() {
     a: false,
     s: false,
     d: false,
+    shift: false,
   });
 
   useEffect(() => {
