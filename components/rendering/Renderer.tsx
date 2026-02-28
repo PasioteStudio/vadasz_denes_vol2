@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer, TILE_GAP } from "./TileRenderer";
 import { Controls } from "../gui/Controls";
 import InventoryPopup from "../gui/InventoryPopup";
+import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -72,9 +73,11 @@ export const Renderer = () => {
 
     const keys = useKeyboard();
     useEffect(() => {
+      if(isInventoryOpen) return;
         const speed = 1;
         let animFrameId: number;
         const loop = () => {
+          
             setDirection(prev => {
                 let dx = 0;
                 let dy = 0;
@@ -92,7 +95,9 @@ export const Renderer = () => {
 
         animFrameId = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(animFrameId);
-    }, [keys]);
+
+    }, [keys, isInventoryOpen]);
+    //converting scroll input into fov changes
 
     useEffect(() => {
         const handleScroll = (e: WheelEvent) => {
@@ -118,6 +123,7 @@ export const Renderer = () => {
 
             <ambientLight intensity={1.3} color={timeOfDay ? 0xffffff : 0xaaaaaa} />
             <directionalLight intensity={1} position={[-2,2,-1]} color={0xffffff} />
+
             {map && bounds &&
               map.map((row: Field[], rowIndex: number) => {
                 if (rowIndex < bounds.minRow || rowIndex > bounds.maxRow) return null;
@@ -134,8 +140,7 @@ export const Renderer = () => {
                 });
               })}
             <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}}/>
-
-
       </Canvas>
+      {isInventoryOpen && <InventoryPopup />}
     </>
 }
