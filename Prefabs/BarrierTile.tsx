@@ -3,6 +3,10 @@ import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import type { GLTF } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
+
+interface TileProps {
+  position: [number, number, number]
+}
 type GLTFResult = GLTF & {
   nodes: {
     Plane_1: THREE.Mesh
@@ -18,7 +22,7 @@ export function BarrierTile(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/akadaly.glb') as unknown as GLTFResult
   return (
-    <group {...props} dispose={null}  scale={[3, 3, 3]}>
+    <group {...props} dispose={null}  scale={[1, 1, 1]}>
       <mesh
         castShadow
         receiveShadow

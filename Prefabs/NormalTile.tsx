@@ -4,6 +4,10 @@ import { useGLTF } from '@react-three/drei'
 import type { GLTF } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
 
+interface TileProps {
+  position: [number, number, number]
+}
+
 type GLTFResult = GLTF & {
   nodes: {
     Plane: THREE.Mesh
@@ -19,7 +23,7 @@ export function NormalTile(props: ThreeElements['group']) {
 
   return (
     //méretét felvettem
-    <group {...props} dispose={null} scale={[3, 1, 3]}>
+    <group {...props} dispose={null} scale={[1, 1, 1]}>
       <mesh
         geometry={nodes.Plane.geometry}
         material={materials['Material.001']}

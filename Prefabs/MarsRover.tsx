@@ -59,8 +59,8 @@ export function MarsRover({ moveForward = 0, ...props }: MarsRoverProps) {
   })
   //modell dolgok
   return (
-    <group ref={group} {...props} dispose={null}>
-      <group position={[1.069, 1.36, -0.226]}>
+    <group ref={group} {...props} dispose={null} scale={0.5}>
+      <group position={[1.069, 3, -0.226]}>
         <primitive object={nodes.Bone} />
         <primitive object={nodes.Bone007} />
         <primitive object={nodes.Bone008} />
