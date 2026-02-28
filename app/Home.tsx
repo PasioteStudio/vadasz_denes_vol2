@@ -48,7 +48,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         return {
           ...p,
           currentTick: t,
-          timeOfDay: t % 48 > 32 ? "night" : "day"
+          timeOfDay: t % 48 >= 32 ? "night" : "day"
         }
       })
     } catch {
