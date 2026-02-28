@@ -13,6 +13,7 @@ import { TileRenderer } from "./TileRenderer";
 import { clamp } from "three/tsl";
 import { Controls } from "../gui/Controls";
 import InventoryPopup from "../gui/InventoryPopup";
+import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -34,9 +35,11 @@ export const Renderer = () => {
     //converting keyboard actions into direction changes
     const keys = useKeyboard();
     useEffect(() => {
+      if(isInventoryOpen) return;
         const speed = 1;
         let animFrameId: number;
         const loop = () => {
+          
             setDirection(prev => {
                 const next = { ...prev };
                 if (keys.current.w) next.y -= speed;
@@ -50,7 +53,7 @@ export const Renderer = () => {
 
         animFrameId = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(animFrameId);
-    }, [keys]);
+    }, [keys, isInventoryOpen]);
     //converting scroll input into fov changes
     useEffect(() => {
         const handleScroll = (e: WheelEvent) => {
@@ -88,8 +91,9 @@ export const Renderer = () => {
               />
             ))
           )}
-            {isInventoryOpen && <InventoryPopup />}
+            
             <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}} onSelect={showInventory}/>
       </Canvas>
+      {isInventoryOpen && <InventoryPopup />}
     </>
 }
