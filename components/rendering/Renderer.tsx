@@ -68,7 +68,7 @@ export const Renderer = () => {
         const minCol = clampNum(camTile.x - radiusCols, 0, cols - 1);
         const maxCol = clampNum(camTile.x + radiusCols, 0, cols - 1);
         return { minRow, maxRow, minCol, maxCol };
-    }, [map, camTile]);
+    }, [camTile]);
 
     const keys = useKeyboard();
     useEffect(() => {
