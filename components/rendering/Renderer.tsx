@@ -16,7 +16,7 @@ export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
     //key input
-    const [direction,setDirection] = useState<Position>({x:10,y:100})
+    const [direction,setDirection] = useState<Position>({x:0,y:130})
     //scroll input
     const [fov,setFov] = useState<number>(10)
     const {timeOfDay} = useCycle();
@@ -62,9 +62,9 @@ export const Renderer = () => {
           <PerspectiveCamera
             makeDefault
             position={[
-              direction.x + (rover?.position.x ?? 0),
+              direction.x + (rover?.position.x  ?? 0) * 2.5,
               70,
-              direction.y + (rover?.position.y ?? 0)
+              direction.y + (rover?.position.y ?? 0) * 2.5
             ]}
             rotation={[-0.5, 0, 0]}
             fov={fov}  />
