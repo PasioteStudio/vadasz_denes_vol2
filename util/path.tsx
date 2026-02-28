@@ -1,7 +1,7 @@
 import {Graph,astar} from "@/util/astar"
 import { Position } from "@/types/RoverContextTypes";
 import { createVectorMapFromWeights } from "./map";
-import {VectorField,WeightPoint} from "./constants"
+import {Tile, VectorField,WeightPoint} from "./constants"
 import { findNearestOre } from "./ore";
 import { useSnapshots } from "@/lib/contexts";
 import { Field, MapSnapshot } from "@/types/MapTypes";
@@ -96,23 +96,10 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
-export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
+export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
 :{vector_map:VectorField[][],go_back:boolean}
 {
-    
-    const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
-        rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
-        { diagonal: true });
-    const startNode = graphWithWeight.grid[point.y][point.x];
-    const endNode = graphWithWeight.grid[start.y][start.x];
-    const astarpath = astar.search(graphWithWeight, startNode, endNode);
-
-    const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
-    
-    //go back even if there's no ore left
-    const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
-    const next_column = update_able_vector_map[last_element.y][last_element.x]
-    
+    path.push(point)
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(path.length,{
@@ -130,5 +117,42 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
       })
       return prev
     })
+    if(tile_id){
+      path.push(point)
+      map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
+      update_able_map[tile_id].weight = 0
+      snapshotsSetter(prev=>{
+        const previousSnap = prev.get(prev.size - 1)
+        previousSnap!.rover.inventory.push({name:"Ore",amount:1})
+        prev.set(path.length,{
+          fields: JSON.parse(JSON.stringify(map)), //TODO change it, dont parse it (time consuming)
+          rover: {
+            currentAction: {
+              action: "mine" as ("mine"),
+            },
+            energy: 100,
+            inventory: previousSnap!.rover.inventory,
+            logs: [],
+            position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
+            startingPosition: previousSnap!.rover.startingPosition,
+          }
+        })
+        return prev
+      })
+    }
+
+    const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
+        rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
+        { diagonal: true });
+    const startNode = graphWithWeight.grid[point.y][point.x];
+    const endNode = graphWithWeight.grid[start.y][start.x];
+    const astarpath = astar.search(graphWithWeight, startNode, endNode);
+
+    const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
+    
+    //go back even if there's no ore left
+    const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
+    const next_column = update_able_vector_map[last_element.y][last_element.x]
+    
     return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
 }

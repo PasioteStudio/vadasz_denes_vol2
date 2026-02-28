@@ -62,7 +62,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     const start = async () => {
         const start = new Date()
-        const {path} = makePath(timeLimit,mapSnapShots.get(0)!.fields,setMapSnapshots);
+        const {path} = makePath(timeLimit,JSON.parse(JSON.stringify(mapSnapShots.get(0)!.fields)),setMapSnapshots);
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())

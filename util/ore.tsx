@@ -31,27 +31,3 @@ export function findNearestOre(
 
   return nearest;
 }
-export function extractOre(tile_id:number, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],map:Field[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,my_path:Position[])
-{
-    map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
-    update_able_map[tile_id].weight = 0
-    snapshotsSetter(prev=>{
-      const previousSnap = prev.get(prev.size - 1)
-      previousSnap!.rover.inventory.push({name:"Ore",amount:1})
-      prev.set(my_path.length,{
-        fields: JSON.parse(JSON.stringify(map)), //TODO change it, dont parse it (time consuming)
-        rover: {
-          currentAction: {
-            action: "mine" as ("mine"),
-          },
-          energy: 100,
-          inventory: previousSnap!.rover.inventory,
-          logs: [],
-          position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
-          startingPosition: previousSnap!.rover.startingPosition,
-        }
-      })
-      return prev
-    })
-    return 
-}

@@ -3,13 +3,14 @@ import { MarsRover } from '@/Prefabs/MarsRover';
 import { Field } from '@/types/MapTypes';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
-import { PerspectiveCamera } from '@react-three/drei';
+import { PerspectiveCamera as PerspectiveCameraComponent } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { InstancedTileGroup } from './InstancedTileGroup';
 import { groupTilesByType } from '@/util/tileGrouping';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
+import { PerspectiveCamera } from 'three';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -29,6 +30,7 @@ export const Renderer = () => {
   const { timeOfDay } = useCycle();
   const snapshots = useSnapshots();
 
+  const cameraRef = useRef<PerspectiveCamera | null>(null)
   const [direction, setDirection] = useState<Position>({ x: 0, y: 110 });
   const [fov, setFov] = useState<number>(10);
   const [isInventoryOpen, setInventoryOpen] = useState(false);
@@ -40,6 +42,11 @@ export const Renderer = () => {
 
   const rxOffset = RADIUS_COLS / 2;
   const ryOffset = RADIUS_ROWS / 2;
+
+  //snap to rover
+  useEffect(()=>{
+    setDirection({x:0,y:110})
+  },[rover])
 
   // Compute camera tile based on direction + rover position
   const camTile = useMemo(() => {
@@ -89,6 +96,47 @@ export const Renderer = () => {
     directionRef.current = direction;
   }, [direction]);
 
+  //LOOK AROUND
+    // Camera rotation state (in radians)
+  const [yaw, setYaw] = useState(0); // left/right
+  const [pitch, setPitch] = useState(-0.5); // up/down, default -0.5 for initial tilt
+  const isDragging = useRef(false);
+  const lastMouse = useRef<{x: number, y: number}>({x: 0, y: 0});
+  // Mouse-based camera rotation
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return; // Only left button
+      isDragging.current = true;
+      lastMouse.current = { x: e.clientX, y: e.clientY };
+    };
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      const dx = e.clientX - lastMouse.current.x;
+      const dy = e.clientY - lastMouse.current.y;
+      lastMouse.current = { x: e.clientX, y: e.clientY };
+      // Sensitivity factors
+      setYaw((prev) => prev - dx * 0.005);
+      setPitch((prev) => {
+        const next = prev - dy * 0.005;
+        // Clamp pitch to avoid flipping
+        return Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, next));
+      });
+    };
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+  //LOOK AROUND
+
+
   // keyboard-based camera movement
   useEffect(() => {
     if (isInventoryOpen) return;
@@ -133,10 +181,11 @@ export const Renderer = () => {
   return (
     <>
       <Canvas style={{ width: '100vw', height: '100vh' }}>
-        <PerspectiveCamera
+        <PerspectiveCameraComponent
+          ref={cameraRef}
           makeDefault
           position={[direction.x + (rover?.position.x ?? 0) * GAP, CAM_HEIGHT, direction.y + (rover?.position.y ?? 0) * GAP]}
-          rotation={[-0.5, 0, 0]}
+          rotation={[pitch, yaw, 0]}
           fov={fov}
         />
 
