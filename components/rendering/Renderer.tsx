@@ -86,7 +86,7 @@ export const Renderer = () => {
 
   useEffect(() => {
     if (isInventoryOpen) return;
-    const  speed = 25; // units per second
+    const  speed = 40; // units per second
     let lastTime = Date.now();
     let animFrameId: number;
 
