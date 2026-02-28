@@ -42,7 +42,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   const setTickTo = (t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
-    try { //TODO check if snapshot for tick exists
+    try {
+      if(mapSnapShots.get(t) == undefined) throw Error;
       setCycle(p => {
         return {
           ...p,
@@ -58,36 +59,16 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   }
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
-    const fetchMap = async () => {
-        //const map = generateMap()
-        const initialMap: Field[][] = (await readMap("/mars_map_50x50.csv"))
-        console.log(initialMap)
-        const newSnap = {
-          fields: initialMap,
-          rover: {
-            currentAction: {
-              action: "move" as ("move" | "wait" | "mine")
-            },
-            energy: 100,
-            inventory: [],
-            logs: [],
-            position: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
-            startingPosition: initialMap.find(row => row.some(f => f.tile == Tile.Start))?.find(f => f.tile == Tile.Start)?.position ?? {x:0,y:0},
-          }
-        }
-        setMapSnapshots(prev=>{
-          prev.set(0,newSnap)
-          return prev
-        })
+    const start = async () => {
         const start = new Date()
-        const {path} = makePath(200,JSON.parse(JSON.stringify(newSnap)).fields,setMapSnapshots);
+        const {path} = makePath(timeLimit,mapSnapShots.get(0)!.fields,setMapSnapshots);
         const end = new Date()
         setTime(end.getTime()-start.getTime())
         console.log("time: ",end.getTime()-start.getTime())
         console.log("path length: ",mapSnapShots.size,mapSnapShots)
         console.log("path:",path)
     }
-    fetchMap()
+    start()
   }, [])
 
 
@@ -109,8 +90,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
       }}>
-        <GUI />
         <Renderer /> {/* THIS WILL HAVE THE THREEJS CANVAS LATER ON */}
+        <GUI />
       </MapSnapshotsContext.Provider>
     </CycleContext.Provider>
   );

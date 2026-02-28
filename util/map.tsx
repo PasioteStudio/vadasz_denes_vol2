@@ -1,4 +1,4 @@
-import { Tile,WeightPoint,VectorField } from "./constants";
+import { Tile, WeightPoint, VectorField } from "./constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
 import { Field } from "@/types/MapTypes";
@@ -6,35 +6,35 @@ import { Field } from "@/types/MapTypes";
 //TESTING ONLY
 export function generateMap(): Tile[][] {
   const mapConstraints = {
-    height:50,
-    width:50
+    height: 50,
+    width: 50
   }
   const mapArray: Tile[][] = [];
   let startingPointSet = false
   for (let i = 0; i < mapConstraints.height; i++) {
     const row = [];
     for (let j = 0; j < mapConstraints.width; j++) {
-        const rand = Math.random();
-      
-        const rand2 = Math.random();
-        if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
-            startingPointSet = true
-            row.push(Tile.Start); // Rover starting point
-        } else if (rand < 0.70) {
-            row.push(Tile.Empty); // Passable terrain
-        } else if (rand < 0.85) {
-            row.push(Tile.Obstacle); // Obstacles
-        } else if (rand < 0.90) {
-            row.push(Tile.Blue); // Blue mineral
-        } else if (rand < 0.95) {
-            row.push(Tile.Yellow); // Yellow mineral
-        } else {
-            row.push(Tile.Green); // Green mineral
-        }
+      const rand = Math.random();
+
+      const rand2 = Math.random();
+      if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
+        startingPointSet = true
+        row.push(Tile.Start); // Rover starting point
+      } else if (rand < 0.70) {
+        row.push(Tile.Empty); // Passable terrain
+      } else if (rand < 0.85) {
+        row.push(Tile.Obstacle); // Obstacles
+      } else if (rand < 0.90) {
+        row.push(Tile.Blue); // Blue mineral
+      } else if (rand < 0.95) {
+        row.push(Tile.Yellow); // Yellow mineral
+      } else {
+        row.push(Tile.Green); // Green mineral
+      }
     }
     mapArray.push(row);
   }
-  
+
   return mapArray;
 }
 //TESTING ONLY
@@ -44,24 +44,30 @@ export function generateMap(): Tile[][] {
  * @param {string} URL the path to the file
  * @returns {Promise<Tile[][]>} map (Promise<Tile[][]>)
  */
-export async function readMap(URL:string):Promise<Field[][]>{
-    let lines:string[] = [];
-    await fetch(URL).then(res=>res.text()).then(async(data)=>{
-        lines = data.split("\n").filter(line => line.trim() != "");
+export async function readMap(URL: string, isText = false): Promise<Field[][]> {
+  let lines: string[] = [];
+  if (!isText) {
+    await fetch(URL).then(res => res.text()).then(async (data) => {
+      lines = data.split("\n").filter(line => line.trim() != "");
     })
-    const map: Field[][] = [];
-    for(let i = 0; i<lines.length; i++){
-        if(lines[i].trim() == "") continue;
-        map.push([]);
-        const currentRow = map[map.length - 1];
-        const fields = lines[i].trim().split(',').map((s,_i): Field => {return {
-          position: { x:_i , y:i},
-          tile: toTile(s),
-        }})
-        fields.forEach(f => currentRow.push(f));
+  } else{
+    lines = URL.split("\n").filter(line => line.trim() != "");
+  }
+  const map: Field[][] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() == "") continue;
+    map.push([]);
+    const currentRow = map[map.length - 1];
+    const fields = lines[i].trim().split(',').map((s, _i): Field => {
+      return {
+        position: { x: _i, y: i },
+        tile: toTile(s),
+      }
+    })
+    fields.forEach(f => currentRow.push(f));
 
-    }
-    return map;
+  }
+  return map;
 }
 
 /**
@@ -76,16 +82,16 @@ export async function readMap(URL:string):Promise<Field[][]>{
 export function createVectorMapFromWeights(
   width: number,
   height: number,
-  point:Position,
+  point: Position,
   weightPoints: WeightPoint[],
-  distance?:number,
+  distance?: number,
 ): VectorField[][] {
   const vectorMap: VectorField[][] = Array(height)
     .fill(null)
     .map(() => Array(width));
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if(!isInDistance({y:y,x:x},point,distance ? distance : 1)){
+      if (!isInDistance({ y: y, x: x }, point, distance ? distance : 1)) {
         vectorMap[y][x] = {
           x,
           y,
@@ -95,12 +101,16 @@ export function createVectorMapFromWeights(
             relative_x: 0,
             relative_y: 0,
           },
-          angleDeg360:0,
+          angleDeg360: 0,
         };
         continue
       }
-      vectorMap[y][x] = calculateTile(weightPoints,x,y)      
+      vectorMap[y][x] = calculateTile(weightPoints, x, y)
     }
   }
   return vectorMap;
+}
+
+export const isValidMap = (map: Field[][]): boolean => {
+  return map.length > 0 && map.find(row => row.find(field => field.tile == Tile.Start)) != undefined;
 }
