@@ -7,8 +7,8 @@ export type CycleContextT = {
     player: {
         playing: "playing" | "paused",
         setPlaying: (state: "playing"|"paused") => void,
-        speed: 1|2,
-        setSpeed: (s: 1|2) => void
+        speed: 1|2|-1|-2,
+        setSpeed: (s: 1|2|-1|-2) => void
     }
     timeLimit: number,
 }

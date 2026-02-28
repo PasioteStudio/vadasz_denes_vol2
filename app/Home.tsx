@@ -36,18 +36,19 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     night: 8*2
   });
   const [player, setPlayer] = useState({
-    speed: 1 as 1 | 2,
+    speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
   });
 
   const setTickTo = (t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try {
-      if(mapSnapShots.get(t) == undefined) throw Error;
+      const actualTick = Math.max(0,Math.min(mapSnapShots.size-1, t));
+      if(!mapSnapShots.get(actualTick)) throw Error;
       setCycle(p => {
         return {
           ...p,
-          currentTick: t,
+          currentTick: actualTick,
           timeOfDay: t % 48 >= 32 ? "night" : "day"
         }
       })
