@@ -19,19 +19,19 @@ export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
 //switch that determines wich tile to use
   switch (tile) {
     case Tile.Obstacle:
-      return <BarrierTile position={position} />
+      return <BarrierTile position={position} castShadow receiveShadow />
 
     case Tile.Blue:
-        return <WaterTile position={position} />
+        return <WaterTile position={position} castShadow receiveShadow />
     case Tile.Green:
-        return <RareTile position={position} />
+        return <RareTile position={position} castShadow receiveShadow />
     case Tile.Yellow:
-      return <GoldTile position={position} />
+      return <GoldTile position={position} castShadow receiveShadow />
 
     case Tile.Start:
-      return <BaseTile position={position} />
+      return <BaseTile position={position} castShadow receiveShadow />
 
     default:
-      return <NormalTile position={position} />
+      return <NormalTile position={position} castShadow receiveShadow />
   }
 }

@@ -35,13 +35,42 @@ type GLTFResult = GLTF & {
 type MarsRoverProps = ThreeElements['group']
 
 export function StaticRover({ ...props }: MarsRoverProps) {
-
   const group = useRef<THREE.Group>(null!)
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
+
+  useEffect(() => {
+    const fixGeometry = (geo: THREE.BufferGeometry) => {
+      if (!geo.attributes.normal) return
+
+      const normals = geo.attributes.normal
+
+      // 🔴 invert normals
+      for (let i = 0; i < normals.count; i++) {
+        normals.setXYZ(
+          i,
+          -normals.getX(i),
+          -normals.getY(i),
+          -normals.getZ(i)
+        )
+      }
+
+      normals.needsUpdate = true
+
+      // recompute (optional but helps)
+      geo.computeVertexNormals()
+    }
+
+    Object.values(nodes).forEach((node: any) => {
+      if (node.isSkinnedMesh && node.geometry) {
+        fixGeometry(node.geometry)
+      }
+    })
+  }, [nodes])
+
   return (
-    <group ref={group} {...props} dispose={null}>
-      <group position={[1.069, 1.36, -0.226]}>
+    <group ref={group} {...props} dispose={null} castShadow>
+      <group>
         <primitive object={nodes.Bone} />
         <primitive object={nodes.Bone007} />
         <primitive object={nodes.Bone008} />

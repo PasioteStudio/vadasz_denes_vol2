@@ -11,6 +11,7 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TileRenderer } from "./TileRenderer";
 import { clamp } from "three/tsl";
+import { Controls } from "../gui/Controls";
 export const Renderer = () => {
     const { currentTick } = useCycle();
     const [path,setPath] = useState<number[]>([])
@@ -56,6 +57,7 @@ export const Renderer = () => {
     return <>
       <Canvas style={{ width: "100vw", height: "100vh" }}>
           {/* setting camera position based on rover position and direction */}
+          <Controls/>
           <PerspectiveCamera
             makeDefault
             position={[
@@ -67,7 +69,7 @@ export const Renderer = () => {
             fov={fov}  />
 
             <ambientLight intensity={1.3} />
-            <spotLight position={[0, 64, 32]} />
+            <directionalLight intensity={2} position={[-2,2,-1]} color={0xffffff} />
             {map!.map((row: Field[], rowIndex: number) =>
             row.map((field, colIndex) => (
               <TileRenderer
@@ -78,7 +80,7 @@ export const Renderer = () => {
               />
             ))
           )}
-            <MarsRover moveForward={10} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
+            <MarsRover moveForward={0} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
 
 
       </Canvas>
