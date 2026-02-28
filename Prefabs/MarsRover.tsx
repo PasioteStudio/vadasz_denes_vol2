@@ -33,10 +33,10 @@ type GLTFResult = GLTF & {
 }
 
 type MarsRoverProps = ThreeElements['group'] & {
-  moveForward?: number
+  targetPos?: {x:number, y: number}
 }
 
-export function MarsRover({ moveForward = 0, ...props }: MarsRoverProps) {
+export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
 
   const group = useRef<THREE.Group>(null!)
   const targetX = useRef(0)
@@ -44,18 +44,15 @@ export function MarsRover({ moveForward = 0, ...props }: MarsRoverProps) {
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
   //gombnyomásra mozgatjuk a marsrovert (teszt)
-  useEffect(() => {
-    targetX.current -= -moveForward
-  }, [moveForward])
 
   useFrame((_, delta) => {
     if (!group.current) return
     //smoothan mozgatjuk
-    group.current.position.x = THREE.MathUtils.lerp(
-      group.current.position.x,
-      targetX.current,
-      5 * delta
-    )
+
+    const gap = 2.5; // Adjust this value to increase/decrease the gap between tiles
+    const position = [targetPos.x*gap, targetPos.y*gap ]
+    group.current.position.x = position[0];
+    group.current.position.z = position[1];
   })
   //modell dolgok
   return (

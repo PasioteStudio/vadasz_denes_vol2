@@ -19,6 +19,7 @@ export const Renderer = () => {
     const [direction,setDirection] = useState<Position>({x:10,y:100})
     //scroll input
     const [fov,setFov] = useState<number>(10)
+    const {timeOfDay} = useCycle();
 
     const map = useSnapshots().snapshots.get(currentTick)?.fields;
     const rover = useSnapshots().snapshots.get(currentTick)?.rover;
@@ -68,8 +69,8 @@ export const Renderer = () => {
             rotation={[-0.5, 0, 0]}
             fov={fov}  />
 
-            <ambientLight intensity={1.3} />
-            <directionalLight intensity={2} position={[-2,2,-1]} color={0xffffff} />
+            <ambientLight intensity={1.3} color={timeOfDay ? 0xffffff : 0xaaaaaa} />
+            <directionalLight intensity={1} position={[-2,2,-1]} color={0xffffff} />
             {map!.map((row: Field[], rowIndex: number) =>
             row.map((field, colIndex) => (
               <TileRenderer
@@ -80,7 +81,7 @@ export const Renderer = () => {
               />
             ))
           )}
-            <MarsRover moveForward={0} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
+            <MarsRover targetPos={{x: rover!.position.x, y: rover!.position.y}}/>
 
 
       </Canvas>
