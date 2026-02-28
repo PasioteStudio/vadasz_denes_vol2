@@ -67,7 +67,7 @@ export const Renderer = () => {
             fov={fov}  />
 
             <ambientLight intensity={1.3} />
-            <spotLight position={[0, 64, 32]} />
+            <directionalLight intensity={2} position={[-2,2,-1]} color={0xffffff} />
             {map!.map((row: Field[], rowIndex: number) =>
             row.map((field, colIndex) => (
               <TileRenderer
@@ -78,7 +78,7 @@ export const Renderer = () => {
               />
             ))
           )}
-            <MarsRover moveForward={10} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
+            <MarsRover moveForward={0} position={[rover?.position.x || 0, 0, rover?.position.y || 0]}/>
 
 
       </Canvas>

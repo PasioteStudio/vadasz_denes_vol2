@@ -5,7 +5,6 @@ import { StaticRover } from "@/Prefabs/static/staticRover";
 import { Field } from "@/types/MapTypes";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
-import { Euler, Vector3 } from "three";
 import { Terrain } from "@/Prefabs/static/Terrain";
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Field[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
@@ -27,11 +26,11 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
         "time": <TimeLimitPanel current={selectedTimeLimit} setter={setSelectedTimeLimit} />,
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         setValidInputs(loadedMap != undefined && loadedMap.length > 0 && selectedTimeLimit >= 48)
     }, [loadedMap, selectedTimeLimit])
 
-    const finalizeInputs = ()=>{
+    const finalizeInputs = () => {
         setTimeLimit(selectedTimeLimit);
         setInitialMap(loadedMap!);
     }
@@ -46,19 +45,25 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     return <>
         <Canvas style={{ width: '100vw', height: '100vh' }} camera={
             {
-                position: [0, 0, 0],
+                position: [0, 0, 4],
                 fov: 50,
-                rotation: new Euler(0, 0, 0)
+                rotation: [0, 0, 0]
             }} className={`bg-[#342A2A]`}>
 
-            <ambientLight intensity={1.3} />
-            <spotLight position={[0, 64, 32]} />
-            
-            <StaticRover rotation={new Euler(0.5, 10, 0)} position={[1.5, 0, -4]} scale={0.6} />
+            {/* <ambientLight intensity={0.1} color={0xb0261c} /> */}
+            {/* <spotLight position={[2, 5, -4]} intensity={70} /> */}
+            <directionalLight intensity={1} position={[5,5,5]} color={0xffffff} />
+
+            {/* <mesh scale={1} position={[0,0,-2]} rotation={[1,1,1]}>
+                <boxGeometry args={[0.5,0.5,0.5]} />
+                <meshStandardMaterial color={'orange'} />
+            </mesh> */}
+
+            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.2, 0.3, 0]} scale={0.7} castShadow />
             {/* Terrain betétele */}
-            <Terrain/>
+            <Terrain receiveShadow castShadow />
         </Canvas>
-        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden">
+        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden bg-linear-90 from-black/10 from-40% to-60% to-transparent">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
                 <h1 className={`text-center text-[5.5vw] bg-linear-to-r from-buttonicon to-misc1 bg-clip-text text-transparent translate-y-[200%] duration-500 ${delayDone && "translate-y-0!"}`}>The Rover v1.0</h1>
                 <div className={`w-9/12 grow py-[3vh] duration-500 opacity-0 translate-y-3/12 ${delayDone && "opacity-100 translate-y-0!"}`}>
@@ -83,8 +88,8 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                         <span className="group-disabled:opacity-40">Indítás</span>
                     </button>
                     <div className="ml-[1vw]">
-                        <p className={`${loadedMap != undefined ? "text-green-500": "text-white"} font-medium text-[1vw]`}>1. Térkép</p>
-                        <p className={`${selectedTimeLimit >= 48 ? "text-green-500": "text-white"} font-medium text-[1vw]`}>2. Idő</p>
+                        <p className={`${loadedMap != undefined ? "text-green-500" : "text-white"} font-medium text-[1vw]`}>1. Térkép</p>
+                        <p className={`${selectedTimeLimit >= 48 ? "text-green-500" : "text-white"} font-medium text-[1vw]`}>2. Idő</p>
                     </div>
                 </div>
             </div>
