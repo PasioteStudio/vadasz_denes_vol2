@@ -36,6 +36,7 @@ export default function TimeControlButtons() {
         style={{
             opacity: resting ? restingOpacity / 100 : 1
         }}>
+        <p className="absolute bottom-full left-0">Eltelt idő: {cycle.currentTick/2} / {cycle.timeLimit/2} óra</p>
         <div className="flex items-center gap-[0.5vw]">
             <button onClick={() => { prev(2) }} className="cursor-pointer"><img src="/time/double.png" className="w-[2vw] aspect-square invert" /></button>
             <button onClick={() => { prev(1) }} className="cursor-pointer"><img src="/time/single.png" className="w-[2vw] aspect-square invert" /></button>
