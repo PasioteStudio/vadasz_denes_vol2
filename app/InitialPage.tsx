@@ -90,7 +90,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                     </button>
                     <div className="ml-[1vw]">
                         <p className={`${loadedMap != undefined ? "text-green-500" : "text-white"} font-medium text-[1vw]`}>1. Térkép</p>
-                        <p className={`${selectedTimeLimit >= 48 ? "text-green-500" : "text-white"} font-medium text-[1vw]`}>2. Idő</p>
+                        <p className={`${selectedTimeLimit >= 48 && visitedTimePanel ? "text-green-500" : "text-white"} font-medium text-[1vw]`}>2. Idő</p>
                     </div>
                 </div>
             </div>
