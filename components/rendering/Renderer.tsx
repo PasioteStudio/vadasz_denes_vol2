@@ -11,6 +11,7 @@ import { groupTilesByType } from '@/util/tileGrouping';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
+import DayNightDirectionalLights from './DayNightDirectonalLight';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -33,8 +34,6 @@ export const Renderer = () => {
   const [direction, setDirection] = useState<Position>({ x: 0, y: 110 });
   const [fov, setFov] = useState<number>(10);
   const [isInventoryOpen, setInventoryOpen] = useState(false);
-
-  const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([-2, 2, -1]);
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
@@ -178,23 +177,6 @@ export const Renderer = () => {
     return () => cancelAnimationFrame(animFrameId);
   }, [keys, isInventoryOpen]);
 
-  useEffect(() => {
-    const tod = timeOfDay;
-    const duration = tod == "day" ? day : night;
-    const relTick = (currentTick % 48) - (tod == "day" ? 0 : day);
-    const ratio = relTick / duration;
-
-    const t = clampNum(ratio, 0,1);
-    const angle = -Math.PI / 2 + t * Math.PI;
-    const radius = 2;
-
-    const x = Math.sin(angle) * radius;
-    const y = Math.cos(angle) * radius;
-    const z = -1;
-
-    setOrbitPosition([x, y, z]);
-  }, [currentTick])
-
   // scroll-to-zoom
   useEffect(() => {
     const handleScroll = (e: WheelEvent) => {
@@ -220,8 +202,7 @@ export const Renderer = () => {
         />
 
         <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
-        <directionalLight intensity={timeOfDay == 'day' ? 1 : 0} position={lightOrbitPosition} color={0xffffff} />
-        <directionalLight intensity={timeOfDay == 'night' ? 1 : 0} position={lightOrbitPosition} color={0xaaaaff} />
+        <DayNightDirectionalLights />
 
         {map && bounds && tileGroups &&
           Array.from(tileGroups.values())
