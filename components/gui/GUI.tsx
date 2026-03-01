@@ -11,9 +11,6 @@ export function GUI(){
     <BatteryDisplayer />
     <TimeControlButtons />
     <LogDisplayer />
-    {/*  */}
-    {/*  */}
-    {/* 
-    <CurrentAction /> */}
+    <CurrentAction />
     </>
 }
