@@ -35,6 +35,7 @@ export const Renderer = () => {
   const [isInventoryOpen, setInventoryOpen] = useState(false);
 
   const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([-2, 2, -1]);
+  const rotationDisabledBecauseIDontFuckWithIt = true;
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
@@ -114,6 +115,7 @@ export const Renderer = () => {
       isDragging.current = false;
     };
     const handleMouseMove = (e: MouseEvent) => {
+      if(rotationDisabledBecauseIDontFuckWithIt) return;
       if (!isDragging.current) return;
       const dx = e.clientX - lastMouse.current.x;
       const dy = e.clientY - lastMouse.current.y;
