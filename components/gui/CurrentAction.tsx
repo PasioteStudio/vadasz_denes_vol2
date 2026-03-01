@@ -1,12 +1,17 @@
 "use client"
-import { useRover } from "@/lib/contexts"
+
+import { useCycle, useSnapshots } from "@/lib/contexts";
+import { Position } from "@/types/RoverContextTypes";
 
 export default function CurrentAction() {
-    const position = useRover().position.get;
-    return <div className="fixed bg-gray-50/30 top-36 right-0 grid">
-        <p>Current action:</p>
-        <p>Mining</p>
-        <p>At: {position.x} ; {position.y}</p>
-        <p>Energy usage: 12 e / tick</p>
+    const  {currentTick} = useCycle();
+    const snap = useSnapshots().snapshots.get(currentTick)!;
+    const currentAction = snap.rover.currentAction;
+
+    return <div className="fixed bg-gray-50/30 top-2/8 right-0 grid">
+        <p>Jelenleg:</p>
+        <p>{currentAction.action}</p>
+        <p>At: {snap.rover.position.x} ; {snap.rover.position.y}</p>
+        <p>Energy usage: TODO</p>
     </div>
 }

@@ -10,9 +10,7 @@ export function GUI(){
     <DayNightCycleDisplayer />
     <BatteryDisplayer />
     <TimeControlButtons />
-    {/*  */}
-    {/* <LogDisplayer /> */}
-    {/* 
-    <CurrentAction /> */}
+    <LogDisplayer />
+    <CurrentAction />
     </>
 }

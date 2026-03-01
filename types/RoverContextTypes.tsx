@@ -10,9 +10,6 @@ export type Item = {
     amount: number,
 }
 export type Log = {
-    postition: Position,
-    consumption: number,
-    inventory: Item[],
     message: string,
 }
 export type RoverAction = {
