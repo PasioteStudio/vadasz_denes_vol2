@@ -17,8 +17,6 @@ type GLTFResult = GLTF & {
     Cube002_7: THREE.SkinnedMesh
     Bone: THREE.Bone
     Bone007: THREE.Bone
-    Bone008: THREE.Bone
-    Bone012: THREE.Bone
     Bone017: THREE.Bone
     Bone018: THREE.Bone
   }
@@ -63,18 +61,43 @@ export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
       <group position={[1.069, 3, -0.226]}>
         <primitive object={nodes.Bone} />
         <primitive object={nodes.Bone007} />
-        <primitive object={nodes.Bone008} />
-        <primitive object={nodes.Bone012} />
         <primitive object={nodes.Bone017} />
         <primitive object={nodes.Bone018} />
-
-        <skinnedMesh geometry={nodes.Cube002_1.geometry} material={materials['Material.001']} skeleton={nodes.Cube002_1.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_2.geometry} material={materials['Material.002']} skeleton={nodes.Cube002_2.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_3.geometry} material={materials['Material.003']} skeleton={nodes.Cube002_3.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_4.geometry} material={materials['Material.005']} skeleton={nodes.Cube002_4.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_5.geometry} material={materials['Material.006']} skeleton={nodes.Cube002_5.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_6.geometry} material={materials['Material.007']} skeleton={nodes.Cube002_6.skeleton} />
-        <skinnedMesh geometry={nodes.Cube002_7.geometry} material={materials['Material.008']} skeleton={nodes.Cube002_7.skeleton} />
+        <skinnedMesh
+          geometry={nodes.Cube002_1.geometry}
+          material={materials['Material.001']}
+          skeleton={nodes.Cube002_1.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_2.geometry}
+          material={materials['Material.002']}
+          skeleton={nodes.Cube002_2.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_3.geometry}
+          material={materials['Material.003']}
+          skeleton={nodes.Cube002_3.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_4.geometry}
+          material={materials['Material.005']}
+          skeleton={nodes.Cube002_4.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_5.geometry}
+          material={materials['Material.006']}
+          skeleton={nodes.Cube002_5.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_6.geometry}
+          material={materials['Material.007']}
+          skeleton={nodes.Cube002_6.skeleton}
+        />
+        <skinnedMesh
+          geometry={nodes.Cube002_7.geometry}
+          material={materials['Material.008']}
+          skeleton={nodes.Cube002_7.skeleton}
+        />
       </group>
     </group>
   )

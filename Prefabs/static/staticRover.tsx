@@ -7,40 +7,42 @@ import { useEffect } from 'react'
 
 type GLTFResult = GLTF & {
   nodes: {
-    Cylinder005_1: THREE.SkinnedMesh
-    Cylinder005_2: THREE.SkinnedMesh
-    Cylinder005_3: THREE.SkinnedMesh
-    Cylinder005_4: THREE.SkinnedMesh
-    Cylinder005_5: THREE.SkinnedMesh
-    Cylinder005_6: THREE.SkinnedMesh
-    Cylinder005_7: THREE.SkinnedMesh
-    Cylinder005_8: THREE.SkinnedMesh
-    Cylinder005_9: THREE.SkinnedMesh
-    Cylinder005_10: THREE.SkinnedMesh
-    Cylinder005_11: THREE.SkinnedMesh
-    Cylinder005_12: THREE.SkinnedMesh
-    Cylinder005_13: THREE.SkinnedMesh
-    Bone: THREE.Bone
-    Bone007: THREE.Bone
-    Bone008: THREE.Bone
-    Bone012: THREE.Bone
-    Bone017: THREE.Bone
-    Bone018: THREE.Bone
+    Cylinder005_1: THREE.Mesh
+    Cylinder005_2: THREE.Mesh
+    Cylinder005_3: THREE.Mesh
+    Cylinder005_4: THREE.Mesh
+    Cylinder005_5: THREE.Mesh
+    Cylinder005_6: THREE.Mesh
+    Cylinder005_7: THREE.Mesh
+    Cylinder005_8: THREE.Mesh
+    Cylinder005_9: THREE.Mesh
+    Cylinder005_10: THREE.Mesh
+    Cylinder005_11: THREE.Mesh
+    Cylinder005_12: THREE.Mesh
+    Cylinder005_13: THREE.Mesh
+    Cylinder005_14: THREE.Mesh
+    Cylinder005_15: THREE.Mesh
+    Cylinder005_16: THREE.Mesh
+    Cylinder005_17: THREE.Mesh
   }
   materials: {
     ['Material.010']: THREE.MeshStandardMaterial
     ['Material.011']: THREE.MeshStandardMaterial
     ['Material.012']: THREE.MeshStandardMaterial
     ['Material.013']: THREE.MeshStandardMaterial
+    ['Material.009']: THREE.MeshStandardMaterial
+    ['Material.014']: THREE.MeshStandardMaterial
+    ['Material.015']: THREE.MeshStandardMaterial
+    ['Material.016']: THREE.MeshStandardMaterial
+    ['Material.017']: THREE.MeshStandardMaterial
+    ['Material.018']: THREE.MeshStandardMaterial
+    ['Material.019']: THREE.MeshStandardMaterial
+    Material: THREE.MeshStandardMaterial
+    ['Material.020']: THREE.MeshStandardMaterial
     ['Material.001']: THREE.MeshStandardMaterial
-    ['Material.002']: THREE.MeshStandardMaterial
     ['Material.003']: THREE.MeshStandardMaterial
-    ['Material.005']: THREE.MeshStandardMaterial
     ['Material.006']: THREE.MeshStandardMaterial
     ['Material.007']: THREE.MeshStandardMaterial
-    ['Material.008']: THREE.MeshStandardMaterial
-    Material: THREE.MeshStandardMaterial
-    ['Material.009']: THREE.MeshStandardMaterial
   }
 }
 
@@ -50,80 +52,109 @@ export function StaticRover(props: ThreeElements['group']) {
 
 
   return (
-    <group {...props} dispose={null}>
-      <group position={[1.069, 1.36, -0.226]}>
-        <primitive object={nodes.Bone} />
-        <primitive object={nodes.Bone007} />
-        <primitive object={nodes.Bone008} />
-        <primitive object={nodes.Bone012} />
-        <primitive object={nodes.Bone017} />
-        <primitive object={nodes.Bone018} />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_1.geometry}
-          material={materials['Material.010']}
-          skeleton={nodes.Cylinder005_1.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_2.geometry}
-          material={materials['Material.011']}
-          skeleton={nodes.Cylinder005_2.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_3.geometry}
-          material={materials['Material.012']}
-          skeleton={nodes.Cylinder005_3.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_4.geometry}
-          material={materials['Material.013']}
-          skeleton={nodes.Cylinder005_4.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_5.geometry}
-          material={materials['Material.001']}
-          skeleton={nodes.Cylinder005_5.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_6.geometry}
-          material={materials['Material.002']}
-          skeleton={nodes.Cylinder005_6.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_7.geometry}
-          material={materials['Material.003']}
-          skeleton={nodes.Cylinder005_7.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_8.geometry}
-          material={materials['Material.005']}
-          skeleton={nodes.Cylinder005_8.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_9.geometry}
-          material={materials['Material.006']}
-          skeleton={nodes.Cylinder005_9.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_10.geometry}
-          material={materials['Material.007']}
-          skeleton={nodes.Cylinder005_10.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_11.geometry}
-          material={materials['Material.008']}
-          skeleton={nodes.Cylinder005_11.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_12.geometry}
-          material={materials.Material}
-          skeleton={nodes.Cylinder005_12.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cylinder005_13.geometry}
-          material={materials['Material.009']}
-          skeleton={nodes.Cylinder005_13.skeleton}
-        />
-      </group>
+    <group {...props} dispose={null} position={[1.069, -0.3, -0.226]}>
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_1.geometry}
+        material={materials['Material.010']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_2.geometry}
+        material={materials['Material.011']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_3.geometry}
+        material={materials['Material.012']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_4.geometry}
+        material={materials['Material.013']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_5.geometry}
+        material={materials['Material.009']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_6.geometry}
+        material={materials['Material.014']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_7.geometry}
+        material={materials['Material.015']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_8.geometry}
+        material={materials['Material.016']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_9.geometry}
+        material={materials['Material.017']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_10.geometry}
+        material={materials['Material.018']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_11.geometry}
+        material={materials['Material.019']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_12.geometry}
+        material={materials.Material}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_13.geometry}
+        material={materials['Material.020']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_14.geometry}
+        material={materials['Material.001']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_15.geometry}
+        material={materials['Material.003']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_16.geometry}
+        material={materials['Material.006']}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.Cylinder005_17.geometry}
+        material={materials['Material.007']}
+      />
     </group>
   )
 }
