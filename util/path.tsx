@@ -5,6 +5,7 @@ import {Tile, VectorField,WeightPoint} from "./constants"
 import { findNearestOre } from "./ore";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { Dispatch, SetStateAction } from "react";
+import { DefaultCycleContextObject } from "@/lib/contexts";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -105,9 +106,14 @@ export function deepCopy<T>(array: T[]): T[] {
   ) as T[];
 }
 
+function isDay(tick:number):boolean{
+  return tick % 48 <= DefaultCycleContextObject.day
+}
+
 export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
 :{map:Field[][],vector_map:VectorField[][],go_back:boolean}
 {
+    //path.length == current_tick (half hour)
     path.push(point)
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
@@ -117,7 +123,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
           currentAction: {
             action: "move" as ("move"),
           },
-          energy: 100,
+          energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100), //TODO calc power usage
           inventory: [],
           logs: [],
           position: point,
@@ -140,7 +146,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
             currentAction: {
               action: "mine" as ("mine"),
             },
-            energy: 100,
+            energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0),100),
             inventory: previousSnap!.rover.inventory,
             logs: [],
             position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
