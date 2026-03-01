@@ -27,7 +27,7 @@ export default function DayNightDirectionalLights() {
       }, [currentTick])
 
       const resolution = 4096;
-      const bias = -0.0005;
+      const bias = -0.001;
       const radius = 2;
     return <>
         {/* daytime sun */}
