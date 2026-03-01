@@ -131,7 +131,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
           logs: [
               ...previousSnap!.rover.logs,
               {
-                message: "Mozgás",
+                message: `Mozgás ide: {TODO}`,
               }
             ],
         }
@@ -159,7 +159,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
             logs: [
               ...previousSnap!.rover.logs,
               {
-                message: "Bányászás",
+                message: "Bányászás: {TODO} érc",
               }
             ],
             position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
