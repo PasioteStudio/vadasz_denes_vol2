@@ -189,9 +189,9 @@ export const Renderer = () => {
           fov={fov}
         />
 
-        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xffaaaa} />
+        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
         <directionalLight intensity={timeOfDay == 'day' ? 1 : 0} position={[-2, 2, -1]} color={0xffffff} />
-        <directionalLight intensity={timeOfDay == 'night' ? 1 : 0} position={[-2, 2, -1]} color={0x0000ff} />
+        <directionalLight intensity={timeOfDay == 'night' ? 1 : 0} position={[-2, 2, -1]} color={0xaaaaff} />
 
         {map && bounds && tileGroups &&
           Array.from(tileGroups.values())
