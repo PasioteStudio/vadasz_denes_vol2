@@ -1,11 +1,11 @@
 import {Graph,astar} from "@/util/astar"
 import { Position } from "@/types/RoverContextTypes";
 import { createVectorMapFromWeights } from "./map";
-import {VectorField,WeightPoint} from "./constants"
+import {Tile, VectorField,WeightPoint} from "./constants"
 import { findNearestOre } from "./ore";
-import { useSnapshots } from "@/lib/contexts";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { Dispatch, SetStateAction } from "react";
+import { DefaultCycleContextObject } from "@/lib/contexts";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -96,10 +96,67 @@ export function isThereAWay(column:VectorField){
     return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
 
-export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>)
-:{vector_map:VectorField[][],go_back:boolean}
+export function deepCopy<T>(array: T[]): T[] {
+  return array.map(item => 
+    typeof item === 'object' && item !== null && !Array.isArray(item)
+      ? { ...item }
+      : Array.isArray(item)
+      ? deepCopy(item as unknown as T[])
+      : item
+  ) as T[];
+}
+
+function isDay(tick:number):boolean{
+  return tick % 48 <= DefaultCycleContextObject.day
+}
+
+export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
+:{map:Field[][],vector_map:VectorField[][],go_back:boolean}
 {
-    
+    //path.length == current_tick (half hour)
+    path.push(point)
+    snapshotsSetter(prev=>{
+      const previousSnap = prev.get(prev.size - 1)
+      prev.set(path.length,{
+        fields: map,
+        rover: {
+          currentAction: {
+            action: "move" as ("move"),
+          },
+          energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100), //TODO calc power usage
+          inventory: [],
+          logs: [],
+          position: point,
+          startingPosition: previousSnap!.rover.startingPosition,
+        }
+      })
+      return prev
+    })
+    if(tile_id){
+      map = deepCopy(map)
+      path.push(point)
+      map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
+      update_able_map[tile_id].weight = 0
+      snapshotsSetter(prev=>{
+        const previousSnap = prev.get(prev.size - 1)
+        previousSnap!.rover.inventory.push({name:"Ore",amount:1})
+        prev.set(path.length,{
+          fields: map,
+          rover: {
+            currentAction: {
+              action: "mine" as ("mine"),
+            },
+            energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0),100),
+            inventory: previousSnap!.rover.inventory,
+            logs: [],
+            position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
+            startingPosition: previousSnap!.rover.startingPosition,
+          }
+        })
+        return prev
+      })
+    }
+
     const graphWithWeight = new Graph(obstacle_map.map((rows,idy) => 
         rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
         { diagonal: true });
@@ -113,22 +170,5 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
     const next_column = update_able_vector_map[last_element.y][last_element.x]
     
-    snapshotsSetter(prev=>{
-      const previousSnap = prev.get(prev.size - 1)
-      prev.set(path.length,{
-        fields: JSON.parse(JSON.stringify(map)), //TODO 2 differen map perhaps
-        rover: {
-          currentAction: {
-            action: "move" as ("move"),
-          },
-          energy: 100,
-          inventory: [],
-          logs: [],
-          position: point,
-          startingPosition: previousSnap!.rover.startingPosition,
-        }
-      })
-      return prev
-    })
-    return {vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
+    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
 }

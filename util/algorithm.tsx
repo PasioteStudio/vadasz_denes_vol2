@@ -11,7 +11,6 @@ import { isOre, vectorValues,Tile,VectorField, WeightPoint } from "@/util/consta
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
 import { getNextStep, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
-import { extractOre } from "./ore";
 import { useSnapshots } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 import { Dispatch, SetStateAction } from "react";
@@ -67,8 +66,7 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             const astarpath = astar.search(graphWithWeight, startNode, endNode);
             if(astarpath.length < 1) break //we arrived
             column=update_able_vector_map[astarpath[0].x][astarpath[0].y]
-            my_path.push({x: column.x, y: column.y})
-            TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
+            TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter,null)
             //ore? we cant grab one ore because then we would be late
             continue
         }
@@ -83,15 +81,14 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             column = update_able_vector_map[next_column_to_go.y][next_column_to_go.x]
             
             //update the map if ore found
-            const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
-            if(update_able_map[tile_id].weight != 0){
-                my_path.push({x: column.x, y: column.y})
-                extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter,my_path)
+            const tile_id_temp = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
+            const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
+            if(update_able_map[tile_id_temp].weight != 0){
                 we_are_stuck=false
-            }else{}
-            my_path.push({x: column.x, y: column.y})
-            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
+            }
+            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter,tile_id)
             update_able_vector_map = step.vector_map
+            mapSnapShot = step.map
             have_to_go_back = step.go_back
             continue
         }
@@ -107,13 +104,10 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
         column = next_column
         
         //update the map if ore found
-        const tile_id = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
-        if(update_able_map[tile_id].weight != 0){
-            my_path.push({x: column.x, y: column.y})
-            extractOre(tile_id,update_able_map,update_able_vector_map,mapSnapShot,snapshotsSetter,my_path)
-        } 
-        my_path.push({x:column.x,y:column.y})
-        const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter)
+        const tile_id_temp = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
+        const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
+        const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,update_able_vector_map,snapshotsSetter,tile_id)
+        mapSnapShot = step.map
         update_able_vector_map = step.vector_map
         have_to_go_back = step.go_back
    
