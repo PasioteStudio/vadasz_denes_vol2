@@ -20,12 +20,15 @@ export default function DayNightDirectionalLights() {
         const radius = c;
     
         const x = Math.sin(angle) * radius * 2;
-        const y = c + Math.cos(angle) * radius;
-        const z = -1;
+        const y = 2 + Math.cos(angle) * radius;
+        const z = -1.2*c;
     
         setOrbitPosition([x, y, z]);
       }, [currentTick])
 
+      const resolution = 4096;
+      const bias = -0.0005;
+      const radius = 2;
     return <>
         {/* daytime sun */}
         <directionalLight
@@ -33,15 +36,17 @@ export default function DayNightDirectionalLights() {
             position={lightOrbitPosition}
             color={0xffffff}
             castShadow={timeOfDay == 'day'}
-            shadow-mapSize-width={5096}
-            shadow-mapSize-height={5096}
+            shadow-mapSize-width={resolution}
+            shadow-mapSize-height={resolution}
+            shadow-radius={radius}
+            shadow-bias={bias}
             // make sure the shadow camera covers a large area of the grid
             shadow-camera-near={0.1}
-            shadow-camera-far={600}
-            shadow-camera-left={-100}
-            shadow-camera-right={100}
-            shadow-camera-top={100}
-            shadow-camera-bottom={-100}
+            shadow-camera-far={300}
+            shadow-camera-left={-300}
+            shadow-camera-right={300}
+            shadow-camera-top={300}
+            shadow-camera-bottom={-300}
         />
         {/* night light (blue) */}
         <directionalLight
@@ -49,14 +54,16 @@ export default function DayNightDirectionalLights() {
             position={lightOrbitPosition}
             color={0xaaaaff}
             castShadow={timeOfDay == 'night'}
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
+            shadow-mapSize-width={resolution}
+            shadow-mapSize-height={resolution}
             shadow-camera-near={0.1}
-            shadow-camera-far={600}
-            shadow-camera-left={-100}
-            shadow-camera-right={100}
-            shadow-camera-top={100}
-            shadow-camera-bottom={-100}
+            shadow-camera-far={300}
+            shadow-camera-left={-300}
+            shadow-camera-right={300}
+            shadow-camera-top={300}
+            shadow-camera-bottom={-300}
+            shadow-radius={radius}
+            shadow-bias={bias}
         />
     </>
 }
