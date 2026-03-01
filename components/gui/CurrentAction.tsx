@@ -1,8 +1,9 @@
 "use client"
-import { useRover } from "@/lib/contexts"
+
+import { Position } from "@/types/RoverContextTypes";
 
 export default function CurrentAction() {
-    const position = useRover().position.get;
+    const position: Position = {x:0,y:0};
     return <div className="fixed bg-gray-50/30 top-36 right-0 grid">
         <p>Current action:</p>
         <p>Mining</p>

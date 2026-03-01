@@ -1,8 +1,9 @@
 "use client"
-import { useRover } from "@/lib/contexts"
+
+import { Log } from "@/types/RoverContextTypes";
 
 export default function LogDisplayer(){
-    const logs = useRover().logs.get;
+    const logs: Log[] = [];
     return <>
         <div className="fixed bottom-0 right-0 bg-gray-50/30 w-102 h-[60vh] translate-y-8/12 hover:translate-y-0 duration-120 flex flex-col items-start justify-start overflow-y-scroll overflow-x-hidden *:w-max">
             {logs.map(l => <span>{l.message}</span> )}
