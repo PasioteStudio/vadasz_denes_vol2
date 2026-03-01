@@ -136,7 +136,7 @@ export const Renderer = () => {
 
   return (
     <>
-      <Canvas style={{ width: '100vw', height: '100vh' }}>
+      <Canvas style={{ width: '100vw', height: '100vh' }} shadows>
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault
@@ -145,7 +145,7 @@ export const Renderer = () => {
           fov={fov}
         />
 
-        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
+        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666}/>
         <DayNightDirectionalLights />
 
         <MapRenderer map={map!} direction={direction} rover={rover!} camH={CAM_HEIGHT}/>
