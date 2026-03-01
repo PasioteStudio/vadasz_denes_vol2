@@ -118,16 +118,22 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     snapshotsSetter(prev=>{
       const previousSnap = prev.get(prev.size - 1)
       prev.set(path.length,{
+        ...previousSnap,
         fields: map,
         rover: {
+          ...previousSnap!.rover,
           currentAction: {
             action: "move" as ("move"),
           },
           energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100), //TODO calc power usage
-          inventory: [],
-          logs: [],
           position: point,
           startingPosition: previousSnap!.rover.startingPosition,
+          logs: [
+              ...previousSnap!.rover.logs,
+              {
+                message: "Mozgás",
+              }
+            ],
         }
       })
       return prev
@@ -139,7 +145,6 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
       update_able_map[tile_id].weight = 0
       snapshotsSetter(prev=>{
         const previousSnap = prev.get(prev.size - 1)
-        previousSnap!.rover.inventory.push({name:"Ore",amount:1})
         prev.set(path.length,{
           fields: map,
           rover: {
@@ -147,8 +152,16 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
               action: "mine" as ("mine"),
             },
             energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0),100),
-            inventory: previousSnap!.rover.inventory,
-            logs: [],
+            inventory: [
+              ...previousSnap!.rover.inventory,
+              {name:"Ore",amount:1}
+            ],
+            logs: [
+              ...previousSnap!.rover.logs,
+              {
+                message: "Bányászás",
+              }
+            ],
             position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
             startingPosition: previousSnap!.rover.startingPosition,
           }

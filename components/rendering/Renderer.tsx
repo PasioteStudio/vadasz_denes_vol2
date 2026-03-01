@@ -26,14 +26,15 @@ function clampNum(v: number, min: number, max: number) {
 }
 
 export const Renderer = () => {
-  const { currentTick } = useCycle();
-  const { timeOfDay } = useCycle();
+  const { currentTick, timeOfDay, day, night } = useCycle();
   const snapshots = useSnapshots();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
   const [direction, setDirection] = useState<Position>({ x: 0, y: 110 });
   const [fov, setFov] = useState<number>(10);
   const [isInventoryOpen, setInventoryOpen] = useState(false);
+
+  const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([-2, 2, -1]);
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
@@ -44,14 +45,14 @@ export const Renderer = () => {
   const ryOffset = RADIUS_ROWS / 2;
 
   //snap to rover
-  useEffect(()=>{
-    setDirection({x:0,y:110})
-  },[rover])
+  useEffect(() => {
+    setDirection({ x: 0, y: 110 })
+  }, [rover])
 
   // Compute camera tile based on direction + rover position
   const camTile = useMemo(() => {
     const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
-    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.75 * (2.5/GAP);
+    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.75 * (2.5 / GAP);
 
     if (!map) return { x: camXraw, y: camYraw };
 
@@ -97,11 +98,11 @@ export const Renderer = () => {
   }, [direction]);
 
   //LOOK AROUND
-    // Camera rotation state (in radians)
+  // Camera rotation state (in radians)
   const [yaw, setYaw] = useState(0); // left/right
   const [pitch, setPitch] = useState(-0.5); // up/down, default -0.5 for initial tilt
   const isDragging = useRef(false);
-  const lastMouse = useRef<{x: number, y: number}>({x: 0, y: 0});
+  const lastMouse = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
   // Mouse-based camera rotation
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
@@ -122,7 +123,7 @@ export const Renderer = () => {
       setPitch((prev) => {
         const next = prev - dy * 0.005;
         // Clamp pitch to avoid flipping
-        return Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, next));
+        return Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, next));
       });
     };
     window.addEventListener('mousedown', handleMouseDown);
@@ -169,6 +170,23 @@ export const Renderer = () => {
     return () => cancelAnimationFrame(animFrameId);
   }, [keys, isInventoryOpen]);
 
+  useEffect(() => {
+    const tod = timeOfDay;
+    const duration = tod == "day" ? day : night;
+    const relTick = (currentTick % 48) - (tod == "day" ? 0 : day);
+    const ratio = relTick / duration;
+
+    const t = clampNum(ratio, 0,1);
+    const angle = -Math.PI / 2 + t * Math.PI;
+    const radius = 2;
+
+    const x = Math.sin(angle) * radius;
+    const y = Math.cos(angle) * radius;
+    const z = -1;
+
+    setOrbitPosition([x, y, z]);
+  }, [currentTick])
+
   // scroll-to-zoom
   useEffect(() => {
     const handleScroll = (e: WheelEvent) => {
@@ -190,8 +208,8 @@ export const Renderer = () => {
         />
 
         <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
-        <directionalLight intensity={timeOfDay == 'day' ? 1 : 0} position={[-2, 2, -1]} color={0xffffff} />
-        <directionalLight intensity={timeOfDay == 'night' ? 1 : 0} position={[-2, 2, -1]} color={0xaaaaff} />
+        <directionalLight intensity={timeOfDay == 'day' ? 1 : 0} position={lightOrbitPosition} color={0xffffff} />
+        <directionalLight intensity={timeOfDay == 'night' ? 1 : 0} position={lightOrbitPosition} color={0xaaaaff} />
 
         {map && bounds && tileGroups &&
           Array.from(tileGroups.values())
