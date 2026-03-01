@@ -35,7 +35,7 @@ export const Renderer = () => {
   const [isInventoryOpen, setInventoryOpen] = useState(false);
 
   const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([-2, 2, -1]);
-  const rotationDisabledBecauseIDontFuckWithIt = true;
+  const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
@@ -115,7 +115,7 @@ export const Renderer = () => {
       isDragging.current = false;
     };
     const handleMouseMove = (e: MouseEvent) => {
-      if(rotationDisabledBecauseIDontFuckWithIt) return;
+      if(!cameraRotationEnabled) return;
       if (!isDragging.current) return;
       const dx = e.clientX - lastMouse.current.x;
       const dy = e.clientY - lastMouse.current.y;
@@ -136,7 +136,7 @@ export const Renderer = () => {
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [cameraRotationEnabled]);
   //LOOK AROUND
 
   //INVENTORY TOGGLE
@@ -200,8 +200,12 @@ export const Renderer = () => {
     const handleScroll = (e: WheelEvent) => {
       setFov((prev) => Math.max(10, Math.min(13, prev + e.deltaY * 0.01)));
     };
+    const handleCameraToggle = (e: KeyboardEvent) => {
+      if(e.key.toLowerCase() == "f") setCamRotEnabled(p => !p);
+    }
     window.addEventListener('wheel', handleScroll);
-    return () => window.removeEventListener('wheel', handleScroll);
+    window.addEventListener('keydown', handleCameraToggle);
+    return () => {window.removeEventListener('wheel', handleScroll);window.removeEventListener('keydown', handleCameraToggle)};
   }, []);
 
   return (
