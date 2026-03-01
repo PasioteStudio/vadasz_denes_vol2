@@ -180,8 +180,10 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
     
     //go back even if there's no ore left
-    const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
-    const next_column = update_able_vector_map[last_element.y][last_element.x]
-    
-    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value - 2 || !isThereAWay(next_column) )}
+    const current_column = update_able_vector_map[point.y][point.x]
+
+    const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
+    const isThereAnOre = update_able_map[tile_id_temp].weight != 0
+
+    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 0 : 1) || !isThereAWay(current_column) )}
 }
