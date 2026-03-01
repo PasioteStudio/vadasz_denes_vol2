@@ -136,6 +136,12 @@ export const Renderer = () => {
   }, []);
   //LOOK AROUND
 
+  //INVENTORY TOGGLE
+  const showInventory = () => {
+  setInventoryOpen(prev => !prev);
+};
+  //INVENTORY TOGGLE
+
 
   // keyboard-based camera movement
   useEffect(() => {
@@ -200,10 +206,12 @@ export const Renderer = () => {
               <InstancedTileGroup key={`tile-group-${group.tileType}`} tileType={group.tileType} positions={group.positions} castShadow receiveShadow tileGap={GAP} />
             ))}
 
-        {rover && <MarsRover targetPos={{ x: rover.position.x, y: rover.position.y }} />}
+        {rover && <MarsRover targetPos={{ x: rover.position.x, y: rover.position.y } } onSelect={showInventory} />}
       </Canvas>
 
-      {isInventoryOpen && <InventoryPopup />}
+      {isInventoryOpen && (
+        <InventoryPopup onClose={() => setInventoryOpen(false)} />
+      )}
     </>
   );
 };
