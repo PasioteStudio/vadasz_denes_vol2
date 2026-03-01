@@ -1,30 +1,18 @@
 import { useCycle, useSnapshots } from '@/lib/contexts';
 import { MarsRover } from '@/Prefabs/MarsRover';
-import { Field } from '@/types/MapTypes';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
 import { PerspectiveCamera as PerspectiveCameraComponent } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { InstancedTileGroup } from './InstancedTileGroup';
-import { groupTilesByType } from '@/util/tileGrouping';
+import { useEffect, useRef, useState } from 'react';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
+import MapRenderer from './MapRenderer';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
-const VISIBLE_ROWS = 26;
-const VISIBLE_COLS = 27;
-const RADIUS_ROWS = Math.floor(VISIBLE_ROWS / 2);
-const RADIUS_COLS = Math.floor(VISIBLE_COLS / 2);
-
-type Bounds = { minRow: number; maxRow: number; minCol: number; maxCol: number };
-
-function clampNum(v: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, v));
-}
 
 export const Renderer = () => {
   const { currentTick, timeOfDay, day, night } = useCycle();
@@ -39,56 +27,12 @@ export const Renderer = () => {
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
 
-  const GAP = TILE_GAP; // keep this local; TILE_GAP is defined in TileRenderer
-
-  const rxOffset = RADIUS_COLS / 2;
-  const ryOffset = RADIUS_ROWS / 2;
+  const GAP = TILE_GAP;
 
   //snap to rover
   useEffect(() => {
     setDirection({ x: 0, y: 110 })
   }, [rover])
-
-  // Compute camera tile based on direction + rover position
-  const camTile = useMemo(() => {
-    const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
-    const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - CAM_HEIGHT * 0.75 * (2.5 / GAP);
-
-    if (!map) return { x: camXraw, y: camYraw };
-
-    const rows = map.length;
-    const cols = map[0]?.length || 0;
-
-    const camX = Math.floor(clampNum(camXraw, rxOffset, cols - 1 - rxOffset));
-    const camY = Math.floor(clampNum(camYraw, ryOffset, rows - 1 - ryOffset));
-    return { x: camX, y: camY };
-  }, [direction, rover, map]);
-
-  // Compute visible bounds (clamped to map dimensions)
-  const bounds = useMemo<Bounds | null>(() => {
-    if (!map) return null;
-    const rows = map.length;
-    const cols = map[0]?.length || 0;
-
-    const minRow = clampNum(camTile.y - RADIUS_ROWS, 0, rows - 1);
-    const maxRow = clampNum(camTile.y + RADIUS_ROWS, 0, rows - 1);
-    const minCol = clampNum(camTile.x - RADIUS_COLS, 0, cols - 1);
-    const maxCol = clampNum(camTile.x + RADIUS_COLS, 0, cols - 1);
-
-    // ensure integer indices
-    return {
-      minRow: Math.floor(minRow),
-      maxRow: Math.floor(maxRow),
-      minCol: Math.floor(minCol),
-      maxCol: Math.floor(maxCol),
-    };
-  }, [camTile, map]);
-
-  // Group tiles by type for instancing (only when map & bounds valid)
-  const tileGroups = useMemo(() => {
-    if (!map || !bounds) return null;
-    return groupTilesByType(map, bounds);
-  }, [map, bounds]);
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);
@@ -192,7 +136,7 @@ export const Renderer = () => {
 
   return (
     <>
-      <Canvas style={{ width: '100vw', height: '100vh' }}>
+      <Canvas style={{ width: '100vw', height: '100vh' }} shadows>
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault
@@ -201,15 +145,10 @@ export const Renderer = () => {
           fov={fov}
         />
 
-        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
+        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666}/>
         <DayNightDirectionalLights />
 
-        {map && bounds && tileGroups &&
-          Array.from(tileGroups.values())
-            .filter((g) => g.positions.length > 0)
-            .map((group) => (
-              <InstancedTileGroup key={`tile-group-${group.tileType}`} tileType={group.tileType} positions={group.positions} castShadow receiveShadow tileGap={GAP} />
-            ))}
+        <MapRenderer map={map!} direction={direction} rover={rover!} camH={CAM_HEIGHT}/>
 
         {rover && <MarsRover targetPos={{ x: rover.position.x, y: rover.position.y } } onSelect={showInventory} />}
       </Canvas>

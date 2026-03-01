@@ -183,5 +183,5 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const last_element = update_able_vector_map[path[path.length - 1].y][path[path.length - 1].x]
     const next_column = update_able_vector_map[last_element.y][last_element.x]
     
-    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value || !isThereAWay(next_column) )}
+    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value - 2 || !isThereAWay(next_column) )}
 }
