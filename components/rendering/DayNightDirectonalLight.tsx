@@ -8,7 +8,7 @@ export default function DayNightDirectionalLights() {
     const c = 25 * TILE_GAP;
 
     const {currentTick, timeOfDay, day, night} = useCycle();
-    const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([0, 0, c]);
+    const [lightOrbitPosition, setOrbitPosition] = useState<[number, number, number]>([0, c/3, c]);
     useEffect(() => {
         const tod = timeOfDay;
         const duration = tod == "day" ? day : night;
@@ -20,19 +20,19 @@ export default function DayNightDirectionalLights() {
         const radius = c;
     
         const x = Math.sin(angle) * radius * 2;
-        const y = 2 + Math.cos(angle) * radius;
-        const z = -1.2*c;
+        const y = c/3 + Math.cos(angle) * radius;
+        const z = -1.2*c - Math.cos(angle) * radius;
     
         setOrbitPosition([x, y, z]);
       }, [currentTick])
 
       const resolution = 4096;
-      const bias = -0.001;
+      const bias = -0.0001;
       const radius = 2;
     return <>
         {/* daytime sun */}
         <directionalLight
-            intensity={timeOfDay == 'day' ? 1 : 0}
+            intensity={timeOfDay == 'day' ? 2 : 0}
             position={lightOrbitPosition}
             color={0xffffff}
             castShadow={timeOfDay == 'day'}
@@ -50,7 +50,7 @@ export default function DayNightDirectionalLights() {
         />
         {/* night light (blue) */}
         <directionalLight
-            intensity={timeOfDay == 'night' ? 1 : 0}
+            intensity={timeOfDay == 'night' ? 1.3 : 0}
             position={lightOrbitPosition}
             color={0xaaaaff}
             castShadow={timeOfDay == 'night'}
