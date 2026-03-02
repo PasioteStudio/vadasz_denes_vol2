@@ -184,5 +184,5 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
     const isThereAnOre = update_able_map[tile_id_temp].weight != 0
 
-    return {map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 0 : 1) || !isThereAWay(current_column) )}
+    return {map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 1 : 1) || !isThereAWay(current_column) )}
 }
