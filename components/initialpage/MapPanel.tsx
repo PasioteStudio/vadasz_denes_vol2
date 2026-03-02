@@ -1,5 +1,5 @@
 import { Field } from "@/types/MapTypes";
-import { isValidMap, readMap } from "@/util/map";
+import { generateMap, isValidMap, readMap } from "@/util/map";
 import { useEffect, useRef, useState } from "react";
 
 export default function MapPanel(
@@ -8,10 +8,10 @@ export default function MapPanel(
         setter
     }: {
         current: {
-            option?: "upload" | "default",
+            option?: "upload" | "default" | "random",
             loadedMap?: Field[][]
         },
-        setter: (option: "upload" | "default", loadedMap: Field[][]) => void
+        setter: (option: "upload" | "default" | "random", loadedMap: Field[][]) => void
     }
 ) {
     const fileInput = useRef<HTMLInputElement | null>(null);
@@ -26,6 +26,12 @@ export default function MapPanel(
     const setUpload = () => {
         fileInput.current?.click();
     };
+
+    const selectRandom = () => {
+        let newMap = generateMap()
+        while (!isValidMap(newMap)) {newMap = generateMap()}
+        setter("random", newMap)
+    }
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -73,7 +79,17 @@ export default function MapPanel(
                 >
                     <img src="/ui/map.png" className="w-[4vw] aspect-square" />
                 </button>
-                <p className="font-thin text-[1vw]/[1.2] max-w-[7.7vw]">vagy használja az alap térképet</p>
+                <p className="font-thin text-[1vw]/[1.2] max-w-[7.7vw]">használja az alap térképet</p>
+            </div>
+            <div className="flex items-center justify-start w-max gap-4">
+                <button
+                    onClick={selectRandom}
+                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-black/30 duration-120
+                    ${current.option === "random" && "border-buttonicon"}`}
+                >
+                    <img src="/ui/mapgen.png" className="w-[4vw] aspect-square relative left-[0.3vw]" />
+                </button>
+                <p className="font-thin text-[1vw]/[1.2] max-w-[7.7vw]">véletlenszerű térkép</p>
             </div>
 
             <p className="text-red-500">{error}</p>

@@ -4,37 +4,54 @@ import { calculateTile, isInDistance, toTile } from "./tile";
 import { Field } from "@/types/MapTypes";
 
 //TESTING ONLY
-export function generateMap(): Tile[][] {
+export function generateMap(): Field[][] {
   const mapConstraints = {
     height: 50,
     width: 50
   }
-  const mapArray: Tile[][] = [];
+  const mapArray: Field[][] = [];
   let startingPointSet = false
   for (let i = 0; i < mapConstraints.height; i++) {
-    const row = [];
+    const row: Field[] = [];
     for (let j = 0; j < mapConstraints.width; j++) {
       const rand = Math.random();
 
       const rand2 = Math.random();
       if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
         startingPointSet = true
-        row.push(Tile.Start); // Rover starting point
+        row.push({
+          tile: Tile.Start,
+          position: {x:j , y:i }
+        }); // Rover starting point
       } else if (rand < 0.70) {
-        row.push(Tile.Empty); // Passable terrain
+        row.push({
+          tile: Tile.Empty,
+          position: {x:j , y:i }
+        }); // Passable terrain
       } else if (rand < 0.85) {
-        row.push(Tile.Obstacle); // Obstacles
+        row.push({
+          tile: Tile.Obstacle,
+          position: {x:j , y:i }  
+        }); // Obstacles
       } else if (rand < 0.90) {
-        row.push(Tile.Blue); // Blue mineral
+        row.push({
+          tile: Tile.Blue,
+          position: {x:j , y:i }  
+        }); // Blue mineral
       } else if (rand < 0.95) {
-        row.push(Tile.Yellow); // Yellow mineral
+        row.push({
+          tile: Tile.Yellow,
+          position: {x:j , y:i }  
+        }); // Yellow mineral
       } else {
-        row.push(Tile.Green); // Green mineral
+        row.push({
+          tile: Tile.Green,
+          position: {x:j , y:i }
+        }); // Green mineral
       }
     }
     mapArray.push(row);
   }
-
   return mapArray;
 }
 //TESTING ONLY

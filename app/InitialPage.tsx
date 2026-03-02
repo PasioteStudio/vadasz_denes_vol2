@@ -9,7 +9,7 @@ import { Terrain } from "@/Prefabs/static/Terrain";
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Field[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
-    const [selectedMapOption, setMapOption] = useState<"upload" | "default">();
+    const [selectedMapOption, setMapOption] = useState<"upload" | "default" | "random">();
     const [loadedMap, setLoadedMap] = useState<Field[][]>();
     const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(48);
     const [validInputs, setValidInputs] = useState(false);
@@ -20,7 +20,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
         "map": <MapPanel current={{
             loadedMap: loadedMap,
             option: selectedMapOption,
-        }} setter={(option: "upload" | "default", loadedMap: Field[][]) => {
+        }} setter={(option: "upload" | "default" | "random", loadedMap: Field[][]) => {
             setMapOption(option);
             setLoadedMap(loadedMap);
         }} />,
