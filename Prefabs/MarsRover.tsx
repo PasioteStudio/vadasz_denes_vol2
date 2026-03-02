@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import type { ThreeElements } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
 import { TILE_GAP } from '@/components/rendering/TileRenderer'
+import { useCycle } from '@/lib/contexts'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -43,40 +44,66 @@ export function MarsRover({targetPos = {x:0,y:0}, from=undefined, ...props }: Ma
 
   const [targetRotation, setTRotation] = useState(0);
   const [currentRotation, setCRotation] = useState(0);
-  const animationSpeed = 10;
+  const cycle = useCycle();
+  const animationSpeed = cycle.player.speed * 5;
 
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
   //gombnyomásra mozgatjuk a marsrovert (teszt)
   const gap = TILE_GAP;
   useFrame((_, delta) => {
-    if (!group.current) return
-    //smoothan mozgatjuk
-    const pos = group.current.position;
+  if (!group.current) return
+  const pos = group.current.position;
 
-    const position = [targetPos.x*gap, targetPos.y*gap ]
-    pos.x = position[0];
-    pos.z = position[1];
-    let newCRot = currentRotation;
-    if (targetRotation < currentRotation) {
-      newCRot = Math.max(currentRotation - animationSpeed * delta, targetRotation)
-    } else {
-      newCRot = Math.min(currentRotation + animationSpeed * delta, targetRotation)
-    }
-    setCRotation(newCRot)
-    group.current.setRotationFromEuler(new THREE.Euler(0,newCRot,0));
-  })
-  useEffect(()=>{
-    if(!from) return;
-    const pos = group.current.position;
-    const origin = new THREE.Vector2(from.x*gap, from.z*gap);
-    const target = new THREE.Vector2(pos.x, pos.z);
-    if(origin.x == target.x && origin.y == target.y) return;
-    const subV = (new THREE.Vector2()).subVectors(origin,target);
-    const angle = Math.atan2(subV.x, subV.y)
+  const position = [targetPos.x*gap, targetPos.y*gap ]
+  pos.x = position[0];
+  pos.z = position[1];
+  
+  let newCRot = currentRotation;
+  
+  // Calculate the shortest rotation path
+  let diff = targetRotation - currentRotation;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  while (diff < -Math.PI) diff += 2 * Math.PI;
+  
+  if (diff < 0) {
+    newCRot = Math.max(currentRotation + diff, targetRotation)
+  } else {
+    newCRot = Math.min(currentRotation + diff, targetRotation)
+  }
+  
+  // Simpler approach: interpolate directly with shortest path
+  if (Math.abs(diff) > 0.001) {
+    const step = Math.sign(diff) * Math.min(Math.abs(diff), animationSpeed * delta);
+    newCRot = currentRotation + step;
+  } else {
+    newCRot = targetRotation;
+  }
+  
+  setCRotation(newCRot)
+  const hasReachedTarget = Math.abs(newCRot - targetRotation) < 0.001;
+  cycle.setIsInAnimation(!hasReachedTarget);
+  group.current.setRotationFromEuler(new THREE.Euler(0, newCRot, 0));
+})
+  
+  useEffect(() => {
+  if (!from) return;
+  const pos = group.current.position;
+  const origin = new THREE.Vector2(from.x * gap, from.z * gap);
+  const target = new THREE.Vector2(pos.x, pos.z);
+  if (origin.x == target.x && origin.y == target.y) return;
+  const subV = (new THREE.Vector2()).subVectors(origin, target);
+  const angle = Math.atan2(subV.x, subV.y);
 
-    setTRotation(angle - Math.PI/2);
-  }, [targetPos])
+  let newTarget = angle - Math.PI / 2;
+  
+  // Normalize the target angle to be within -PI to PI
+  while (newTarget > Math.PI) newTarget -= 2 * Math.PI;
+  while (newTarget < -Math.PI) newTarget += 2 * Math.PI;
+  
+  setTRotation(newTarget);
+}, [cycle.currentTick, targetPos, from])
+
   //modell dolgok
   return (
     //modell megnyomásakkor meghívjuk a invenotry megjelnítőt

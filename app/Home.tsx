@@ -29,13 +29,14 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }],
     ]));
 
-  const [cycle, setCycle] = useState<Omit<CycleContextT, "player" | "timeLimit">>({
+  const [cycle, setCycle] = useState<Omit<CycleContextT, "player" | "timeLimit" | "isInAnimation" | "setIsInAnimation">>({
     currentTick: 0,
     timeOfDay: "day",
     setTick: (t: number) => { setTickTo(t) },
     day: 16*2,
-    night: 8*2
+    night: 8*2,
   });
+  const [cycleInAnimation, setCycleInAnimation] = useState(false);
   const [player, setPlayer] = useState({
     speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
@@ -44,6 +45,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const setTickTo = (t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try {
+      if(cycleInAnimation) return;
       const actualTick = Math.max(0,Math.min(mapSnapShots.size-1, t));
       if(!mapSnapShots.get(actualTick)) throw Error;
       setCycle(p => {
@@ -88,7 +90,9 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       },
       day: cycle.day,
       night: cycle.night,
-      timeLimit: timeLimit
+      timeLimit: timeLimit,
+      isInAnimation: cycleInAnimation,
+      setIsInAnimation: (state: boolean) => {setCycleInAnimation(state)},
     }}>
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots

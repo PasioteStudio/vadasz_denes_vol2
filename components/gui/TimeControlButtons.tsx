@@ -8,9 +8,9 @@ export default function TimeControlButtons() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if (cycle.player.playing != "playing") return;
+            if (cycle.player.playing != "playing" || cycle.isInAnimation) return;
             cycle.setTick(cycle.currentTick + cycle.player.speed);
-        }, 400 / Math.abs(cycle.player.speed))
+        }, 400)
 
         return () => { clearInterval(interval) };
     }, [cycle.player])
