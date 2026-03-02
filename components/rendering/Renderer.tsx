@@ -15,7 +15,7 @@ import MapRenderer from './MapRenderer';
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { currentTick, timeOfDay, day, night } = useCycle();
+  const { currentTick, timeOfDay } = useCycle();
   const snapshots = useSnapshots();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
@@ -29,13 +29,16 @@ export const Renderer = () => {
 
   const GAP = TILE_GAP;
 
+  const jumpToRoverOnMove = false;
   //snap to rover
   useEffect(() => {
+    if(!jumpToRoverOnMove) return;
     setDirection({ x: 0, y: 110 })
   }, [rover])
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);
+
 
   useEffect(() => {
     directionRef.current = direction;
@@ -140,7 +143,10 @@ export const Renderer = () => {
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault
-          position={[direction.x + (rover?.position.x ?? 0) * GAP, CAM_HEIGHT, direction.y + (rover?.position.y ?? 0) * GAP]}
+          position={[
+            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
+            CAM_HEIGHT, 
+            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]}
           rotation={[pitch, yaw, 0]}
           fov={fov}
         />
@@ -148,9 +154,12 @@ export const Renderer = () => {
         <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666}/>
         <DayNightDirectionalLights />
 
-        <MapRenderer map={map!} direction={direction} rover={rover!} camH={CAM_HEIGHT}/>
+        <MapRenderer map={map!} camPos={[
+            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
+            CAM_HEIGHT, 
+            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
 
-        {rover && <MarsRover targetPos={{ x: rover.position.x, y: rover.position.y } } onSelect={showInventory} />}
+        {rover && <MarsRover onSelect={showInventory} />}
       </Canvas>
 
       {isInventoryOpen && (
