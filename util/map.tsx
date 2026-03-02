@@ -3,7 +3,6 @@ import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
 import { Field } from "@/types/MapTypes";
 
-//TESTING ONLY
 export function generateMap(): Field[][] {
   const mapConstraints = {
     height: 50,
@@ -23,7 +22,7 @@ export function generateMap(): Field[][] {
           tile: Tile.Start,
           position: {x:j , y:i }
         }); // Rover starting point
-      } else if (rand < 0.70) {
+      } else if (rand < 0.99) {
         row.push({
           tile: Tile.Empty,
           position: {x:j , y:i }
@@ -54,7 +53,6 @@ export function generateMap(): Field[][] {
   }
   return mapArray;
 }
-//TESTING ONLY
 
 /**
  * Creates a map from a file using an URL

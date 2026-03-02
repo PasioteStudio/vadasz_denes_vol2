@@ -6,6 +6,7 @@ import { findNearestOre } from "./ore";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { Dispatch, SetStateAction } from "react";
 import { DefaultCycleContextObject } from "@/lib/contexts";
+import { calculateTile } from "./tile";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -110,8 +111,8 @@ function isDay(tick:number):boolean{
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],update_able_vector_map:VectorField[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
-:{map:Field[][],vector_map:VectorField[][],go_back:boolean}
+export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_map:(0|1)[][],start:Position,path:Position[],point:Position, update_able_map:WeightPoint[],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>,tile_id:number | null)
+:{map:Field[][],go_back:boolean}
 {
     //path.length == current_tick (half hour)
     path.push(point)
@@ -141,7 +142,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     if(tile_id){
       map = deepCopy(map)
       path.push(point)
-      map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].tile = Tile.Empty
+      map[Math.floor(tile_id / map.length)][tile_id % map[0].length].tile = Tile.Empty
       update_able_map[tile_id].weight = 0
       snapshotsSetter(prev=>{
         const previousSnap = prev.get(prev.size - 1)
@@ -162,7 +163,7 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
                 message: "Bányászás: {TODO} érc",
               }
             ],
-            position: map[Math.floor(tile_id / update_able_vector_map.length)][tile_id % update_able_vector_map.length].position,
+            position: map[Math.floor(tile_id / map.length)][tile_id % map[0].length].position,
             startingPosition: previousSnap!.rover.startingPosition,
           }
         })
@@ -176,14 +177,12 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     const startNode = graphWithWeight.grid[point.y][point.x];
     const endNode = graphWithWeight.grid[start.y][start.x];
     const astarpath = astar.search(graphWithWeight, startNode, endNode);
-
-    const vector_map = createVectorMapFromWeights(update_able_vector_map.length,update_able_vector_map[0].length,point,update_able_map)
     
     //go back even if there's no ore left
-    const current_column = update_able_vector_map[point.y][point.x]
+    const current_column = calculateTile(update_able_map,point.x,point.y)
 
     const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
     const isThereAnOre = update_able_map[tile_id_temp].weight != 0
 
-    return {map,vector_map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 0 : 1) || !isThereAWay(current_column) )}
+    return {map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 0 : 1) || !isThereAWay(current_column) )}
 }
