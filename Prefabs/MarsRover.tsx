@@ -43,6 +43,7 @@ export function MarsRover({targetPos = {x:0,y:0}, from=undefined, ...props }: Ma
 
   const [targetRotation, setTRotation] = useState(0);
   const [currentRotation, setCRotation] = useState(0);
+  const animationSpeed = 10;
 
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
@@ -58,9 +59,9 @@ export function MarsRover({targetPos = {x:0,y:0}, from=undefined, ...props }: Ma
     pos.z = position[1];
     let newCRot = currentRotation;
     if (targetRotation < currentRotation) {
-      newCRot = Math.max(currentRotation - 10 * delta, targetRotation)
+      newCRot = Math.max(currentRotation - animationSpeed * delta, targetRotation)
     } else {
-      newCRot = Math.min(currentRotation + 10 * delta, targetRotation)
+      newCRot = Math.min(currentRotation + animationSpeed * delta, targetRotation)
     }
     setCRotation(newCRot)
     group.current.setRotationFromEuler(new THREE.Euler(0,newCRot,0));
@@ -70,6 +71,7 @@ export function MarsRover({targetPos = {x:0,y:0}, from=undefined, ...props }: Ma
     const pos = group.current.position;
     const origin = new THREE.Vector2(from.x*gap, from.z*gap);
     const target = new THREE.Vector2(pos.x, pos.z);
+    if(origin.x == target.x && origin.y == target.y) return;
     const subV = (new THREE.Vector2()).subVectors(origin,target);
     const angle = Math.atan2(subV.x, subV.y)
 
