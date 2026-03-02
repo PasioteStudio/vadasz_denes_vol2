@@ -136,11 +136,11 @@ export const Renderer = () => {
   }, []);
 
   useEffect(()=> {
-    const prevSnap = snapshots.snapshots.get(currentTick);
-    if(prevSnap)
+    const snap = snapshots.snapshots.get(currentTick+1);
+    if(snap)
       setRoverFrom({
-        x: prevSnap.rover.position.x,
-        z: prevSnap.rover.position.y,
+        x: snap.rover.position.x,
+        z: snap.rover.position.y,
     })
   }, [currentTick])
 
