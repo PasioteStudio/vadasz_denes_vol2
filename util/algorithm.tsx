@@ -63,13 +63,9 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             const startNode = graphWithWeight.grid[column.x][column.y];
             const endNode = graphWithWeight.grid[start.x][start.y];
             const astarpath = astar.search(graphWithWeight, startNode, endNode);
-            if(astarpath.length < 1){
-                have_to_go_back = false
-                break
-            }
+            if(astarpath.length < 1) break
             column=calculateTile(update_able_map,astarpath[0].x,astarpath[0].y)
-            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,null)
-            have_to_go_back = step.go_back
+            TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,null)
             //ore? we cant grab one ore because then we would be late
             continue
         }
