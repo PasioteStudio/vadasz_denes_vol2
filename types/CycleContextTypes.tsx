@@ -13,4 +13,5 @@ export type CycleContextT = {
     isInAnimation: boolean,
     setIsInAnimation: (state: boolean)=>void,
     timeLimit: number,
+    lastDirection: -1|1
 }

@@ -28,7 +28,10 @@ export const DefaultCycleContextObject: CycleContextT = {
         setPlaying: () => { },
         setSpeed: () => { },
     },
-    timeLimit: 48
+    timeLimit: 48,
+    isInAnimation: false,
+    lastDirection: 1,
+    setIsInAnimation: ()=>{},
 }
 export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
     snapshots: new Map<Number, MapSnapshot>()

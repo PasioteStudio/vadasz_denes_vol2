@@ -15,7 +15,7 @@ import MapRenderer from './MapRenderer';
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { currentTick, timeOfDay, day, night } = useCycle();
+  const { currentTick, timeOfDay } = useCycle();
   const snapshots = useSnapshots();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
@@ -23,7 +23,6 @@ export const Renderer = () => {
   const [fov, setFov] = useState<number>(10);
   const [isInventoryOpen, setInventoryOpen] = useState(false);
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
-  const [roverFromPos, setRoverFrom] = useState<{x:number, z:number}>();
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
@@ -135,15 +134,6 @@ export const Renderer = () => {
     return () => {window.removeEventListener('wheel', handleScroll);window.removeEventListener('keydown', handleCameraToggle)};
   }, []);
 
-  useEffect(()=> {
-    const snap = snapshots.snapshots.get(currentTick+1);
-    if(snap)
-      setRoverFrom({
-        x: snap.rover.position.x,
-        z: snap.rover.position.y,
-    })
-  }, [currentTick])
-
   return (
     <>
       <Canvas style={{ width: '100vw', height: '100vh' }} shadows>
@@ -160,7 +150,7 @@ export const Renderer = () => {
 
         <MapRenderer map={map!} direction={direction} rover={rover!} camH={CAM_HEIGHT}/>
 
-        {rover && <MarsRover targetPos={{ x: rover.position.x, y: rover.position.y } } from={roverFromPos}  onSelect={showInventory} />}
+        {rover && <MarsRover onSelect={showInventory} />}
       </Canvas>
 
       {isInventoryOpen && (

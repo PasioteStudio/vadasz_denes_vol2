@@ -29,12 +29,13 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }],
     ]));
 
-  const [cycle, setCycle] = useState<Omit<CycleContextT, "player" | "timeLimit" | "isInAnimation" | "setIsInAnimation">>({
+  const [cycle, setCycle] = useState<Omit<CycleContextT, | "player" | "timeLimit" | "isInAnimation" | "setIsInAnimation">>({
     currentTick: 0,
     timeOfDay: "day",
     setTick: (t: number) => { setTickTo(t) },
     day: 16*2,
     night: 8*2,
+    lastDirection: 1,
   });
   const [cycleInAnimation, setCycleInAnimation] = useState(false);
   const [player, setPlayer] = useState({
@@ -52,7 +53,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         return {
           ...p,
           currentTick: actualTick,
-          timeOfDay: t % 48 >= 32 ? "night" : "day"
+          timeOfDay: t % 48 >= 32 ? "night" : "day",
+          lastDirection: t < cycle.currentTick ? -1 : 1,
         }
       })
     } catch {
@@ -93,6 +95,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       timeLimit: timeLimit,
       isInAnimation: cycleInAnimation,
       setIsInAnimation: (state: boolean) => {setCycleInAnimation(state)},
+      lastDirection: cycle.lastDirection
     }}>
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
