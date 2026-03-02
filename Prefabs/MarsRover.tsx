@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeElements } from '@react-three/fiber'
@@ -32,28 +32,49 @@ type GLTFResult = GLTF & {
 }
 
 type MarsRoverProps = ThreeElements['group'] & {
-  targetPos?: {x:number, y: number}
+  targetPos?: {x:number, y: number},
+  from?: {x:number, z:number},
   onSelect?: () => void
 }
 
-export function MarsRover({targetPos = {x:0,y:0}, ...props }: MarsRoverProps) {
+export function MarsRover({targetPos = {x:0,y:0}, from=undefined, ...props }: MarsRoverProps) {
 
   const group = useRef<THREE.Group>(null!)
-  const targetX = useRef(0)
+
+  const [targetRotation, setTRotation] = useState(0);
+  const [currentRotation, setCRotation] = useState(0);
 
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
   //gombnyomásra mozgatjuk a marsrovert (teszt)
-
+  const gap = TILE_GAP;
   useFrame((_, delta) => {
     if (!group.current) return
     //smoothan mozgatjuk
+    const pos = group.current.position;
 
-    const gap = TILE_GAP; // Adjust this value to increase/decrease the gap between tiles
     const position = [targetPos.x*gap, targetPos.y*gap ]
-    group.current.position.x = position[0];
-    group.current.position.z = position[1];
+    pos.x = position[0];
+    pos.z = position[1];
+    let newCRot = currentRotation;
+    if (targetRotation < currentRotation) {
+      newCRot = Math.max(currentRotation - 10 * delta, targetRotation)
+    } else {
+      newCRot = Math.min(currentRotation + 10 * delta, targetRotation)
+    }
+    setCRotation(newCRot)
+    group.current.setRotationFromEuler(new THREE.Euler(0,newCRot,0));
   })
+  useEffect(()=>{
+    if(!from) return;
+    const pos = group.current.position;
+    const origin = new THREE.Vector2(from.x*gap, from.z*gap);
+    const target = new THREE.Vector2(pos.x, pos.z);
+    const subV = (new THREE.Vector2()).subVectors(origin,target);
+    const angle = Math.atan2(subV.x, subV.y)
+
+    setTRotation(angle - Math.PI/2);
+  }, [targetPos])
   //modell dolgok
   return (
     //modell megnyomásakkor meghívjuk a invenotry megjelnítőt
