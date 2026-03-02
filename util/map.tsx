@@ -22,7 +22,7 @@ export function generateMap(): Field[][] {
           tile: Tile.Start,
           position: {x:j , y:i }
         }); // Rover starting point
-      } else if (rand < 0.99) {
+      } else if (rand < 0.70) {
         row.push({
           tile: Tile.Empty,
           position: {x:j , y:i }
