@@ -6,6 +6,8 @@ import type { ThreeElements } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
 import { TILE_GAP } from '@/components/rendering/TileRenderer'
 import { useCycle, useSnapshots } from '@/lib/contexts'
+import { lerp } from 'three/src/math/MathUtils.js'
+import { Position } from '@/types/RoverContextTypes'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -39,24 +41,46 @@ type MarsRoverProps = ThreeElements['group'] & {
 export function MarsRover({...props }: MarsRoverProps) {
 
   const group = useRef<THREE.Group>(null!)
-
   const cycle = useCycle();
-
   const rover = useSnapshots().snapshots.get(cycle.currentTick)!.rover;
+  const gap = TILE_GAP;
+  const actionStartTime = useRef(Date.now());
+  const actionStartPos = useRef(new THREE.Vector2(rover.position.x*gap, rover.position.y*gap));
+  const actionDuration = 300 / cycle.player.speed; //ms
+
+  const [position, setPosition] = useState({
+    target: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap),
+    current: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap),
+  })
 
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
   //gombnyomásra mozgatjuk a marsrovert (teszt)
-  const gap = TILE_GAP;
   useFrame((_, delta) => {
     if (!group.current) return
-    //smoothan mozgatjuk
-    const pos = group.current.position;
 
-    const position = [rover.position.x*gap, rover.position.y*gap ]
-    pos.x = position[0];
-    pos.z = position[1];
+    const pos = group.current.position;
+    const elapsed = Date.now() - actionStartTime.current;
+
+    const newCurrent = actionStartPos.current.clone().lerp(position.target, Math.min(elapsed / actionDuration, 1));
+    setPosition(p => {return {
+      ...p,
+      current: newCurrent,
+    }})
+    pos.x = newCurrent.x;
+    pos.z = newCurrent.y;
+    cycle.setIsInAnimation(position.target.distanceTo(newCurrent) != 0);
   })
+
+  useEffect(()=>{
+    setPosition(p => {return {
+      ...p,
+      target: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap)
+    }})
+    actionStartTime.current = Date.now();
+    actionStartPos.current = position.current;
+    cycle.setIsInAnimation(true);
+  }, [cycle.currentTick])
   //modell dolgok
   return (
     //modell megnyomásakkor meghívjuk a invenotry megjelnítőt

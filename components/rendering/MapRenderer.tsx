@@ -16,19 +16,19 @@ const ryOffset = RADIUS_ROWS / 2;
 
 export default function MapRenderer({
     map,
-    direction,
+    camPos,
     rover,
     camH,
 }: {
     map: Field[][],
-    direction: Position,
+    camPos: [number, number, number],
     rover: RoverT,
     camH: number,
 }) {
     const GAP = TILE_GAP
     const camTile = useMemo(() => {
-        const camXraw = Math.round((direction.x + (rover?.position.x ?? 0) * GAP) / GAP);
-        const camYraw = Math.round((direction.y + (rover?.position.y ?? 0) * GAP) / GAP) - camH * 0.75 * (2.5 / GAP);
+        const camXraw = Math.round((camPos[0]) / GAP);
+        const camYraw = Math.round((camPos[2]) / GAP) - camH * 0.75 * (2.5 / GAP);
 
         if (!map) return { x: camXraw, y: camYraw };
 
@@ -38,7 +38,7 @@ export default function MapRenderer({
         const camX = Math.floor(clampNum(camXraw, rxOffset, cols - 1 - rxOffset));
         const camY = Math.floor(clampNum(camYraw, ryOffset, rows - 1 - ryOffset));
         return { x: camX, y: camY };
-    }, [direction, rover, map]);
+    }, [camPos, rover, map]);
 
     const bounds = useMemo<Bounds | null>(() => {
 
