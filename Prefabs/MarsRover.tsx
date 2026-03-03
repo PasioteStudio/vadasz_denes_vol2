@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import React, { useRef, useEffect } from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, useAnimations } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeElements } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
@@ -9,28 +9,28 @@ import { useCycle, useSnapshots } from '@/lib/contexts'
 
 type GLTFResult = GLTF & {
   nodes: {
-    Cube002_1: THREE.SkinnedMesh
-    Cube002_2: THREE.SkinnedMesh
-    Cube002_3: THREE.SkinnedMesh
-    Cube002_4: THREE.SkinnedMesh
-    Cube002_5: THREE.SkinnedMesh
-    Cube002_6: THREE.SkinnedMesh
-    Cube002_7: THREE.SkinnedMesh
+    Cube001: THREE.SkinnedMesh
+    Cube001_1: THREE.SkinnedMesh
+    Cube001_2: THREE.SkinnedMesh
+    Cube001_3: THREE.SkinnedMesh
+    Cube001_4: THREE.SkinnedMesh
+    Cube001_5: THREE.SkinnedMesh
+    Cube001_6: THREE.SkinnedMesh
     Bone: THREE.Bone
-    Bone007: THREE.Bone
-    Bone017: THREE.Bone
-    Bone018: THREE.Bone
   }
   materials: {
-    ['Material.001']: THREE.MeshStandardMaterial
-    ['Material.002']: THREE.MeshStandardMaterial
-    ['Material.003']: THREE.MeshStandardMaterial
-    ['Material.005']: THREE.MeshStandardMaterial
-    ['Material.006']: THREE.MeshStandardMaterial
-    ['Material.007']: THREE.MeshStandardMaterial
-    ['Material.008']: THREE.MeshStandardMaterial
+    ['Material.004']: THREE.MeshStandardMaterial
+    ['Material.009']: THREE.MeshStandardMaterial
+    ['Material.010']: THREE.MeshStandardMaterial
+    ['Material.011']: THREE.MeshStandardMaterial
+    ['Material.012']: THREE.MeshStandardMaterial
+    ['Material.013']: THREE.MeshStandardMaterial
+    ['Material.014']: THREE.MeshStandardMaterial
   }
 }
+
+type ActionName = 'IDLE' | 'mine'
+type GLTFActions = Record<ActionName, THREE.AnimationAction>
 
 type MarsRoverProps = ThreeElements['group'] & {
   onSelect?: () => void
@@ -42,6 +42,10 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const cycle = useCycle()
   const rover = useSnapshots().snapshots.get(cycle.currentTick)!.rover
   const gap = TILE_GAP
+
+  const { nodes, materials, animations } =
+    useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
+const { actions } = useAnimations(animations, group)
 
   /**
    * Animation state machine
@@ -73,6 +77,17 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   /**
    * Tick change → setup animation
    */
+  //ANIMÁCIÓ
+  const callMine = () => {
+    
+      if (actions['mine']) {
+        actions['mine'].timeScale = 2
+        actions['mine'].setLoop(THREE.LoopOnce, 1)
+        actions['mine'].clampWhenFinished = true
+        actions['mine'].play()
+      }
+  }
+
   useEffect(() => {
     const newPos = new THREE.Vector2(
       rover.position.x * gap,
@@ -127,6 +142,10 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       if (t === 1) {
         // switch to move
         action.current = "move"
+      //mine animáció indítása
+        callMine();
+
+
         startTime.current = state.clock.getElapsedTime()
         duration.current = 0.35 / cycle.player.speed
       }
@@ -151,61 +170,66 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     group.current.rotation.y = currentRot.current - Math.PI/2
   })
 
-  const { nodes, materials } =
-    useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
-
   return (
     <group
       ref={group}
       {...props}
       dispose={null}
       scale={0.5}
+      position={[1.069, 1, -0.226]}
       onClick={(e) => {
         e.stopPropagation()
         props.onSelect?.()
       }}
     >
-      <group position={[1.069, 3, -0.226]}>
-        <primitive object={nodes.Bone} />
-        <primitive object={nodes.Bone007} />
-        <primitive object={nodes.Bone017} />
-        <primitive object={nodes.Bone018} />
-
-        <skinnedMesh
-          geometry={nodes.Cube002_1.geometry}
-          material={materials['Material.001']}
-          skeleton={nodes.Cube002_1.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_2.geometry}
-          material={materials['Material.002']}
-          skeleton={nodes.Cube002_2.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_3.geometry}
-          material={materials['Material.003']}
-          skeleton={nodes.Cube002_3.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_4.geometry}
-          material={materials['Material.005']}
-          skeleton={nodes.Cube002_4.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_5.geometry}
-          material={materials['Material.006']}
-          skeleton={nodes.Cube002_5.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_6.geometry}
-          material={materials['Material.007']}
-          skeleton={nodes.Cube002_6.skeleton}
-        />
-        <skinnedMesh
-          geometry={nodes.Cube002_7.geometry}
-          material={materials['Material.008']}
-          skeleton={nodes.Cube002_7.skeleton}
-        />
+      <group name="Scene">
+        <group name="Armature">
+          <group name="Cube002">
+            <skinnedMesh
+              name="Cube001"
+              geometry={nodes.Cube001.geometry}
+              material={materials['Material.004']}
+              skeleton={nodes.Cube001.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_1"
+              geometry={nodes.Cube001_1.geometry}
+              material={materials['Material.009']}
+              skeleton={nodes.Cube001_1.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_2"
+              geometry={nodes.Cube001_2.geometry}
+              material={materials['Material.010']}
+              skeleton={nodes.Cube001_2.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_3"
+              geometry={nodes.Cube001_3.geometry}
+              material={materials['Material.011']}
+              skeleton={nodes.Cube001_3.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_4"
+              geometry={nodes.Cube001_4.geometry}
+              material={materials['Material.012']}
+              skeleton={nodes.Cube001_4.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_5"
+              geometry={nodes.Cube001_5.geometry}
+              material={materials['Material.013']}
+              skeleton={nodes.Cube001_5.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_6"
+              geometry={nodes.Cube001_6.geometry}
+              material={materials['Material.014']}
+              skeleton={nodes.Cube001_6.skeleton}
+            />
+          </group>
+          <primitive object={nodes.Bone} />
+        </group>
       </group>
     </group>
   )
