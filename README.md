@@ -2,6 +2,8 @@
 
 ## Introduction
 
+Install packages:
+
 ```
 npm i
 ```
