@@ -10,7 +10,7 @@
 import { isOre, vectorValues,Tile,VectorField, WeightPoint } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
-import { getNextStep, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
+import { getNextStep, isDay, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
 import { useSnapshots } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 import { Dispatch, SetStateAction } from "react";
@@ -109,6 +109,31 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
         have_to_go_back = step.go_back
    
     }
-
+    for(let i = my_path.length;i< iterations;i++){
+        my_path.push(my_path[i - 1])
+        snapshotsSetter(prev=>{
+        const previousSnap = prev.get(prev.size - 1)
+        prev.set(i,{
+            ...previousSnap,
+            fields: mapSnapShot,
+            rover: {
+            ...previousSnap!.rover,
+            currentAction: {
+                action: "wait" as ("wait"),
+            },
+            energy: Math.min(previousSnap!.rover.energy - 1 + (isDay(i) ? 10 : 0), 100),
+            position: my_path[i - 1],
+            startingPosition: previousSnap!.rover.startingPosition,
+            logs: [
+                ...previousSnap!.rover.logs,
+                {
+                    message: `Állás itt: {TODO}`,
+                }
+                ],
+            }
+        })
+        return prev
+        })
+    }
     return {path:my_path}
 }

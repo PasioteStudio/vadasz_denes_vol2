@@ -107,7 +107,7 @@ export function deepCopy<T>(array: T[]): T[] {
   ) as T[];
 }
 
-function isDay(tick:number):boolean{
+export function isDay(tick:number):boolean{
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
