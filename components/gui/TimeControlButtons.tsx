@@ -6,15 +6,6 @@ export default function TimeControlButtons() {
     const { resting, restingOpacity } = useUIHelper();
     const cycle = useCycle();
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (cycle.player.playing != "playing" || cycle.isInAnimation) return;
-            cycle.setTick(cycle.currentTick + 1);
-        }, 350 / cycle.player.speed)
-
-        return () => { clearInterval(interval) };
-    }, [cycle.player])
-
     const prev = (amount = 1) => {
         if (cycle.player.playing == "playing") {
             cycle.player.setSpeed(-amount as 1 | 2 | -1 | -2);

@@ -107,7 +107,7 @@ export function deepCopy<T>(array: T[]): T[] {
   ) as T[];
 }
 
-function isDay(tick:number):boolean{
+export function isDay(tick:number):boolean{
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
@@ -181,8 +181,8 @@ export function TookAnotherStep(map:Field[][], turnback_value:number,obstacle_ma
     //go back even if there's no ore left
     const current_column = calculateTile(update_able_map,point.x,point.y)
 
-    const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
-    const isThereAnOre = update_able_map[tile_id_temp].weight != 0
+    //const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
+    //const isThereAnOre = update_able_map[tile_id_temp].weight != 0
 
-    return {map,go_back:((path.length + astarpath.length) >= turnback_value - (isThereAnOre ? 1 : 1) || !isThereAWay(current_column) )}
+    return {map,go_back:((path.length + astarpath.length) >= turnback_value - 1 || !isThereAWay(current_column) )}
 }
