@@ -45,13 +45,21 @@ export function MarsRover({...props }: MarsRoverProps) {
   const rover = useSnapshots().snapshots.get(cycle.currentTick)!.rover;
   const gap = TILE_GAP;
   const actionStartTime = useRef(Date.now());
-  const actionStartPos = useRef(new THREE.Vector2(rover.position.x*gap, rover.position.y*gap));
+  const actionStart = useRef({
+    position: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap),
+    rotation: 0,
+  })
   const actionDuration = 300 / cycle.player.speed; //ms
 
   const [position, setPosition] = useState({
     target: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap),
     current: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap),
   })
+  const [rotation, setRotation] = useState({
+    target: 0,
+    current: 0,
+  })
+  const [currentAction, setCurrentAction] = useState<"rotate" | "move">("rotate");
 
   const { nodes, materials } =
     useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
@@ -62,23 +70,49 @@ export function MarsRover({...props }: MarsRoverProps) {
     const pos = group.current.position;
     const elapsed = Date.now() - actionStartTime.current;
 
-    const newCurrent = actionStartPos.current.clone().lerp(position.target, Math.min(elapsed / actionDuration, 1));
-    setPosition(p => {return {
-      ...p,
-      current: newCurrent,
-    }})
+    let newCurrent = position.current;
+    let newRot = rotation.current;
+    if(currentAction == "rotate"){
+      newRot = newRot + (rotation.target - newRot) * Math.min(elapsed / actionDuration, 1); // TODO calculate rot
+      setRotation(p => {return {
+        ...p,
+        current: newRot,
+      }});
+      if(newRot == rotation.target){
+        setCurrentAction("move");
+        actionStartTime.current = Date.now();
+      }
+    }else if(currentAction == "move"){
+      newCurrent = actionStart.current.position.clone().lerp(position.target, Math.min(elapsed / actionDuration, 1));
+      setPosition(p => {return {
+        ...p,
+        current: newCurrent,
+      }})
+      if(newCurrent == position.target){
+        setCurrentAction("rotate");
+        console.log("switched to rot")
+        actionStartTime.current = Date.now();
+      }
+    }
     pos.x = newCurrent.x;
     pos.z = newCurrent.y;
-    cycle.setIsInAnimation(position.target.distanceTo(newCurrent) != 0);
+    group.current.rotation.y = newRot;
+    cycle.setIsInAnimation(position.target.distanceTo(newCurrent) != 0 && rotation.current == newRot);
   })
 
   useEffect(()=>{
+    const newPos = new THREE.Vector2(rover.position.x*gap, rover.position.y*gap);
     setPosition(p => {return {
       ...p,
-      target: new THREE.Vector2(rover.position.x*gap, rover.position.y*gap)
+      target: newPos,
     }})
+    setRotation(p => {return {
+      ...p,
+      target: new THREE.Vector2().angleTo(newPos),
+    }})
+    setCurrentAction("rotate")
     actionStartTime.current = Date.now();
-    actionStartPos.current = position.current;
+    actionStart.current.position = position.current;
     cycle.setIsInAnimation(true);
   }, [cycle.currentTick])
   //modell dolgok
