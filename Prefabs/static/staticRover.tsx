@@ -1,29 +1,34 @@
 import * as THREE from 'three'
-import React from 'react'
-import { useGLTF } from '@react-three/drei'
+import React, { useRef, useEffect } from 'react'
+import { useGLTF, useAnimations } from '@react-three/drei'
 import type { GLTF } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
-import { useEffect } from 'react'
 
 type GLTFResult = GLTF & {
   nodes: {
-    Cylinder005_1: THREE.Mesh
-    Cylinder005_2: THREE.Mesh
-    Cylinder005_3: THREE.Mesh
-    Cylinder005_4: THREE.Mesh
-    Cylinder005_5: THREE.Mesh
-    Cylinder005_6: THREE.Mesh
-    Cylinder005_7: THREE.Mesh
-    Cylinder005_8: THREE.Mesh
-    Cylinder005_9: THREE.Mesh
-    Cylinder005_10: THREE.Mesh
-    Cylinder005_11: THREE.Mesh
-    Cylinder005_12: THREE.Mesh
-    Cylinder005_13: THREE.Mesh
-    Cylinder005_14: THREE.Mesh
-    Cylinder005_15: THREE.Mesh
-    Cylinder005_16: THREE.Mesh
-    Cylinder005_17: THREE.Mesh
+    Cylinder005_1: THREE.SkinnedMesh
+    Cylinder005_2: THREE.SkinnedMesh
+    Cylinder005_3: THREE.SkinnedMesh
+    Cylinder005_4: THREE.SkinnedMesh
+    Cylinder005_5: THREE.SkinnedMesh
+    Cylinder005_6: THREE.SkinnedMesh
+    Cylinder005_7: THREE.SkinnedMesh
+    Cylinder005_8: THREE.SkinnedMesh
+    Cylinder005_9: THREE.SkinnedMesh
+    Cylinder005_10: THREE.SkinnedMesh
+    Cylinder005_11: THREE.SkinnedMesh
+    Cylinder005_12: THREE.SkinnedMesh
+    Cylinder005_13: THREE.SkinnedMesh
+    Cylinder005_14: THREE.SkinnedMesh
+    Cylinder005_15: THREE.SkinnedMesh
+    Cylinder005_16: THREE.SkinnedMesh
+    Cylinder005_17: THREE.SkinnedMesh
+    Bone001: THREE.Bone
+    Bone012: THREE.Bone
+    Bone013: THREE.Bone
+    Bone002: THREE.Bone
+    Bone014: THREE.Bone
+    Bone017: THREE.Bone
   }
   materials: {
     ['Material.010']: THREE.MeshStandardMaterial
@@ -44,120 +49,67 @@ type GLTFResult = GLTF & {
     ['Material.006']: THREE.MeshStandardMaterial
     ['Material.007']: THREE.MeshStandardMaterial
   }
+  animations: THREE.AnimationClip[]   // <-- EZ HIÁNYZOTT
 }
 
 export function StaticRover(props: ThreeElements['group']) {
-  const { nodes, materials } =
+  const group = useRef<THREE.Group>(null!)
+
+  const { nodes, materials, animations } =
     useGLTF('/Modells/marsrover-highres.glb') as unknown as GLTFResult
 
+  const { actions } = useAnimations(animations, group)
+
+  useEffect(() => {
+    if (!actions) return
+
+    console.log(Object.keys(actions)) // debug: nézd meg az anim neveket
+
+    const idle = actions['idle'] // ha nagy I-vel van, akkor 'Idle'
+    idle?.reset().fadeIn(0.3).play()
+
+    return () => {
+      idle?.fadeOut(0.3)
+    }
+  }, [actions])
 
   return (
-    <group {...props} dispose={null} position={[1.069, -0.3, -0.226]}>
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_1.geometry}
-        material={materials['Material.010']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_2.geometry}
-        material={materials['Material.011']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_3.geometry}
-        material={materials['Material.012']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_4.geometry}
-        material={materials['Material.013']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_5.geometry}
-        material={materials['Material.009']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_6.geometry}
-        material={materials['Material.014']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_7.geometry}
-        material={materials['Material.015']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_8.geometry}
-        material={materials['Material.016']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_9.geometry}
-        material={materials['Material.017']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_10.geometry}
-        material={materials['Material.018']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_11.geometry}
-        material={materials['Material.019']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_12.geometry}
-        material={materials.Material}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_13.geometry}
-        material={materials['Material.020']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_14.geometry}
-        material={materials['Material.001']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_15.geometry}
-        material={materials['Material.003']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_16.geometry}
-        material={materials['Material.006']}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder005_17.geometry}
-        material={materials['Material.007']}
-      />
+    <group
+      ref={group}
+      {...props}
+      dispose={null}
+      position={[1.069, -0.3, -0.226]}
+    >
+      <group name="Scene">
+        <group name="Armature" position={[0.017, 0.304, 0.041]}>
+          <group name="Cylinder005">
+
+            {Object.keys(nodes)
+              .filter((key) => key.startsWith('Cylinder005_'))
+              .map((key) => {
+                const mesh = nodes[key as keyof typeof nodes] as THREE.SkinnedMesh
+                return (
+                  <skinnedMesh
+                    key={key}
+                    geometry={mesh.geometry}
+                    material={mesh.material}
+                    skeleton={mesh.skeleton}
+                  />
+                )
+              })}
+
+          </group>
+
+          <primitive object={nodes.Bone001} />
+          <primitive object={nodes.Bone012} />
+          <primitive object={nodes.Bone013} />
+          <primitive object={nodes.Bone002} />
+          <primitive object={nodes.Bone014} />
+          <primitive object={nodes.Bone017} />
+        </group>
+      </group>
     </group>
   )
 }
 
 useGLTF.preload('/Modells/marsrover-highres.glb')
-
