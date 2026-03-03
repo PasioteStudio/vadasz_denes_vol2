@@ -1,18 +1,32 @@
 {
   "name": "vadasz_denes_vol2",
   "main": "main.js",
+  "author": {
+    "name": "Attila Pope",
+    "email": "szopdleafaszom@pasiotestudio.hu",
+    "url": "https://pasiotestudio.hu"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "package": "electron-packager . vadasz_denes_vol2 --platform=win32 --arch=x64 --out=dist --overwrite"
+    "package": "electron-builder -w --x64"
   },
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@electron/packager": "^19.0.5",
     "@types/node": "^20",
     "electron": "^40.6.1",
-    "electron-packager": "^17.1.2"
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "vadasz.denes.atemzy",
+    "productName": "Vadász Dénes",
+    "copyright": "Copyright © 2026 Pasiote Studio",
+    "publish": {
+      "provider": "github",
+      "owner": "Attila Pope",
+      "repo": "vadasz_denes_vol2"
+    }
   }
 }
