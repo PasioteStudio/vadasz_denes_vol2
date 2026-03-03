@@ -109,7 +109,15 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   // ---- NORMAL MOVEMENT ----
   startRot.current = currentRot.current
-  targetRot.current = Math.atan2(dir.x, dir.y)
+
+let angle = Math.atan2(dir.x, dir.y)
+
+// If playing backwards, keep facing forward
+if (cycle.player.speed < 0) {
+  angle += Math.PI
+}
+
+targetRot.current = angle
 
   startTime.current = 0
   duration.current = 0.25
