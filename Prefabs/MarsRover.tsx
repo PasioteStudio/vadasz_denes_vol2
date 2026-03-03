@@ -6,6 +6,7 @@ import type { ThreeElements } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
 import { TILE_GAP } from '@/components/rendering/TileRenderer'
 import { useCycle, useSnapshots } from '@/lib/contexts'
+import { ROVER_ANIMATION } from '@/util/constants';
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -128,7 +129,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     targetRot.current = angle
 
     startTime.current = 0
-    duration.current = 0.25
+    duration.current = ROVER_ANIMATION.rotate
     action.current = "rotate"
 
     startPos.current.copy(currentPos.current)
@@ -166,8 +167,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         action.current = "move"
         startTime.current =
           state.clock.getElapsedTime()
-        duration.current =
-          0.35 / Math.abs(cycle.player.speed)
+        duration.current = ROVER_ANIMATION.move / Math.abs(cycle.player.speed)
       }
     } else if (action.current === "move") {
       currentPos.current.lerpVectors(
