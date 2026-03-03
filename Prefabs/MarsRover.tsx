@@ -43,13 +43,11 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const rover = useSnapshots().snapshots.get(cycle.currentTick)!.rover
   const gap = TILE_GAP
 
-  /**
-   * Animation state machine
-   */
+  /** Animation State */
   const action = useRef<"idle" | "rotate" | "move">("idle")
 
   const startTime = useRef(0)
-  const duration = useRef(0.3) // seconds
+  const duration = useRef(0.3)
 
   const startPos = useRef(new THREE.Vector2())
   const targetPos = useRef(new THREE.Vector2())
@@ -58,53 +56,76 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const targetRot = useRef(0)
 
   const currentPos = useRef(
-    new THREE.Vector2(rover.position.x * gap, rover.position.y * gap)
+    new THREE.Vector2(
+      rover.position.x * gap,
+      rover.position.y * gap
+    )
   )
 
   const currentRot = useRef(0)
 
-  /**
-   * Normalize angle to shortest path
-   */
+  /** Normalize angle to shortest rotation path */
   function normalizeAngle(angle: number) {
     return Math.atan2(Math.sin(angle), Math.cos(angle))
   }
 
   /**
+   * Start first tick when switching to playing
+   */
+  useEffect(() => {
+    if (
+      cycle.player.playing === "playing" &&
+      action.current === "idle" &&
+      !cycle.isInAnimation
+    ) {
+      cycle.setTick(
+        cycle.currentTick +
+          (cycle.player.speed < 0 ? -1 : 1)
+      )
+    }
+  }, [cycle.player.playing])
+
+  /**
    * Tick change → setup animation
    */
   useEffect(() => {
-    const newPos = new THREE.Vector2(
-      rover.position.x * gap,
-      rover.position.y * gap
-    )
+  const newPos = new THREE.Vector2(
+    rover.position.x * gap,
+    rover.position.y * gap
+  )
 
-    const dir = newPos.clone().sub(currentPos.current)
+  const dir = newPos.clone().sub(currentPos.current)
 
-    // no movement → no animation
-    if (dir.lengthSq() === 0) return
+  // ---- NO MOVEMENT (e.g. mining) ----
+  if (dir.lengthSq() === 0) {
+    if (cycle.player.playing === "playing") {
+      cycle.setTick(
+        cycle.currentTick +
+          (cycle.player.speed < 0 ? -1 : 1)
+      )
+    }
+    return
+  }
 
-    // --- SETUP ROTATION ---
-    startRot.current = currentRot.current
-    targetRot.current = Math.atan2(dir.x, dir.y)
+  // ---- NORMAL MOVEMENT ----
+  startRot.current = currentRot.current
+  targetRot.current = Math.atan2(dir.x, dir.y)
 
-    startTime.current = 0
-    duration.current = 0.25
-    action.current = "rotate"
+  startTime.current = 0
+  duration.current = 0.25
+  action.current = "rotate"
 
-    // prepare move phase
-    startPos.current.copy(currentPos.current)
-    targetPos.current.copy(newPos)
+  startPos.current.copy(currentPos.current)
+  targetPos.current.copy(newPos)
 
-    cycle.setIsInAnimation(true)
-  }, [cycle.currentTick])
+  cycle.setIsInAnimation(true)
+}, [cycle.currentTick])
 
   /**
    * Frame loop
    */
   useFrame((state) => {
     if (!group.current) return
-
     if (action.current === "idle") return
 
     if (startTime.current === 0) {
@@ -112,7 +133,8 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     }
 
     const elapsed =
-      state.clock.getElapsedTime() - startTime.current
+      state.clock.getElapsedTime() -
+      startTime.current
 
     const t = Math.min(elapsed / duration.current, 1)
 
@@ -124,35 +146,48 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       currentRot.current =
         startRot.current + diff * t
 
-      if (t === 1) {
-        // switch to move
+      if (t >= 1) {
         action.current = "move"
-        startTime.current = state.clock.getElapsedTime()
-        duration.current = 0.35 / cycle.player.speed
+        startTime.current =
+          state.clock.getElapsedTime()
+        duration.current =
+          0.35 / Math.abs(cycle.player.speed)
       }
-    }
-
-    else if (action.current === "move") {
+    } else if (action.current === "move") {
       currentPos.current.lerpVectors(
         startPos.current,
         targetPos.current,
         t
       )
 
-      if (t === 1) {
+      if (t >= 1) {
         action.current = "idle"
         cycle.setIsInAnimation(false)
+
+        if (cycle.player.playing === "playing") {
+          cycle.setTick(
+            cycle.currentTick +
+              (cycle.player.speed < 0 ? -1 : 1)
+          )
+        }
       }
     }
 
-    // Apply transforms
-    group.current.position.x = currentPos.current.x
-    group.current.position.z = currentPos.current.y
-    group.current.rotation.y = currentRot.current - Math.PI/2
+    /** Apply transforms */
+    group.current.position.x =
+      currentPos.current.x
+    group.current.position.z =
+      currentPos.current.y
+
+    // model forward correction
+    group.current.rotation.y =
+      currentRot.current - Math.PI / 2
   })
 
   const { nodes, materials } =
-    useGLTF('/Modells/marsrover.glb') as unknown as GLTFResult
+    useGLTF(
+      '/Modells/marsrover.glb'
+    ) as unknown as GLTFResult
 
   return (
     <group
