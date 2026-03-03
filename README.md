@@ -14,13 +14,13 @@ npm i
 
 ## How to use
 
-DEVELOPMENT
+**DEVELOPMENT**
 
 ```
 npm run dev
 ```
 
-PRODUCTION:
+**PRODUCTION:**
 
 ```
 npm run build
