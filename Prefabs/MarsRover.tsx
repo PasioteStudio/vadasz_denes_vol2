@@ -69,6 +69,14 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     return Math.atan2(Math.sin(angle), Math.cos(angle))
   }
 
+  useEffect(() => {
+    if (!group.current) return
+
+    group.current.position.x = currentPos.current.x
+    group.current.position.z = currentPos.current.y
+    group.current.rotation.y =
+      currentRot.current - Math.PI / 2
+  }, [])
   /**
    * Start first tick when switching to playing
    */
@@ -80,7 +88,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     ) {
       cycle.setTick(
         cycle.currentTick +
-          (cycle.player.speed < 0 ? -1 : 1)
+        (cycle.player.speed < 0 ? -1 : 1)
       )
     }
   }, [cycle.player.playing])
@@ -89,45 +97,45 @@ export function MarsRover({ ...props }: MarsRoverProps) {
    * Tick change → setup animation
    */
   useEffect(() => {
-  const newPos = new THREE.Vector2(
-    rover.position.x * gap,
-    rover.position.y * gap
-  )
+    const newPos = new THREE.Vector2(
+      rover.position.x * gap,
+      rover.position.y * gap
+    )
 
-  const dir = newPos.clone().sub(currentPos.current)
+    const dir = newPos.clone().sub(currentPos.current)
 
-  // ---- NO MOVEMENT (e.g. mining) ----
-  if (dir.lengthSq() === 0) {
-    if (cycle.player.playing === "playing") {
-      cycle.setTick(
-        cycle.currentTick +
+    // ---- NO MOVEMENT (e.g. mining) ----
+    if (dir.lengthSq() === 0) {
+      if (cycle.player.playing === "playing") {
+        cycle.setTick(
+          cycle.currentTick +
           (cycle.player.speed < 0 ? -1 : 1)
-      )
+        )
+      }
+      return
     }
-    return
-  }
 
-  // ---- NORMAL MOVEMENT ----
-  startRot.current = currentRot.current
+    // ---- NORMAL MOVEMENT ----
+    startRot.current = currentRot.current
 
-let angle = Math.atan2(dir.x, dir.y)
+    let angle = Math.atan2(dir.x, dir.y)
 
-// If playing backwards, keep facing forward
-if (cycle.player.speed < 0) {
-  angle += Math.PI
-}
+    // If playing backwards, keep facing forward
+    if (cycle.player.speed < 0) {
+      angle += Math.PI
+    }
 
-targetRot.current = angle
+    targetRot.current = angle
 
-  startTime.current = 0
-  duration.current = 0.25
-  action.current = "rotate"
+    startTime.current = 0
+    duration.current = 0.25
+    action.current = "rotate"
 
-  startPos.current.copy(currentPos.current)
-  targetPos.current.copy(newPos)
+    startPos.current.copy(currentPos.current)
+    targetPos.current.copy(newPos)
 
-  cycle.setIsInAnimation(true)
-}, [cycle.currentTick])
+    cycle.setIsInAnimation(true)
+  }, [cycle.currentTick])
 
   /**
    * Frame loop
@@ -175,7 +183,7 @@ targetRot.current = angle
         if (cycle.player.playing === "playing") {
           cycle.setTick(
             cycle.currentTick +
-              (cycle.player.speed < 0 ? -1 : 1)
+            (cycle.player.speed < 0 ? -1 : 1)
           )
         }
       }
