@@ -148,7 +148,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     // Apply transforms
     group.current.position.x = currentPos.current.x
     group.current.position.z = currentPos.current.y
-    group.current.rotation.y = currentRot.current
+    group.current.rotation.y = currentRot.current - Math.PI/2
   })
 
   const { nodes, materials } =
