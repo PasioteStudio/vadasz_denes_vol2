@@ -163,7 +163,8 @@ export const Renderer = () => {
       </Canvas>
 
       {isInventoryOpen && (
-        <InventoryPopup onClose={() => setInventoryOpen(false)} />
+              <InventoryPopup goldCount={0} waterCount={0} rareCount={0} onClose={() => setInventoryOpen(false)}/>
+
       )}
     </>
   );
