@@ -38,7 +38,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
   const { actions } = useAnimations(animations, group)
-
   const animating = useRef(false)
 
   function normalizeAngle(angle: number) {
@@ -52,7 +51,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     group.current.position.set(
       targetrover.position.x * gap,
-      1,
+      0.77,
       targetrover.position.y * gap
     );
   })
