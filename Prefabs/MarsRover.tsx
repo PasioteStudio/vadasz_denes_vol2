@@ -174,7 +174,7 @@ const { actions } = useAnimations(animations, group)
       state.clock.getElapsedTime() -
       startTime.current
 
-    const t = Math.min(elapsed / duration.current, 1)
+    cycle.t.current = Math.min(elapsed / duration.current, 1);
 
     if (action.current === "rotate") {
       const diff = normalizeAngle(
@@ -182,12 +182,12 @@ const { actions } = useAnimations(animations, group)
       )
 
       currentRot.current =
-        startRot.current + diff * t
+        startRot.current + diff * cycle.t.current
 
-      if (t >= 1) {
+      if (cycle.t.current >= 1) {
         action.current = "move"
       //mine animáció indítása
-        callMine();
+        callMine(); // the. what.
 
 
         startTime.current = state.clock.getElapsedTime()
@@ -202,10 +202,10 @@ const { actions } = useAnimations(animations, group)
       currentPos.current.lerpVectors(
         startPos.current,
         targetPos.current,
-        t
+        cycle.t.current
       )
 
-      if (t >= 1) {
+      if (cycle.t.current >= 1) {
         action.current = "idle"
         cycle.setIsInAnimation(false)
 

@@ -32,6 +32,7 @@ export const DefaultCycleContextObject: CycleContextT = {
     isInAnimation: false,
     lastDirection: 1,
     setIsInAnimation: ()=>{},
+    t: {current: 0},
 }
 export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
     snapshots: new Map<Number, MapSnapshot>()

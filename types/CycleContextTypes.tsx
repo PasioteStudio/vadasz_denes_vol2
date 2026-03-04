@@ -1,3 +1,5 @@
+import { RefObject } from "react"
+
 export type CycleContextT = {
     currentTick: number,
     timeOfDay: "day" | "night",
@@ -13,5 +15,6 @@ export type CycleContextT = {
     isInAnimation: boolean,
     setIsInAnimation: (state: boolean)=>void,
     timeLimit: number,
-    lastDirection: -1|1
+    lastDirection: -1|1,
+    t: RefObject<number>,
 }

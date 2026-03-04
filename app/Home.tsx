@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CycleContext, MapSnapshotsContext, useSnapshots } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { Field, MapSnapshot } from "@/types/MapTypes";
@@ -29,7 +29,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }],
     ]));
 
-  const [cycle, setCycle] = useState<Omit<CycleContextT, | "player" | "timeLimit" | "isInAnimation" | "setIsInAnimation">>({
+  const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "isInAnimation" | "setIsInAnimation">>({
     currentTick: 0,
     timeOfDay: "day",
     setTick: (t: number) => { setTickTo(t) },
@@ -61,6 +61,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       console.log("Gálati's gay") //TODO handle error or smth
     }
   };
+  const t = useRef(0);
   const loadSnapshot = (snapshot: MapSnapshot) => {
 
   }
@@ -95,7 +96,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       timeLimit: timeLimit,
       isInAnimation: cycleInAnimation,
       setIsInAnimation: (state: boolean) => {setCycleInAnimation(state)},
-      lastDirection: cycle.lastDirection
+      lastDirection: cycle.lastDirection,
+      t: t,
     }}>
       <MapSnapshotsContext.Provider value={{
         snapshots: mapSnapShots
