@@ -2,18 +2,81 @@ import { Delta, InventoryChange, Move } from "@/types/MapTimelineContextTypes"
 import { Item, Log, Position } from "@/types/RoverContextTypes"
 import { Tile } from "./constants"
 
-export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1|1) => {
-    
+export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
+    const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
+    let newPos = { ...startPos }
+    deltas.forEach(d => {
+        if(d.from == d.to) return;
+        newPos = { x: d.to.x, y: d.to.y };
+    })
+    return newPos;
 }
 
-export const processInventoryChanges = (startInv: Item[], delta: InventoryChange[], direction: -1|1) => {
-    
+export const processInventoryChanges = (startInv: Item[], delta: InventoryChange[], direction: -1 | 1): Item[] => {
+    const deltas = direction == 1 ? [...delta] : [...delta].reverse()
+    let newInv = [...startInv];
+    deltas.forEach(d => {
+        if ((d.mode == "add" && direction == 1)
+            || (d.mode == "remove" && direction == -1)) { // add item
+
+            const entry = newInv.find(i => i.ore == d.ore);
+            if (entry) {
+                entry.amount += d.amount;
+                newInv = [
+                    ...newInv.filter(i => i.ore != entry.ore),
+                    entry
+                ]
+                return;
+            }
+            newInv = [
+                ...newInv.filter(i => i.ore != d.ore),
+                { ore: d.ore, amount: d.amount }
+            ]
+
+        } else if ((d.mode == "remove" && direction == 1)
+            || (d.mode == "add" && direction == -1)) {// remove item
+
+            const entry = newInv.find(i => i.ore == d.ore);
+            if (entry && entry.amount == d.amount) {
+                newInv = [
+                    ...newInv.filter(i => i.ore != entry.ore),
+                ]
+            } else if (entry){
+                entry.amount -= d.amount;
+                newInv = [
+                    ...newInv.filter(i => i.ore != entry.ore),
+                    entry
+                ]
+                return;
+            }
+        }
+    })
+    return newInv;
 }
 
-export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction: -1|1) => {
-    
+export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction: -1 | 1): Log[] => {
+    const deltas = direction == 1 ? [...addedLogs] : [...addedLogs].reverse()
+    let newLogs = [...startLogs];
+
+    deltas.forEach(d => {
+        if(direction == 1){
+            newLogs.push(d)
+            return;
+        }
+        newLogs = newLogs.filter((l,i) => i < newLogs.length-1)
+    })
+    return newLogs;
 }
 
-export const processMapChanges = (startMap: Tile[][], moves: Move[], direction: -1|1) => {
-    
+export const processMapChanges = (startMap: Tile[][], roverMoves: Move[], direction: -1 | 1): Tile[][] => {
+    const deltas = direction == 1 ? [...roverMoves] : [...roverMoves].reverse()
+    let newMap = [...startMap];
+
+    deltas.forEach(d => {
+        if(d.mode!= "mine" || d.ore === undefined) return;
+        const newTile = direction == 1 ? Tile.Empty : d.ore;
+        newMap[d.from.y][d.from.x] = newTile;
+    })
+
+    return newMap;
 }

@@ -7,9 +7,8 @@
 // S = a rover kiindulópontja
 
 // TODO iterations helyett time és tickek
-import { isOre, vectorValues,Tile,VectorField, WeightPoint } from "@/util/constants";
+import { isOre, vectorValues,Tile, WeightPoint } from "@/util/constants";
 import {Graph,astar} from "@/util/astar"
-import {createVectorMapFromWeights} from "@/util/map"
 import { getNextStep, isDay, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
 import { Dispatch, SetStateAction } from "react";
@@ -23,18 +22,18 @@ export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<S
     let mapConstraints:{width:number,height:number} = {width:0,height:0};
     const obstacle_map:(0|1)[][] = []
     let update_able_map:WeightPoint[] = []
-    mapSnapShot.forEach((row)=>{
-        row.forEach((field)=>{
+    map.forEach((row, y)=>{
+        row.forEach((field, x)=>{
             //start
-            if(field.tile == Tile.Start) start = field.position
+            if(field == Tile.Start) start = {x:x, y:y}
             //constraints
-            if(field.position.x + 1 > mapConstraints.width) mapConstraints.width = field.position.x + 1
-            if(field.position.y + 1 > mapConstraints.height) mapConstraints.height = field.position.y + 1
+            if(x + 1 > mapConstraints.width) mapConstraints.width = x + 1
+            if(y + 1 > mapConstraints.height) mapConstraints.height = y + 1
             //obstacles
-            if(obstacle_map.length < field.position.y + 1) obstacle_map.push([field.tile == Tile.Obstacle ? 1 : 0 ])
-            else obstacle_map[field.position.y].push(field.tile == Tile.Obstacle ? 1 : 0 )
+            if(obstacle_map.length < y + 1) obstacle_map.push([field == Tile.Obstacle ? 1 : 0 ])
+            else obstacle_map[y].push(field == Tile.Obstacle ? 1 : 0 )
             //update_able_map
-            update_able_map.push({x:field.position.x,y:field.position.y,weight:isOre(field.tile) ? vectorValues.ore : 0})
+            update_able_map.push({x:x,y:y,weight:isOre(field) ? vectorValues.ore : 0})
         })
     })
         
@@ -64,7 +63,7 @@ export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<S
             const astarpath = astar.search(graphWithWeight, startNode, endNode);
             if(astarpath.length < 1) break
             column=calculateTile(update_able_map,astarpath[0].y /* x but stupidly */,astarpath[0].x /* y but stupidly */)
-            TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,null)
+            TookAnotherStep(map,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,deltasSetter,null)
             //ore? we cant grab one ore because then we would be late
             continue
         }
@@ -84,8 +83,8 @@ export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<S
             if(update_able_map[tile_id_temp].weight != 0){
                 we_are_stuck=false
             }
-            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,tile_id)
-            mapSnapShot = step.map
+            const step = TookAnotherStep(map,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,deltasSetter,tile_id)
+            map = step.map
             have_to_go_back = step.go_back
             continue
         }
@@ -103,14 +102,14 @@ export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<S
         //update the map if ore found
         const tile_id_temp = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
-        const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,tile_id)
-        mapSnapShot = step.map
+        const step = TookAnotherStep(map,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,deltasSetter,tile_id)
+        map = step.map
         have_to_go_back = step.go_back
    
     }
     for(let i = my_path.length;i< iterations;i++){
         my_path.push(my_path[i - 1])
-        snapshotsSetter(prev=>{
+        deltasSetter(prev=>{
         const previousSnap = prev.get(prev.size - 1)
         prev.set(i,{
             ...previousSnap,

@@ -3,7 +3,6 @@ import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 import { MouseEvent, useState } from "react";
 
 export default function BatteryDisplayer() {
-    const { currentTick } = useCycle();
     const energy = useTimeline().rover.energy;
     const [position, setPosition] = useState({ x: -100, y: -100 });
     const { resting, restingOpacity } = useUIHelper();

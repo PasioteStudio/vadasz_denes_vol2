@@ -61,14 +61,14 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let energy = rover!.energy;
     let logs: Log[] = [...rover!.logs];
 
-    const newMap = [...map];
+    let newMap = [...map];
 
     deltasToExecute.forEach(d => {
       energy += d.energy * direction;
-      processPositionChanges(position, d.moves, direction)
-      processInventoryChanges(inventory, d.inventoryChanges, direction)
-      processLogChanges(logs, d.logsAdded, direction)
-      processMapChanges(newMap, d.moves, direction)
+      position = processPositionChanges(position, d.moves, direction)
+      inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
+      logs = processLogChanges(logs, d.logsAdded, direction)
+      newMap = processMapChanges(newMap, d.moves, direction)
     })
 
     setRover(p => { return {

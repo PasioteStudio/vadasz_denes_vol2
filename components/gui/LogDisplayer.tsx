@@ -4,7 +4,6 @@ import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 import { useMemo } from "react";
 
 export default function LogDisplayer() {
-    const { currentTick } = useCycle();
     const logs = useTimeline().rover.logs;
     const { resting, restingOpacity } = useUIHelper();
     const { logsToDisplay, freshLogs } = useMemo(() => {

@@ -5,6 +5,7 @@ import { findNearestOre } from "./ore";
 import { Dispatch, SetStateAction } from "react";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { calculateTile } from "./tile";
+import { Delta } from "@/types/MapTimelineContextTypes";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -109,7 +110,7 @@ export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Tile[][]>>, tile_id: number | null)
+export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Delta[]>>, tile_id: number | null)
   : { map: Tile[][], go_back: boolean } {
   //path.length == current_tick (half hour)
   path.push(point)

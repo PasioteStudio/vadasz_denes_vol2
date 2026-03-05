@@ -14,7 +14,12 @@ export type Delta = {
     logsAdded: Log[]
 }
 
-export type Move = (Position|"mine"|"wait")
+export type Move = {
+    mode: ("move"|"mine"|"wait"),
+    from: Position,
+    to: Position,
+    ore?: Tile
+}
 export type InventoryChange = {
     mode: "add"|"remove",
     ore: Tile.Yellow | Tile.Green | Tile.Blue,

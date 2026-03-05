@@ -20,9 +20,9 @@ const toMapTile = (tile: Tile): string => {
 }
 export function GUI() {
     const [text, setText] = useState("");
-
+    const firstmap = useTimeline().map;
+    
     useEffect(() => {
-        const firstmap = useTimeline().map;
         let _txt = "";
         firstmap?.forEach(r => {
             const line = r.map(f => toMapTile(f)).join(',')
