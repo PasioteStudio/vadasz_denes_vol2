@@ -31,7 +31,7 @@ export default function CurrentAction() {
             style={{ opacity: resting ? restingOpacity / 100 : 1 }}
         >
             <p className="text-sm font-semibold my-0">Jelenleg:</p>
-            <p className="text-lg my-0">{actionMap[currentAction.action] ?? currentAction.action}</p>
+            <p className="text-sm mb-3 my-0">{actionMap[currentAction.action] ?? currentAction.action}</p>
             <p className="text-xs">Pozíció: {pos.x} ; {pos.y}</p>
             <p className="text-xs">fogyasztás: TODO</p>
         </div>
