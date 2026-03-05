@@ -41,22 +41,22 @@ const InventoryPopup = ({ onClose }: InvenotryPopupType) => {
         </button>
 
         <ul className="w-full">
-          <li className='flex items-center justify-center w-full my-3'>
-            <p className='text-xl'>Sárga érc</p>
-            <img src="/icons/gold.png" alt="Sárga érc" className='w-10 aspect-square ml-auto' />
-            <h5>{items.g}x</h5>
+          <li className='flex items-center justify-center w-full my-3 relative'>
+            <p className='text-xl '>Sárga érc</p>
+            <img src="/icons/gold.png" alt="Sárga érc" className='w-10 aspect-square ml-auto mr-10' />
+            <h5 className='absolute right-0'>{items.g}x</h5>
           </li>
 
-          <li className='flex items-center justify-center w-full my-3'>
-            <p className='text-xl'>Kék ásvány</p>
-            <img src="/icons/water.png" alt="Kék ásvány" className='w-10 aspect-square ml-auto' />
-            <h5>{items.b}x</h5>
+          <li className='flex items-center justify-center w-full my-3 relative'>
+            <p className='text-xl '>Kék ásvány</p>
+            <img src="/icons/water.png" alt="Kék ásvány" className='w-10 aspect-square ml-auto mr-10' />
+            <h5 className='absolute right-0'>{items.b}x</h5>
           </li>
 
-          <li className='flex items-center justify-center w-full my-3'>
-            <p className='text-xl'>Zöld érc</p>
-            <img src="/icons/rare.png" alt="Zöld érc" className='w-10 aspect-square ml-auto' />
-            <h5>{items.y}x</h5>
+          <li className='flex items-center justify-center w-full my-3 relative'>
+            <p className='text-xl '>Zöld érc</p>
+            <img src="/icons/rare.png" alt="Zöld érc" className='w-10 aspect-square ml-auto mr-10' />
+            <h5 className='absolute right-0'>{items.y}x</h5>
           </li>
         </ul>
       </div>
