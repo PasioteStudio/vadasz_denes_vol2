@@ -24,14 +24,9 @@ export const Renderer = () => {
   const [isInventoryOpen, setInventoryOpen] = useState(false);
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
-  const [gold, setGoldCount] = useState(0);
-  const [water, setWaterCount] = useState(0);
-  const [rare, setRareCount] = useState(0);
-
 
   const map = snapshots.snapshots.get(currentTick)?.fields;
   const rover = snapshots.snapshots.get(currentTick)?.rover;
-  const roverInventory = rover?.inventory;
   const GAP = TILE_GAP;
 
   const jumpToRoverOnMove = false;
@@ -43,20 +38,6 @@ export const Renderer = () => {
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);
-//TODO: lecsekkolni mi a neve
-    useEffect(()=>{
-      roverInventory?.forEach(item => {
-        if(item.name == "gold"){
-          setGoldCount(item.amount);
-        }
-        if(item.name == "water"){
-          setWaterCount(item.amount);
-        }
-        if(item.name == "rare"){
-          setRareCount(item.amount);
-        }
-      });
-    })
 
   useEffect(() => {
     directionRef.current = direction;
@@ -181,7 +162,7 @@ export const Renderer = () => {
       </Canvas>
 
       {isInventoryOpen && (
-              <InventoryPopup goldCount={gold} waterCount={water} rareCount={rare} onClose={() => setInventoryOpen(false)}/>
+              <InventoryPopup onClose={() => setInventoryOpen(false)}/>
 
       )}
     </>
