@@ -5,7 +5,6 @@ import { findNearestOre } from "./ore";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { calculateTile } from "./tile";
 import { Delta } from "@/types/MapTimelineContextTypes";
-import { processPositionChanges } from "./deltas";
 
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   0: { dx: 1, dy: 0 },
@@ -90,49 +89,48 @@ export function TookAnotherStep(
   path: Position[],
   point: Position,
   update_able_map: WeightPoint[],
-  deltas: Delta[],   // <-- plain array now, not a setter
+  deltas: Delta[],
   tile_id: number | null
 ): { map: Tile[][], go_back: boolean } {
   path.push(point)
 
+  deltas.push({
+    energy: -1 + (isDay(path.length) ? 10 : 0),
+    inventoryChanges: [],
+    logsAdded: [{ message: "Mozgás ide: TODO" }],
+    moves: [{
+      mode: "move",
+      from: path.length >= 2 ? path[path.length - 2] : point,
+      to: point,
+    }]
+  })
+
+  if (tile_id !== null) {
+    const tileY = Math.floor(tile_id / map[0].length);
+    const tileX = tile_id % map[0].length;
+    const oreType = map[tileY][tileX]; // read BEFORE clearing
+
+    map = deepCopy(map)
+    map[tileY][tileX] = Tile.Empty
+    update_able_map[tile_id].weight = 0
+
+    path.push(point)
     deltas.push({
-        energy: -1 + (isDay(path.length) ? 10 : 0),
-        inventoryChanges: [],
-        logsAdded: [{ message: "Mozgás ide: TODO" }],
-        moves: [{
-            mode: "move",
-            from: path.length >= 2 ? path[path.length - 2] : point,
-            to: point,
-        }]
+      energy: -2 + (isDay(path.length) ? 10 : 0),
+      inventoryChanges: [{
+        amount: 1,
+        mode: "add",
+        ore: oreType as Tile.Yellow | Tile.Green | Tile.Blue
+      }],
+      logsAdded: [{ message: "Bányászás: {TODO} érc" }],
+      moves: [{
+        mode: "mine",
+        from: point,
+        to: point,
+        ore: oreType,
+      }]
     })
-
-    if (tile_id !== null) {
-        const tileY = Math.floor(tile_id / map[0].length);
-        const tileX = tile_id % map[0].length;
-        const oreType = map[tileY][tileX]; // read BEFORE clearing
-
-        map = deepCopy(map)
-        map[tileY][tileX] = Tile.Empty
-        update_able_map[tile_id].weight = 0
-
-        // mine is a separate delta — rover stays on same tile
-        path.push(point)
-        deltas.push({
-            energy: -2 + (isDay(path.length) ? 10 : 0),
-            inventoryChanges: [{
-                amount: 1,
-                mode: "add",
-                ore: oreType as Tile.Yellow | Tile.Green | Tile.Blue
-            }],
-            logsAdded: [{ message: "Bányászás: {TODO} érc" }],
-            moves: [{
-                mode: "mine",
-                from: point,
-                to: point,
-                ore: oreType,
-            }]
-        })
-    }
+  }
 
   const graphWithWeight = new Graph(obstacle_map.map((rows) =>
     rows.map((tile) => tile === 1 ? 0 : 1)),
