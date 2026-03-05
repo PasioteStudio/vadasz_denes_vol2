@@ -73,10 +73,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   useEffect(() => {
     const snapshot = snapshots.get(cycle.currentTick)
+    const prevsnapshot = snapshots.get(cycle.currentTick-1)
     if (!snapshot) return
 
     const rover = snapshot.rover
-    const map = snapshot.fields
+    const map = snapshot.fields;
+    const prevmap = prevsnapshot?.fields;
 
     const targetPos = new THREE.Vector3(
       rover.position.x * gap,
@@ -101,7 +103,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const rotationChanged =
       Math.abs(shortestAngleDelta(startRotY, targetRotY)) > 0.001
 
-    const mining = isOre(map[rover.position.y][rover.position.x].tile)
+    const mining = (prevmap ? isOre(prevmap[rover.position.y][rover.position.x].tile) : false) && !isOre(map[rover.position.y][rover.position.x].tile)
 
     const doRotate = rotationChanged
     const doMine = mining
@@ -186,8 +188,8 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         const phaseT = plan.moveDuration > 0
           ? Math.min(Math.max(phaseElapsed / plan.moveDuration, 0), 1)
           : 1
-        posX = THREE.MathUtils.lerp(plan.startPos.x, plan.targetPos.x, easeInOut(phaseT))
-        posZ = THREE.MathUtils.lerp(plan.startPos.z, plan.targetPos.z, easeInOut(phaseT))
+        posX = THREE.MathUtils.lerp(plan.startPos.x, plan.targetPos.x, cycle.t.current)
+        posZ = THREE.MathUtils.lerp(plan.startPos.z, plan.targetPos.z, cycle.t.current)
       } else {
         // Haven't started moving yet — stay at start
         posX = plan.startPos.x
