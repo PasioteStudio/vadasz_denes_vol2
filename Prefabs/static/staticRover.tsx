@@ -32,6 +32,7 @@ type GLTFResult = GLTF & {
     Cylinder005_10: THREE.SkinnedMesh
     Cylinder005_11: THREE.SkinnedMesh
     Cylinder005_12: THREE.SkinnedMesh
+    Cylinder005_13: THREE.SkinnedMesh
     Cylinder_1: THREE.Mesh
     Cylinder_2: THREE.Mesh
     Cylinder_3: THREE.Mesh
@@ -130,14 +131,15 @@ export function StaticRover(props: ThreeElements['group']) {
             <skinnedMesh name="Cylinder005_2"  geometry={nodes.Cylinder005_2.geometry}  material={materials['Material.009']} skeleton={nodes.Cylinder005_2.skeleton} />
             <skinnedMesh name="Cylinder005_3"  geometry={nodes.Cylinder005_3.geometry}  material={materials['Material.014']} skeleton={nodes.Cylinder005_3.skeleton} />
             <skinnedMesh name="Cylinder005_4"  geometry={nodes.Cylinder005_4.geometry}  material={materials['Material.015']} skeleton={nodes.Cylinder005_4.skeleton} />
-            <skinnedMesh name="Cylinder005_5"  geometry={nodes.Cylinder005_5.geometry}  material={materials['Material.017']} skeleton={nodes.Cylinder005_5.skeleton} />
-            <skinnedMesh name="Cylinder005_6"  geometry={nodes.Cylinder005_6.geometry}  material={materials['Material.018']} skeleton={nodes.Cylinder005_6.skeleton} />
-            <skinnedMesh name="Cylinder005_7"  geometry={nodes.Cylinder005_7.geometry}  material={materials['Material.019']} skeleton={nodes.Cylinder005_7.skeleton} />
-            <skinnedMesh name="Cylinder005_8"  geometry={nodes.Cylinder005_8.geometry}  material={materials['Material.006']} skeleton={nodes.Cylinder005_8.skeleton} />
-            <skinnedMesh name="Cylinder005_9"  geometry={nodes.Cylinder005_9.geometry}  material={materials['Material.007']} skeleton={nodes.Cylinder005_9.skeleton} />
-            <skinnedMesh name="Cylinder005_10" geometry={nodes.Cylinder005_10.geometry} material={materials['Material.022']} skeleton={nodes.Cylinder005_10.skeleton} />
-            <skinnedMesh name="Cylinder005_11" geometry={nodes.Cylinder005_11.geometry} material={materials['Material.023']} skeleton={nodes.Cylinder005_11.skeleton} />
-            <skinnedMesh name="Cylinder005_12" geometry={nodes.Cylinder005_12.geometry} material={materials['Material.024']} skeleton={nodes.Cylinder005_12.skeleton} />
+            <skinnedMesh name="Cylinder005_5"  geometry={nodes.Cylinder005_5.geometry}  material={materials['Material.016']} skeleton={nodes.Cylinder005_5.skeleton} />
+            <skinnedMesh name="Cylinder005_6"  geometry={nodes.Cylinder005_6.geometry}  material={materials['Material.017']} skeleton={nodes.Cylinder005_6.skeleton} />
+            <skinnedMesh name="Cylinder005_7"  geometry={nodes.Cylinder005_7.geometry}  material={materials['Material.018']} skeleton={nodes.Cylinder005_7.skeleton} />
+            <skinnedMesh name="Cylinder005_8"  geometry={nodes.Cylinder005_8.geometry}  material={materials['Material.019']} skeleton={nodes.Cylinder005_8.skeleton} />
+            <skinnedMesh name="Cylinder005_9"  geometry={nodes.Cylinder005_9.geometry}  material={materials['Material.006']} skeleton={nodes.Cylinder005_9.skeleton} />
+            <skinnedMesh name="Cylinder005_10" geometry={nodes.Cylinder005_10.geometry} material={materials['Material.007']} skeleton={nodes.Cylinder005_10.skeleton} />
+            <skinnedMesh name="Cylinder005_11" geometry={nodes.Cylinder005_11.geometry} material={materials['Material.022']} skeleton={nodes.Cylinder005_11.skeleton} />
+            <skinnedMesh name="Cylinder005_12" geometry={nodes.Cylinder005_12.geometry} material={materials['Material.023']} skeleton={nodes.Cylinder005_12.skeleton} />
+            <skinnedMesh name="Cylinder005_13" geometry={nodes.Cylinder005_13.geometry} material={materials['Material.024']} skeleton={nodes.Cylinder005_13.skeleton} />
           </group>
           <primitive object={nodes.Bone001} />
           <primitive object={nodes.Bone012} />
