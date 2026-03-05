@@ -77,7 +77,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     if (!timeline.map) return
 
     const rover = timeline.rover
-    const prevmap = processMapChanges(map, timeline.deltas[cycle.currentTick].moves, -1);
 
     const targetPos = new THREE.Vector3(
       rover.position.x * gap,
