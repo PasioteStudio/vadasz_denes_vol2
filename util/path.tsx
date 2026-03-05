@@ -138,40 +138,50 @@ export function TookAnotherStep(map: Field[][], turnback_value: number, obstacle
     })
     return prev
   })
-  if (tile_id) {
+  if (tile_id !== null) {
     map = deepCopy(map)
     path.push(point)
+
     map[Math.floor(tile_id / map.length)][tile_id % map[0].length].tile = Tile.Empty
     update_able_map[tile_id].weight = 0
+
     snapshotsSetter(prev => {
-      const previousSnap = prev.get(prev.size - 1)
-      const newInventory = previousSnap?.rover.inventory ?? [];
-      const oreEntry = newInventory.find(i => i.ore == Tile.Yellow);
-      if(!oreEntry){
-        newInventory.push({ore: Tile.Yellow, amount:1})
-      }else{
-        oreEntry.amount++;
+      const previousSnap = prev.get(prev.size - 1)!
+      const prevInventory = previousSnap.rover.inventory ?? []
+
+      let found = false
+      const newInventory = prevInventory.map(item => {
+        if (item.ore === Tile.Yellow) {
+          found = true
+          return { ...item, amount: item.amount + 1 }
+        }
+        return item
+      })
+
+      if (!found) {
+        newInventory.push({ ore: Tile.Yellow, amount: 1 })
       }
+
       prev.set(path.length, {
+        ...previousSnap,
         fields: map,
         rover: {
+          ...previousSnap.rover,
           currentAction: {
-            action: "mine" as ("mine"),
+            action: "mine" as "mine",
           },
-          energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100),
-          inventory: [
-            ...newInventory
-          ],
+          energy: Math.min(previousSnap.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100),
+          inventory: newInventory,
           logs: [
-            ...previousSnap!.rover.logs,
+            ...previousSnap.rover.logs,
             {
               message: "Bányászás: {TODO} érc",
             }
           ],
           position: map[Math.floor(tile_id / map.length)][tile_id % map[0].length].position,
-          startingPosition: previousSnap!.rover.startingPosition,
         }
       })
+
       return prev
     })
   }
