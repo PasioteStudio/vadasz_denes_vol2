@@ -42,7 +42,7 @@ export function groupTilesByType(
   for (let row = safeMinRow; row <= safeMaxRow; row++) {
     for (let col = safeMinCol; col <= safeMaxCol; col++) {
       const field = map[row]?.[col];
-      if (!field) continue;
+      if (field === undefined) continue;
 
       const tileType = field;
       if (!groups.has(tileType)) {

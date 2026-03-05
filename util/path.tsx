@@ -2,13 +2,11 @@ import { Graph, astar } from "@/util/astar"
 import { Position } from "@/types/RoverContextTypes";
 import { Tile, VectorField, WeightPoint } from "./constants"
 import { findNearestOre } from "./ore";
-import { Dispatch, SetStateAction } from "react";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { calculateTile } from "./tile";
 import { Delta } from "@/types/MapTimelineContextTypes";
 import { processPositionChanges } from "./deltas";
 
-// Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   0: { dx: 1, dy: 0 },
   1: { dx: 1, dy: -1 },
@@ -20,16 +18,6 @@ export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   7: { dx: 1, dy: 1 },
 };
 
-/**
- * Get next step toward a target position using grid directions
- * Considers obstacles and uses A* if direct path is blocked
- * @param {number} fromX where we are
- * @param {number} fromY where we are
- * @param {number} toX where we want to go
- * @param {number} toY where we want to go
- * @param {(0|1)[][]} obstacle_map
- * @returns {{dx:(-1|0|1), dy:(-1|0|1)}} {dx:(-1|0|1), dy:(-1|0|1)}
- */
 export function getNextStep(
   fromX: number,
   fromY: number,
@@ -45,20 +33,17 @@ export function getNextStep(
   const nextX = fromX + directStep.dx;
   const nextY = fromY + directStep.dy;
 
-  // Check if direct path is walkable (0 = walkable, 1 = obstacle)
   if (obstacle_map[nextY][nextX] === 0) {
     return directStep;
   }
 
-  // Path blocked, use A* to find alternative
   const graphWithWeight = new Graph(obstacle_map.map((rows, idy) =>
-    rows.map((tile, idx) => tile === 1 ? (idy == toY && idx == toX ? 1 : 0) : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
+    rows.map((tile, idx) => tile === 1 ? (idy == toY && idx == toX ? 1 : 0) : 1)),
     { diagonal: true });
   const startNode = graphWithWeight.grid[fromY][fromX];
   const endNode = graphWithWeight.grid[toY][toX];
   const path = astar.search(graphWithWeight, startNode, endNode);
 
-  // Extract first step from path
   if (path && path.length > 1) {
     const nextNode = path[0];
     return {
@@ -66,17 +51,9 @@ export function getNextStep(
       dy: nextNode.x - fromY,
     };
   }
-  return { dx: 0, dy: 0 }; // No path found
+  return { dx: 0, dy: 0 };
 }
 
-/**
- * Are we gonna be stuck?
- * @param {Position} column where we are
- * @param {WeightPoint[]} update_able_map
- * @param {(0|1)[][]} [obstacle_map]
- * 
- * @returns {Position} next_column_to_go
- */
 export function stuck(
   column: Position,
   update_able_map: WeightPoint[],
@@ -87,12 +64,6 @@ export function stuck(
   return { next_column_to_go: { x: column.x + step.dx, y: column.y + step.dy } }
 }
 
-/**
- * Returns a bool
- * @param {VectorField} column where we are
- * 
- * @returns {boolean} does the vector points to somewhere?
- */
 export function isThereAWay(column: VectorField) {
   return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
 }
@@ -111,22 +82,30 @@ export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], deltasSetter: Dispatch<SetStateAction<Delta[]>>, tile_id: number | null)
-  : { map: Tile[][], go_back: boolean } {
-  //path.length == current_tick (half hour)
+export function TookAnotherStep(
+  map: Tile[][],
+  turnback_value: number,
+  obstacle_map: (0 | 1)[][],
+  start: Position,
+  path: Position[],
+  point: Position,
+  update_able_map: WeightPoint[],
+  deltas: Delta[],   // <-- plain array now, not a setter
+  tile_id: number | null
+): { map: Tile[][], go_back: boolean } {
   path.push(point)
-  deltasSetter(p => [...p,
-  {
-    energy: - 1 + (isDay(path.length) ? 10 : 0),
+
+  deltas.push({
+    energy: -1 + (isDay(path.length) ? 10 : 0),
     inventoryChanges: [],
     logsAdded: [{ message: "Mozgás ide: TODO" }],
     moves: [{
       mode: "move",
-      from: processPositionChanges(point, p[p.length - 1].moves, -1),
+      from: processPositionChanges(point, deltas[deltas.length - 1]?.moves ?? [], -1),
       to: point,
     }]
-  }
-  ])
+  })
+  console.log("regular delta set")
 
   if (tile_id !== null) {
     map = deepCopy(map)
@@ -135,9 +114,8 @@ export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_
     map[Math.floor(tile_id / map.length)][tile_id % map[0].length] = Tile.Empty
     update_able_map[tile_id].weight = 0
 
-    deltasSetter(p => [...p.filter((_, i) => i != p.length - 1),
-    {
-      energy: - 2 + (isDay(path.length) ? 10 : 0),
+    deltas.push({
+      energy: -2 + (isDay(path.length) ? 10 : 0),
       inventoryChanges: [{
         amount: 1,
         mode: "add",
@@ -145,25 +123,21 @@ export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_
       }],
       logsAdded: [{ message: "Bányászás: {TODO} érc" }],
       moves: [{
-        ...p[p.length - 1].moves[p[p.length - 1].moves.length], //FUJJJ
+        ...deltas[deltas.length - 1].moves[deltas[deltas.length - 1].moves.length - 1],
         mode: "mine",
       }]
-    }
-    ])
+    })
+    console.log("expanded to ore mine")
   }
 
-  const graphWithWeight = new Graph(obstacle_map.map((rows, idy) =>
-    rows.map((tile, idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
+  const graphWithWeight = new Graph(obstacle_map.map((rows) =>
+    rows.map((tile) => tile === 1 ? 0 : 1)),
     { diagonal: true });
   const startNode = graphWithWeight.grid[point.y][point.x];
   const endNode = graphWithWeight.grid[start.y][start.x];
   const astarpath = astar.search(graphWithWeight, startNode, endNode);
 
-  //go back even if there's no ore left
   const current_column = calculateTile(update_able_map, point.x, point.y)
-
-  //const tile_id_temp = update_able_map.findIndex(tile=>tile.y == current_column.y + current_column.endPoint.relative_y && tile.x == current_column.x + current_column.endPoint.relative_x)
-  //const isThereAnOre = update_able_map[tile_id_temp].weight != 0
 
   return { map, go_back: ((path.length + astarpath.length) >= turnback_value - 1 || !isThereAWay(current_column)) }
 }

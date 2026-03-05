@@ -101,7 +101,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const rotationChanged =
       Math.abs(shortestAngleDelta(startRotY, targetRotY)) > 0.001
 
-    const mining = timeline.deltas[cycle.currentTick].moves.findLast(()=>true)?.mode == "mine"
+    const mining = false //TODO
 
     const doRotate = rotationChanged
     const doMine = mining

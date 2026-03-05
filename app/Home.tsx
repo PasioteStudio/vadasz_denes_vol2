@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CycleContext, DefaultRoverContextObject, MapTimeLineContext } from "@/lib/contexts";
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { GUI } from "@/components/gui/GUI";
@@ -26,15 +26,16 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     playing: "paused" as "paused" | "playing",
   });
   const t = useRef(0);
-  const [map, setMap] = useState<Tile[][]>([]);
+  const [map, setMap] = useState<Tile[][]>(initialMap);
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [rover, setRover] = useState<RoverT>();
   const startingPoint = getStartingPoint(initialMap)
 
-  const setTickTo = (t: number) => {
+  const setTickTo = useCallback((t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try {
-      const actualTick = Math.max(0,Math.min(deltas.length-1, t));
+      const actualTick = Math.max(0,Math.min(deltas.length, t));
+      console.log("next tick: ", actualTick, deltas.length)
       if(actualTick == cycle.currentTick) return;
       if(!(deltas[actualTick] ?? undefined)) throw Error;
       setCycle(p => {
@@ -49,9 +50,9 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     } catch {
       console.log("Gálati's gay") //TODO handle error or smth
     }
-  };
+  }, [deltas]);
 
-  const recalculateSnapshots = (tTick: number) => {
+  const recalculateSnapshots = useCallback((tTick: number) => {
     const cTick = cycle.currentTick;
     const direction = tTick < cTick ? -1 : 1;
     const deltasToExecute = direction == -1 ? 
@@ -81,17 +82,30 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       position: position,
     }})
     setMap(newMap)
-  }
+  }, [deltas, rover, map])
 
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     if(deltas.length > 0) return //dont run it twice
     const start = async () => {
         const start = new Date()
-        const {path} = makePath(timeLimit,deepCopy(initialMap),setDeltas);
+        const path = makePath(timeLimit,deepCopy(initialMap));
+        setDeltas([
+    {
+        energy: 0,
+        inventoryChanges: [],
+        logsAdded: [],
+        moves: [{
+            from: path.path[0],
+            to: path.path[0],
+            mode: "wait",
+        }]
+    },
+    ...path.deltas
+]);
         const end = new Date()
         console.log("time: ",end.getTime()-start.getTime())
-        console.log("deltas: ", deltas)
-        console.log("path:",path)
+        console.log("deltas: ", path.deltas)
+        console.log("path:",path.path)
     }
     start()
   }, [initialMap])
@@ -101,7 +115,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     <CycleContext.Provider value={{
       currentTick: cycle.currentTick,
       timeOfDay: cycle.timeOfDay,
-      setTick: (t: number) => { cycle.setTick(t) },
+      setTick: (t: number) => { setTickTo(t) },
       player: {
         playing: player.playing,
         speed: player.speed,
