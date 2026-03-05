@@ -1,3 +1,4 @@
+import { useCycle, useSnapshots } from '@/lib/contexts'
 import React from 'react'
 
 export type InvenotryPopupType = {
@@ -8,6 +9,8 @@ export type InvenotryPopupType = {
 }
 
 const InventoryPopup = ({ goldCount, waterCount, rareCount, onClose }: InvenotryPopupType) => {
+  const {currentTick} = useCycle();
+  const inventory = useSnapshots().snapshots.get(currentTick)!.rover.inventory;
   return (
     <>
       <style>
