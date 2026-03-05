@@ -6,8 +6,8 @@ export const processPositionChanges = (startPos: Position, delta: Move[], direct
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
     let newPos = { ...startPos }
     deltas.forEach(d => {
-        if(d.from == d.to) return;
-        newPos = { x: d.to.x, y: d.to.y };
+        if(d.from.x == d.to.x && d.from.y == d.to.y) return;
+        newPos = direction == 1 ? { x: d.to.x, y: d.to.y } : { x: d.from.x, y: d.from.y };
     })
     return newPos;
 }
@@ -70,13 +70,14 @@ export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction:
 
 export const processMapChanges = (startMap: Tile[][], roverMoves: Move[], direction: -1 | 1): Tile[][] => {
     const deltas = direction == 1 ? [...roverMoves] : [...roverMoves].reverse()
-    let newMap = [...startMap];
+    let newMap = startMap.map(row => [...row]);
 
-    deltas.forEach(d => {
-        if(d.mode!= "mine" || d.ore === undefined) return;
-        const newTile = direction == 1 ? Tile.Empty : d.ore;
-        newMap[d.from.y][d.from.x] = newTile;
-    })
+    for (const d of deltas) {
+        console.log("move:", d.mode, "ore:", d.ore, "from:", d.from)
+        if (d.mode != "mine" || d.ore === undefined) continue;
+        console.log("APPLYING mine at", d.from, "setting to", direction == 1 ? Tile.Empty : d.ore)
+        newMap[d.from.y][d.from.x] = direction == 1 ? Tile.Empty : d.ore;
+    }
 
     return newMap;
 }

@@ -134,10 +134,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     cycle.t.current = 0
   }, [cycle.currentTick])
 
-  useEffect(()=>{
-    console.log(timeline.rover.position)
-  }, [timeline.rover])
-
   useFrame(() => {
     if (!group.current) return
 
@@ -201,7 +197,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       elapsed > tickPlan.current.totalDuration
       && cycle.player.playing == "playing"
     ) {
-      cycle.setTick(cycle.currentTick+1);
+      cycle.setTick(cycle.currentTick + (cycle.player.speed < 0 ? -1 : 1));
     }
   })
 

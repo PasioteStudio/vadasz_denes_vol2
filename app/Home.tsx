@@ -30,12 +30,12 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const [map, setMap] = useState<Tile[][]>(initialMap);
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [rover, setRover] = useState<RoverT>({
-        energy: 100,
-        inventory: [],
-        logs: [],
-        position: startingPoint,
-        startingPosition: startingPoint,
-      });
+    energy: 100,
+    inventory: [],
+    logs: [],
+    position: startingPoint,
+    startingPosition: startingPoint,
+  });
 
   const setTickTo = useCallback((t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
@@ -55,7 +55,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     } catch (e) {
       console.log("hiba") //TODO handle error or smth
     }
-  }, [deltas]);
+  }, [deltas, map]);
 
   const recalculateSnapshots = useCallback((tTick: number) => {
     const cTick = cycle.currentTick;
@@ -65,11 +65,17 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       : deltas.filter((d, i) => i > cTick && i <= tTick); // TODO
 
     let position: Position = { ...rover!.position }
-    let inventory: Item[] = [ ...rover!.inventory ]
+    let inventory: Item[] = [...rover!.inventory]
     let energy = rover!.energy;
     let logs: Log[] = [...rover!.logs];
 
-    let newMap = [...map];
+
+    let newMap = map.map(row => [...row]);
+
+    console.log("deltasToExecute:", deltasToExecute.length)
+    deltasToExecute.forEach((d, i) => {
+      console.log(`delta ${i} moves:`, d.moves.map(m => `${m.mode} at (${m.from.x},${m.from.y})`))
+    })
 
     deltasToExecute.forEach(d => {
       energy += d.energy * direction;
@@ -89,26 +95,14 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }
     })
     setMap(newMap)
-  }, [deltas, map, rover])
+  }, [deltas, rover])
 
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     if (deltas.length > 0) return //dont run it twice
     const start = async () => {
       const start = new Date()
       const path = makePath(timeLimit, deepCopy(initialMap));
-      setDeltas([
-        {
-          energy: 0,
-          inventoryChanges: [],
-          logsAdded: [],
-          moves: [{
-            from: path.path[0],
-            to: path.path[0],
-            mode: "wait",
-          }]
-        },
-        ...path.deltas
-      ]);
+      setDeltas(path.deltas);
       const end = new Date()
       console.log("time: ", end.getTime() - start.getTime())
       console.log("deltas: ", path.deltas)

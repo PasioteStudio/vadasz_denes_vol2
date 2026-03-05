@@ -24,7 +24,13 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
         })
     })
 
-    const my_path: Position[] = []
+    const my_path: Position[] = [start]
+    deltas.push({
+        energy: 0,
+        inventoryChanges: [],
+        logsAdded: [],
+        moves: [{ from: start, to: start, mode: "wait" }]
+    })
     let column = calculateTile(update_able_map, start.x, start.y)
     let we_are_stuck = false;
     let have_to_go_back = false
