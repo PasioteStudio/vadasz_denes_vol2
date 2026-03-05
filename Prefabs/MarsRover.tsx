@@ -143,61 +143,55 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const now = Date.now()
     const elapsed = now - plan.startTime
 
-    // Global t across the whole tick (0 → 1)
     const globalT = plan.totalDuration > 0
       ? Math.min(elapsed / plan.totalDuration, 1)
       : 1
     cycle.t.current = globalT
 
-    // Phase boundaries (in ms from tick start)
     const rotateEnd = plan.rotateDuration
     const mineEnd = rotateEnd + plan.mineDuration
     const moveEnd = mineEnd + plan.moveDuration
 
     // --- ROTATION PHASE ---
-    let rotY = plan.startRotY
-    if (plan.rotate) {
-      const phaseT = rotateEnd > 0
-        ? Math.min(Math.max(elapsed / rotateEnd, 0), 1)
-        : 1
-      const delta = shortestAngleDelta(plan.startRotY, plan.targetRotY)
-      rotY = plan.startRotY + delta * easeInOut(phaseT)
-    } else {
+    let rotY: number
+    if (!plan.rotate) {
+      // No rotation this tick — stay at target
       rotY = plan.targetRotY
+    } else if (elapsed >= rotateEnd) {
+      // Rotation phase complete — snap to target
+      rotY = plan.targetRotY
+    } else {
+      // Inside rotation phase
+      const phaseT = elapsed / rotateEnd
+      const delta = shortestAngleDelta(plan.startRotY, plan.targetRotY)
+      rotY = plan.startRotY + delta * phaseT
     }
-    group.current.rotation.y = rotY - Math.PI/2
+    group.current.rotation.y = rotY - Math.PI / 2
 
-    // --- MINE PHASE ---
-    // (visual feedback: bob up/down during mine phase)
-    let posY = 0.77
-    if (plan.mine && elapsed >= rotateEnd) {
-      const phaseElapsed = elapsed - rotateEnd
-      const phaseT = plan.mineDuration > 0
-        ? Math.min(Math.max(phaseElapsed / plan.mineDuration, 0), 1)
-        : 1
-      // Simple bob: sine wave
-      posY = 0.77 + Math.sin(phaseT * Math.PI) * 0.08
-    }
+    // --- MINE PHASE --- (no visual, just time passing)
+    const posY = 0.77
 
     // --- MOVE PHASE ---
-    let posX = plan.startPos.x
-    let posZ = plan.startPos.z
-    if (plan.move) {
-      if (elapsed >= mineEnd) {
-        const phaseElapsed = elapsed - mineEnd
-        const phaseT = plan.moveDuration > 0
-          ? Math.min(Math.max(phaseElapsed / plan.moveDuration, 0), 1)
-          : 1
-        posX = THREE.MathUtils.lerp(plan.startPos.x, plan.targetPos.x, cycle.t.current)
-        posZ = THREE.MathUtils.lerp(plan.startPos.z, plan.targetPos.z, cycle.t.current)
-      } else {
-        // Haven't started moving yet — stay at start
-        posX = plan.startPos.x
-        posZ = plan.startPos.z
-      }
-    } else {
+    let posX: number
+    let posZ: number
+    if (!plan.move) {
+      // No movement this tick — stay at target
       posX = plan.targetPos.x
       posZ = plan.targetPos.z
+    } else if (elapsed < mineEnd) {
+      // Move phase hasn't started yet — stay at start
+      posX = plan.startPos.x
+      posZ = plan.startPos.z
+    } else if (elapsed >= moveEnd) {
+      // Move phase complete — snap to target
+      posX = plan.targetPos.x
+      posZ = plan.targetPos.z
+    } else {
+      // Inside move phase
+      const phaseElapsed = elapsed - mineEnd
+      const phaseT = phaseElapsed / plan.moveDuration
+      posX = THREE.MathUtils.lerp(plan.startPos.x, plan.targetPos.x, phaseT)
+      posZ = THREE.MathUtils.lerp(plan.startPos.z, plan.targetPos.z, phaseT)
     }
 
     group.current.position.set(posX, posY, posZ)
