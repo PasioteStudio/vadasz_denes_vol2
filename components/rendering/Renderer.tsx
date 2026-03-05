@@ -16,7 +16,7 @@ import { WindParticles } from '@/Prefabs/Particles/WindParticle';
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { currentTick, timeOfDay } = useCycle();
+  const { timeOfDay } = useCycle();
   const timeline = useTimeline();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)

@@ -134,6 +134,10 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     cycle.t.current = 0
   }, [cycle.currentTick])
 
+  useEffect(()=>{
+    console.log(timeline.rover.position)
+  }, [timeline.rover])
+
   useFrame(() => {
     if (!group.current) return
 
