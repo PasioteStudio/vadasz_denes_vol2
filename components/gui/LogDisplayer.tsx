@@ -1,29 +1,29 @@
 "use client"
 
-import { useCycle, useSnapshots } from "@/lib/contexts";
+import { useCycle, useSnapshots, useUIHelper } from "@/lib/contexts";
 import { useMemo } from "react";
 
 export default function LogDisplayer() {
-  const { currentTick } = useCycle();
-  const logs = useSnapshots().snapshots.get(currentTick)?.rover.logs ?? [];
+    const { currentTick } = useCycle();
+    const logs = useSnapshots().snapshots.get(currentTick)?.rover.logs ?? [];
+    const { resting, restingOpacity } = useUIHelper();
+    const { logsToDisplay, freshLogs } = useMemo(() => {
+        const ordered = [...logs].reverse();
+        const fresh = logs.slice(Math.max(logs.length - 4, 0)).reverse();
+        return { logsToDisplay: ordered, freshLogs: fresh };
+    }, [logs]);
 
-  const { logsToDisplay, freshLogs } = useMemo(() => {
-    const ordered = [...logs].reverse();
-    const fresh = logs.slice(Math.max(logs.length - 4, 0)).reverse();
-    return { logsToDisplay: ordered, freshLogs: fresh };
-  }, [logs]);
+    const renderLog = (log: { message: string }, i: number) => (
+        <span key={i} className="text-[0.8vw] font-mono wrap-break-word text-[#ffdda0] text-center">
+            {log.message}
+        </span>
+    );
 
-  const renderLog = (log: { message: string }, i: number) => (
-    <span key={i} className="text-[0.8vw] font-mono wrap-break-word text-[#ffdda0] text-center">
-      {log.message}
-    </span>
-  );
-
-  return (
-    <>
-      {/* Bottom-right log panel (minimized → expands on hover) */}
-      <div
-        className="
+    return (
+        <>
+            {/* Bottom-right log panel (minimized → expands on hover) */}
+            <div
+                className="
           fixed bottom-2 right-2
           w-28 h-32
           p-2
@@ -40,21 +40,23 @@ export default function LogDisplayer() {
           duration-200
           hover:w-96 hover:h-[60vh]
         "
-      >
-        {logsToDisplay.map(renderLog)}
-      </div>
+                style={{ opacity: resting ? restingOpacity / 100 : 1 }}
+            >
+                {logsToDisplay.map(renderLog)}
+            </div>
 
-      {/* Floating recent logs above the main panel */}
-      <div
-        className="fixed bottom-[18vh] left-1/2 -translate-x-1/2 w-[30vw] flex flex-col gap-0.5 overflow-hidden"
-        style={{
-          maskImage: "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
-        }}
-      >
-        {freshLogs.map(renderLog)}
-      </div>
-    </>
-  );
+            {/* Floating recent logs above the main panel */}
+            <div
+                className="fixed bottom-[18vh] left-1/2 -translate-x-1/2 w-[30vw] flex flex-col gap-0.5 overflow-hidden"
+                style={{
+                    maskImage: "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                    WebkitMaskImage:
+                        "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                    opacity: resting ? restingOpacity / 100 : 1
+                }}
+            >
+                {freshLogs.map(renderLog)}
+            </div>
+        </>
+    );
 }
