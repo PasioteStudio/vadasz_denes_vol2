@@ -40,7 +40,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const setTickTo = useCallback((t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try {
-      const actualTick = Math.max(0, Math.min(deltas.length, t));
+      const actualTick = Math.max(0, Math.min(deltas.length-1, t));
       if (actualTick == cycle.currentTick) return;
       if (!(deltas[actualTick] ?? undefined)) throw Error;
       setCycle(p => {
@@ -71,11 +71,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
 
     let newMap = map.map(row => [...row]);
-
-    console.log("deltasToExecute:", deltasToExecute.length)
-    deltasToExecute.forEach((d, i) => {
-      console.log(`delta ${i} moves:`, d.moves.map(m => `${m.mode} at (${m.from.x},${m.from.y})`))
-    })
 
     deltasToExecute.forEach(d => {
       energy += d.energy * direction;

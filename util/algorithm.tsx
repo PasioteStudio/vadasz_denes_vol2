@@ -83,6 +83,11 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
         have_to_go_back = step.go_back
     }
 
+    if (my_path[my_path.length - 1].x !== start.x || my_path[my_path.length - 1].y !== start.y) {
+        const step = TookAnotherStep(map, iterations, obstacle_map, start, my_path, start, update_able_map, deltas, null)
+        map = step.map
+    }
+
     for (let i = my_path.length; i < iterations; i++) {
         my_path.push(my_path[i - 1])
         deltas.push({
@@ -214,6 +219,7 @@ export function estimatePathWithWeight(
         const astarpath = astar.search(graphWithWeight, startNode, endNode);
         have_to_go_back = (my_path.length + astarpath.length) >= iterations - 1 || !isThereAWay(calculateTile(update_able_map, column.x, column.y))
     }
+    
 
     return { my_path }
 }
