@@ -165,7 +165,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     } else {
       rotY = plan.targetRotY
     }
-    group.current.rotation.y = rotY
+    group.current.rotation.y = rotY - Math.PI/2
 
     // --- MINE PHASE ---
     // (visual feedback: bob up/down during mine phase)
