@@ -1,5 +1,6 @@
 import { useCycle, useSnapshots } from '@/lib/contexts'
-import React from 'react'
+import { Tile } from '@/util/constants'
+import React, { useEffect, useMemo, useState } from 'react'
 
 export type InvenotryPopupType = {
   onClose: () => void
@@ -8,9 +9,26 @@ export type InvenotryPopupType = {
 const InventoryPopup = ({ onClose }: InvenotryPopupType) => {
   const {currentTick} = useCycle();
   const inventory = useSnapshots().snapshots.get(currentTick)!.rover.inventory;
-  const G = 0;
-  const Y = 0;
-  const B = 0;
+  const [items, setItems] = useState({
+    y: 0,
+    g: 0,
+    b: 0,
+  });
+
+  const {y,g,b} = useMemo(()=>{
+    let _y = inventory.find(x => x.ore == Tile.Yellow)?.amount ?? 0;
+    let _g = inventory.find(x => x.ore == Tile.Green)?.amount ?? 0;
+    let _b = inventory.find(x => x.ore == Tile.Blue)?.amount ?? 0;
+    return {y:_y, g:_g, b:_b}
+  }, [currentTick])
+
+  useEffect(()=>{
+    setItems({
+      y:y,
+      g:g,
+      b:b,
+    })
+  }, [y,g,b])
 
   return (
     <>
@@ -26,19 +44,19 @@ const InventoryPopup = ({ onClose }: InvenotryPopupType) => {
           <li className='flex items-center justify-center w-full my-3'>
             <p className='text-xl'>Sárga érc</p>
             <img src="/icons/gold.png" alt="Sárga érc" className='w-10 aspect-square ml-auto' />
-            <h5>{G}x</h5>
+            <h5>{items.g}x</h5>
           </li>
 
           <li className='flex items-center justify-center w-full my-3'>
             <p className='text-xl'>Kék ásvány</p>
             <img src="/icons/water.png" alt="Kék ásvány" className='w-10 aspect-square ml-auto' />
-            <h5>{B}x</h5>
+            <h5>{items.b}x</h5>
           </li>
 
           <li className='flex items-center justify-center w-full my-3'>
             <p className='text-xl'>Zöld érc</p>
             <img src="/icons/rare.png" alt="Zöld érc" className='w-10 aspect-square ml-auto' />
-            <h5>{Y}x</h5>
+            <h5>{items.y}x</h5>
           </li>
         </ul>
       </div>

@@ -1,4 +1,4 @@
-import { SPEED } from "@/util/constants"
+import { SPEED, Tile } from "@/util/constants"
 import { Field, MapSnapshot } from "./MapTypes"
 
 export type Position = {
@@ -6,7 +6,7 @@ export type Position = {
     y: number,
 } 
 export type Item = {
-    name: string,
+    ore: Tile.Blue | Tile.Green | Tile.Yellow,
     amount: number,
 }
 export type Log = {
