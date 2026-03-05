@@ -109,29 +109,19 @@ export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<S
     }
     for(let i = my_path.length;i< iterations;i++){
         my_path.push(my_path[i - 1])
-        deltasSetter(prev=>{
-        const previousSnap = prev.get(prev.size - 1)
-        prev.set(i,{
-            ...previousSnap,
-            fields: mapSnapShot,
-            rover: {
-            ...previousSnap!.rover,
-            currentAction: {
-                action: "wait" as ("wait"),
-            },
-            energy: Math.min(previousSnap!.rover.energy - 1 + (isDay(i) ? 10 : 0), 100),
-            position: my_path[i - 1],
-            startingPosition: previousSnap!.rover.startingPosition,
-            logs: [
-                ...previousSnap!.rover.logs,
-                {
-                    message: `Állás itt: {TODO}`,
-                }
-                ],
+
+        deltasSetter(p => [...p,
+            {
+                energy: - 1 + (isDay(i) ? 10 : 0),
+                inventoryChanges: [],
+                logsAdded: [{message:"Állás itt: TODO"}],
+                moves: [{
+                    from: my_path[i - 1],
+                    to: my_path[i - 1],
+                    mode: "wait",
+                }],
             }
-        })
-        return prev
-        })
+        ])
     }
     return {path:my_path}
 }

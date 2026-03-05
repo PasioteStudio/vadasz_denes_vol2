@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from "react";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { calculateTile } from "./tile";
 import { Delta } from "@/types/MapTimelineContextTypes";
+import { processPositionChanges } from "./deltas";
 
 // Precompute octant-to-step map once (not per iteration)
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
@@ -110,33 +111,23 @@ export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Delta[]>>, tile_id: number | null)
+export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], deltasSetter: Dispatch<SetStateAction<Delta[]>>, tile_id: number | null)
   : { map: Tile[][], go_back: boolean } {
   //path.length == current_tick (half hour)
   path.push(point)
-  snapshotsSetter(prev => {
-    const previousSnap = prev.get(prev.size - 1)
-    prev.set(path.length, {
-      ...previousSnap,
-      fields: map,
-      rover: {
-        ...previousSnap!.rover,
-        currentAction: {
-          action: "move" as ("move"),
-        },
-        energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100), //TODO calc power usage
-        position: point,
-        startingPosition: previousSnap!.rover.startingPosition,
-        logs: [
-          ...previousSnap!.rover.logs,
-          {
-            message: `Mozgás ide: {TODO}`,
-          }
-        ],
-      }
-    })
-    return prev
-  })
+  deltasSetter(p => [...p,
+  {
+    energy: - 1 + (isDay(path.length) ? 10 : 0),
+    inventoryChanges: [],
+    logsAdded: [{ message: "Mozgás ide: TODO" }],
+    moves: [{
+      mode: "move",
+      from: processPositionChanges(point, p[p.length - 1].moves, -1),
+      to: point,
+    }]
+  }
+  ])
+
   if (tile_id !== null) {
     map = deepCopy(map)
     path.push(point)
@@ -144,45 +135,21 @@ export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_
     map[Math.floor(tile_id / map.length)][tile_id % map[0].length] = Tile.Empty
     update_able_map[tile_id].weight = 0
 
-    snapshotsSetter(prev => {
-      const previousSnap = prev.get(prev.size - 1)!
-      const prevInventory = previousSnap.rover.inventory ?? []
-
-      let found = false
-      const newInventory = prevInventory.map(item => {
-        if (item.ore === Tile.Yellow) {
-          found = true
-          return { ...item, amount: item.amount + 1 }
-        }
-        return item
-      })
-
-      if (!found) {
-        newInventory.push({ ore: Tile.Yellow, amount: 1 })
-      }
-
-      prev.set(path.length, {
-        ...previousSnap,
-        fields: map,
-        rover: {
-          ...previousSnap.rover,
-          currentAction: {
-            action: "mine" as "mine",
-          },
-          energy: Math.min(previousSnap.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100),
-          inventory: newInventory,
-          logs: [
-            ...previousSnap.rover.logs,
-            {
-              message: "Bányászás: {TODO} érc",
-            }
-          ],
-          position: map[Math.floor(tile_id / map.length)][tile_id % map[0].length].position,
-        }
-      })
-
-      return prev
-    })
+    deltasSetter(p => [...p.filter((_, i) => i != p.length - 1),
+    {
+      energy: - 2 + (isDay(path.length) ? 10 : 0),
+      inventoryChanges: [{
+        amount: 1,
+        mode: "add",
+        ore: Tile.Yellow
+      }],
+      logsAdded: [{ message: "Bányászás: {TODO} érc" }],
+      moves: [{
+        ...p[p.length - 1].moves[p[p.length - 1].moves.length], //FUJJJ
+        mode: "mine",
+      }]
+    }
+    ])
   }
 
   const graphWithWeight = new Graph(obstacle_map.map((rows, idy) =>
