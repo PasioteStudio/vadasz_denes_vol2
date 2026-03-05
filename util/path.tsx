@@ -111,86 +111,23 @@ export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map: Field[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Map<Number, MapSnapshot>>>, tile_id: number | null)
+export function TookAnotherStep(map: Field[][], turnback_value: number, obstacle_map: (0 | 1)[][], end: Position, path: {action:"move" | "mine",position:Position}[], point: Position, update_able_map: WeightPoint[], tile_id: number | null)
   : { map: Field[][], go_back: boolean } {
   //path.length == current_tick (half hour)
-  path.push(point)
-  snapshotsSetter(prev => {
-    const previousSnap = prev.get(prev.size - 1)
-    prev.set(path.length, {
-      ...previousSnap,
-      fields: map,
-      rover: {
-        ...previousSnap!.rover,
-        currentAction: {
-          action: "move" as ("move"),
-        },
-        energy: Math.min(previousSnap!.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100), //TODO calc power usage
-        position: point,
-        startingPosition: previousSnap!.rover.startingPosition,
-        logs: [
-          ...previousSnap!.rover.logs,
-          {
-            message: `Mozgás ide: {TODO}`,
-          }
-        ],
-      }
-    })
-    return prev
-  })
+  path.push({position:point,action:"move"})
   if (tile_id !== null) {
     map = deepCopy(map)
-    path.push(point)
+    path.push({position:point,action:"mine"})
 
     map[Math.floor(tile_id / map.length)][tile_id % map[0].length].tile = Tile.Empty
     update_able_map[tile_id].weight = 0
-
-    snapshotsSetter(prev => {
-      const previousSnap = prev.get(prev.size - 1)!
-      const prevInventory = previousSnap.rover.inventory ?? []
-
-      let found = false
-      const newInventory = prevInventory.map(item => {
-        if (item.ore === Tile.Yellow) {
-          found = true
-          return { ...item, amount: item.amount + 1 }
-        }
-        return item
-      })
-
-      if (!found) {
-        newInventory.push({ ore: Tile.Yellow, amount: 1 })
-      }
-
-      prev.set(path.length, {
-        ...previousSnap,
-        fields: map,
-        rover: {
-          ...previousSnap.rover,
-          currentAction: {
-            action: "mine" as "mine",
-          },
-          energy: Math.min(previousSnap.rover.energy - 2 + (isDay(path.length) ? 10 : 0), 100),
-          inventory: newInventory,
-          logs: [
-            ...previousSnap.rover.logs,
-            {
-              message: "Bányászás: {TODO} érc",
-            }
-          ],
-          position: map[Math.floor(tile_id / map.length)][tile_id % map[0].length].position,
-        }
-      })
-
-      return prev
-    })
   }
 
   const graphWithWeight = new Graph(obstacle_map.map((rows, idy) =>
     rows.map((tile, idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell (start is always 1)
     { diagonal: true });
   const startNode = graphWithWeight.grid[point.y][point.x];
-  const endNode = graphWithWeight.grid[start.y][start.x];
+  const endNode = graphWithWeight.grid[end.y][end.x];
   const astarpath = astar.search(graphWithWeight, startNode, endNode);
 
   //go back even if there's no ore left

@@ -16,6 +16,8 @@ import { Position } from "@/types/RoverContextTypes";
 import { Dispatch, SetStateAction } from "react";
 import { Field, MapSnapshot } from "@/types/MapTypes";
 import { calculateTile } from "./tile";
+import {solve} from "./salesman"
+import { findNearestOre } from "./ore";
 
 
 export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>) {
@@ -42,16 +44,130 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
     //METHOD 1: Search for a destination?
     //
     //TODO WARNING - CAUTION - Astar's Graph somehow messes up and the nodes' x and y are swapped! (if i remember correctly)
-    //const graphWithWeight = new Graph(map.map(rows=>{
-    //    return rows.map(tile=>tile == "#" ? 0 : 1)
-    //}),{diagonal:true});
-    //const startWithWeight = graphWithWeight.grid[start.y][start.x];
-    //const endWithWeight = graphWithWeight.grid[vector_map[start.y][start.x].endPoint.y][vector_map[start.y][start.x].endPoint.x];
-    //const resultWithWeight = astar.search(graphWithWeight, startWithWeight, endWithWeight);
-    //resultWithWeight is an array containing the shortest path taking into account the weight of a node
     
-    //METHOD 2: go with the flow ~
-    const my_path:Position[] = []
+    let final_path:{action:"move"|"mine",position:Position}[] = [];
+    let go_home:{action:"move"|"mine",position:Position}[] = [];
+    let temp_final_path:{action:"move"|"mine",position:Position}[] = [];
+    let temp_go_home:{action:"move"|"mine",position:Position}[] = [];
+    while(final_path.length + (final_path.length < 1 ? 0 : findNearestOre(final_path[final_path.length - 1].position.x,final_path[final_path.length - 1].position.y,update_able_map).distance) +  go_home.length < iterations){
+        temp_final_path = final_path
+        temp_go_home = go_home
+        //METHOD 2: go with the flow ~
+        let {my_path} = estimatePathWithWeight(mapSnapShot,obstacle_map,update_able_map,start,final_path.length < 1 ? start : final_path[final_path.length - 1].position,iterations - final_path.length)
+        my_path = [...final_path,...my_path]
+        
+        //salesman
+        const {ordered_path} = salesmanSolver(my_path,obstacle_map,start)
+        final_path = ordered_path
+
+        let column:Position = ordered_path[ordered_path.length - 1].position
+        const graphWithWeight = new Graph(obstacle_map.map((rows) => 
+            rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
+            { diagonal: true });
+        const startNode = graphWithWeight.grid[column.y][column.x];
+        const endNode = graphWithWeight.grid[start.y][start.x];
+        const astarpath = astar.search(graphWithWeight, startNode, endNode);
+        go_home = astarpath.map(tile=>{return {action:"move",position:{x:tile.y,y:tile.x}}})
+        
+        console.log("salesman",ordered_path)
+        console.log("regular",my_path.map(i=>i.position))
+    }
+    final_path = temp_final_path
+    go_home = temp_go_home
+    final_path = [...final_path,...go_home]
+    
+    //set all the values
+    for(let i =0;i<final_path.length;i++){
+        snapshotsSetter(prev=>{
+        const previousSnap = prev.get(prev.size - 1)!
+        const prevInventory = previousSnap.rover.inventory ?? []
+
+        let found = false
+        const newInventory = prevInventory.map(item => {
+            if (item.ore === Tile.Yellow) {
+            found = true
+            return { ...item, amount: item.amount + 1 }
+            }
+            return item
+        })
+
+        if (!found) {
+            newInventory.push({ ore: Tile.Yellow, amount: 1 })
+        }
+        prev.set(i+1,{
+            ...previousSnap,
+            fields: mapSnapShot, //TODO
+            rover: {
+            ...previousSnap!.rover,
+            currentAction: {
+                action: final_path[i].action,
+            },
+            energy: Math.min(previousSnap!.rover.energy - (final_path[i].action == "mine" ? 2 : 1) + (isDay(i) ? 10 : 0), 100),
+            position: final_path[i].position,
+            startingPosition: previousSnap!.rover.startingPosition,
+            logs: [
+                ...previousSnap!.rover.logs,
+                {
+                    message: `Állás itt: {TODO}`, //TODO
+                }
+                ],
+            }
+        })
+        return prev
+        })
+    }
+    
+    //waiting
+    for(let i = final_path.length;i< iterations;i++){
+        final_path.push(final_path[i - 1])
+        snapshotsSetter(prev=>{
+        const previousSnap = prev.get(prev.size - 1)
+        prev.set(i,{
+            ...previousSnap,
+            fields: mapSnapShot,
+            rover: {
+            ...previousSnap!.rover,
+            currentAction: {
+                action: "wait" as ("wait"),
+            },
+            energy: Math.min(previousSnap!.rover.energy - 1 + (isDay(i) ? 10 : 0), 100),
+            position: final_path[i - 1].position,
+            startingPosition: previousSnap!.rover.startingPosition,
+            logs: [
+                ...previousSnap!.rover.logs,
+                {
+                    message: `Állás itt: {TODO}`,
+                }
+                ],
+            }
+        })
+        return prev
+        })
+    }
+    return {path:final_path}
+}
+function salesmanSolver(my_path:{action:"move" | "mine",position:Position}[],obstacle_map:(0|1)[][],start:Position)
+:{ordered_path:{action:"move" | "mine",position:Position}[]}
+{
+    const points = my_path.filter(tile=>tile.action == "mine").map(i=>i.position)
+    const solution = solve(points,0.99999993,undefined,undefined,true);
+    const ordered_points = solution.map(i => points[i]);
+    const ordered_path:{action:"move" | "mine",position:Position}[] = []
+    let ordered_column = start
+    for(let i =0;i<ordered_points.length;i++){
+        while(!(ordered_column.x == ordered_points[i].x && ordered_column.y == ordered_points[i].y)){
+            const step = getNextStep(ordered_column.x, ordered_column.y,ordered_points[i].x ,ordered_points[i].y ,obstacle_map)
+            ordered_column = {x:ordered_column.x + step.dx,y:ordered_column.y + step.dy}
+            ordered_path.push({action:"move",position:ordered_column})
+        }
+        ordered_path.push({action:"mine",position:ordered_column})
+    }
+    return {ordered_path}
+}
+function estimatePathWithWeight(mapSnapShot:Field[][],obstacle_map:(0 | 1)[][],update_able_map:WeightPoint[],start:Position,end:Position,iterations:number)
+:{my_path:{action:"mine"|"move",position:Position}[]}
+{
+    const my_path:{action:"mine"|"move",position:Position}[] = []
     let column = calculateTile(update_able_map,start.x,start.y)
     let we_are_stuck = false;
     let have_to_go_back = false
@@ -61,11 +177,11 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
                 rows.map((tile,idx) => tile === 1 ? 0 : 1)),  //if obstacle = 0 otherwise be 1 and the destination should be 1 aswell
                 { diagonal: true });
             const startNode = graphWithWeight.grid[column.y][column.x];
-            const endNode = graphWithWeight.grid[start.y][start.x];
+            const endNode = graphWithWeight.grid[end.y][end.x];
             const astarpath = astar.search(graphWithWeight, startNode, endNode);
             if(astarpath.length < 1) break
             column=calculateTile(update_able_map,astarpath[0].y /* x but stupidly */,astarpath[0].x /* y but stupidly */)
-            TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,null)
+            TookAnotherStep(mapSnapShot,iterations, obstacle_map,end,my_path,{x:column.x,y:column.y},update_able_map,null)
             //ore? we cant grab one ore because then we would be late
             continue
         }
@@ -73,7 +189,7 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
         let next_column = calculateTile(update_able_map,column.x + column.endPoint.relative_x,column.y + column.endPoint.relative_y)
         //not 100% that it's gonna be the next column (but we assume)
         //check if we're gonna be stuck
-        if(we_are_stuck || my_path.slice(-2).filter(tile=>(tile.x == next_column.x && tile.y == next_column.y) || (column.x == tile.x && tile.y == column.y)).length > 0){
+        if(we_are_stuck || my_path.slice(-2).filter(tile=>(tile.position.x == next_column.x && tile.position.y == next_column.y) || (column.x == tile.position.x && tile.position.y == column.y)).length > 0){
             //we stuck -> search for the nearest ore
             const {next_column_to_go} = stuck(column,update_able_map,obstacle_map)
             
@@ -85,7 +201,7 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
             if(update_able_map[tile_id_temp].weight != 0){
                 we_are_stuck=false
             }
-            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,tile_id)
+            const step = TookAnotherStep(mapSnapShot,iterations, obstacle_map,end,my_path,{x:column.x,y:column.y},update_able_map,tile_id)
             mapSnapShot = step.map
             have_to_go_back = step.go_back
             continue
@@ -104,36 +220,10 @@ export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter
         //update the map if ore found
         const tile_id_temp = update_able_map.findIndex(tile=>tile.y == column.y && tile.x == column.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
-        const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,start,my_path,{x:column.x,y:column.y},update_able_map,snapshotsSetter,tile_id)
+        const step = TookAnotherStep(mapSnapShot,iterations,obstacle_map,end,my_path,{x:column.x,y:column.y},update_able_map,tile_id)
         mapSnapShot = step.map
         have_to_go_back = step.go_back
    
     }
-    for(let i = my_path.length;i< iterations;i++){
-        my_path.push(my_path[i - 1])
-        snapshotsSetter(prev=>{
-        const previousSnap = prev.get(prev.size - 1)
-        prev.set(i,{
-            ...previousSnap,
-            fields: mapSnapShot,
-            rover: {
-            ...previousSnap!.rover,
-            currentAction: {
-                action: "wait" as ("wait"),
-            },
-            energy: Math.min(previousSnap!.rover.energy - 1 + (isDay(i) ? 10 : 0), 100),
-            position: my_path[i - 1],
-            startingPosition: previousSnap!.rover.startingPosition,
-            logs: [
-                ...previousSnap!.rover.logs,
-                {
-                    message: `Állás itt: {TODO}`,
-                }
-                ],
-            }
-        })
-        return prev
-        })
-    }
-    return {path:my_path}
+    return {my_path}
 }
