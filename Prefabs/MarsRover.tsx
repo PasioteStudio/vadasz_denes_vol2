@@ -8,6 +8,7 @@ import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/components/rendering/TileRenderer"
 import { useCycle, useSnapshots } from "@/lib/contexts"
+import { isOre } from "@/util/constants"
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -29,10 +30,33 @@ type MarsRoverProps = ThreeElements["group"] & {
 
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
-
   const cycle = useCycle()
-  const targetrover = useSnapshots().snapshots.get(cycle.currentTick)!.rover
+  const targetrover = useSnapshots().snapshots.get(cycle.currentTick)!.rover;
+  const map = useSnapshots().snapshots.get(cycle.currentTick)!.fields;
   const gap = TILE_GAP
+
+  const postition = useRef({
+    start: new THREE.Vector3(targetrover.position.x*gap, 0.77, targetrover.position.y*gap),
+    target: new THREE.Vector3(targetrover.position.x*gap,0.77, targetrover.position.y*gap)
+  });
+  const rotation = useRef({
+    start: 0,
+    target: 0
+  });
+  const moveDuration = 300;
+  const mineDuration = 300;
+  const rotateDuration = 300;
+
+  const clock = useRef({
+    total: 300,
+    start: Date.now()
+  })
+
+  const tickActions = useRef({
+    rotate: false,
+    move: false,
+    mine: false,
+  })
 
   const { nodes, materials, animations } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
@@ -42,6 +66,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   function normalizeAngle(angle: number) {
     return Math.atan2(Math.sin(angle), Math.cos(angle))
+  }
+  function isMining():boolean {
+    return isOre(map[targetrover.position.y][targetrover.position.x].tile);
   }
 
 
@@ -55,6 +82,44 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       targetrover.position.y * gap
     );
   })
+
+  useEffect(()=>{
+    const currPos = postition.current.target;
+    const targetPos = new THREE.Vector3(targetrover.position.x*gap, 0.77, targetrover.position.y*gap)
+
+    postition.current = {
+      start: currPos, 
+      target: targetPos,
+    }
+
+    const currRot = rotation.current.target;
+    const targetRot = normalizeAngle(currPos.angleTo(targetPos));
+    rotation.current = {
+      start: currRot,
+      target: targetRot,
+    }
+    let mine = 0;
+    let move = 0;
+    let rotate = 0;
+
+    if(currRot != targetRot) rotate = rotateDuration;
+    if(isMining()) mine = mineDuration;
+    if(currPos != targetPos) move = moveDuration;
+
+    tickActions.current = {
+      move: move != 0,
+      mine: mine != 0,
+      rotate: rotate != 0,
+    }
+
+    clock.current = {
+      start: Date.now(),
+      total: mine+move+rotate,
+    }
+
+    cycle.t.current = 0;
+
+  }, [cycle.currentTick])
 
 
   return (
