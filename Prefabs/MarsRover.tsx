@@ -73,7 +73,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   useEffect(() => {
     const snapshot = snapshots.get(cycle.currentTick)
-    const prevsnapshot = snapshots.get(cycle.currentTick-1)
+    const prevsnapshot = snapshots.get(cycle.currentTick - 1)
     if (!snapshot) return
 
     const rover = snapshot.rover
@@ -109,9 +109,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const doMine = mining
     const doMove = positionChanged
 
-    const rDur = doRotate ? rotateDuration : 0
-    const mDur = doMine ? mineDuration : 0
-    const mvDur = doMove ? moveDuration : 0
+    const rDur = doRotate ? rotateDuration / Math.abs(cycle.player.speed) : 0
+    const mDur = doMine ? mineDuration / Math.abs(cycle.player.speed) : 0
+    const mvDur = doMove ? moveDuration / Math.abs(cycle.player.speed) : 0
     const total = rDur + mDur + mvDur
 
     tickPlan.current = {
@@ -195,6 +195,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     }
 
     group.current.position.set(posX, posY, posZ)
+    if (
+      elapsed > tickPlan.current.totalDuration
+      && cycle.player.playing == "playing"
+    ) {
+      cycle.setTick(cycle.currentTick+1);
+    }
   })
 
   return (
