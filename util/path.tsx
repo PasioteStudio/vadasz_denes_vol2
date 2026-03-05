@@ -1,9 +1,7 @@
 import { Graph, astar } from "@/util/astar"
 import { Position } from "@/types/RoverContextTypes";
-import { createVectorMapFromWeights } from "./map";
 import { Tile, VectorField, WeightPoint } from "./constants"
 import { findNearestOre } from "./ore";
-import { Field, MapSnapshot } from "@/types/MapTypes";
 import { Dispatch, SetStateAction } from "react";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { calculateTile } from "./tile";
@@ -111,8 +109,8 @@ export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
 }
 
-export function TookAnotherStep(map: Field[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Map<Number, MapSnapshot>>>, tile_id: number | null)
-  : { map: Field[][], go_back: boolean } {
+export function TookAnotherStep(map: Tile[][], turnback_value: number, obstacle_map: (0 | 1)[][], start: Position, path: Position[], point: Position, update_able_map: WeightPoint[], snapshotsSetter: Dispatch<SetStateAction<Tile[][]>>, tile_id: number | null)
+  : { map: Tile[][], go_back: boolean } {
   //path.length == current_tick (half hour)
   path.push(point)
   snapshotsSetter(prev => {
@@ -142,7 +140,7 @@ export function TookAnotherStep(map: Field[][], turnback_value: number, obstacle
     map = deepCopy(map)
     path.push(point)
 
-    map[Math.floor(tile_id / map.length)][tile_id % map[0].length].tile = Tile.Empty
+    map[Math.floor(tile_id / map.length)][tile_id % map[0].length] = Tile.Empty
     update_able_map[tile_id].weight = 0
 
     snapshotsSetter(prev => {

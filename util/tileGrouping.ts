@@ -1,4 +1,3 @@
-import { Field } from '@/types/MapTypes';
 import { Tile } from '@/util/constants';
 
 export interface TilePositionGroup {
@@ -11,7 +10,7 @@ export interface TilePositionGroup {
  * Used for efficient instanced rendering
  */
 export function groupTilesByType(
-  map: Field[][],
+  map: Tile[][],
   bounds: {
     minRow: number;
     maxRow: number;
@@ -45,7 +44,7 @@ export function groupTilesByType(
       const field = map[row]?.[col];
       if (!field) continue;
 
-      const tileType = field.tile;
+      const tileType = field;
       if (!groups.has(tileType)) {
         groups.set(tileType, {
           tileType,

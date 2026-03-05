@@ -1,7 +1,6 @@
 "use client"
 import { CycleContextT } from "@/types/CycleContextTypes";
-import { MapSnapshotsContextT } from "@/types/MapSnapshotContextTypes";
-import { MapSnapshot } from "@/types/MapTypes";
+import { MapTimelineContextT } from "@/types/MapTimelineContextTypes";
 import { RoverAction, RoverT } from "@/types/RoverContextTypes";
 import { UIHelperContextT } from "@/types/UIHelperContextTypes";
 import { createContext, useContext } from "react";
@@ -29,13 +28,13 @@ export const DefaultCycleContextObject: CycleContextT = {
         setSpeed: () => { },
     },
     timeLimit: 48,
-    isInAnimation: false,
     lastDirection: 1,
-    setIsInAnimation: ()=>{},
     t: {current: 0},
 }
-export const DefaultSnapshotsContextObject: MapSnapshotsContextT = {
-    snapshots: new Map<Number, MapSnapshot>()
+export const DefaultTimelineContextObject: MapTimelineContextT = {
+    map: [],
+    deltas: [],
+    rover: DefaultRoverContextObject,
 }
 
 export const DefaultUIHelperContextObject: UIHelperContextT = {
@@ -50,9 +49,9 @@ export const useCycle = (): CycleContextT => {
     return ctx;
 }
 
-export const MapSnapshotsContext = createContext<MapSnapshotsContextT>({ ...DefaultSnapshotsContextObject })
-export const useSnapshots = (): MapSnapshotsContextT => {
-    const ctx = useContext(MapSnapshotsContext);
+export const MapTimeLineContext = createContext<MapTimelineContextT>({ ...DefaultTimelineContextObject })
+export const useTimeline = (): MapTimelineContextT => {
+    const ctx = useContext(MapTimeLineContext);
     if (!ctx) throw new Error("Context needs to be initialized, ya buffoon");
     return ctx;
 }

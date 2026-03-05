@@ -7,8 +7,9 @@ import { useFrame } from "@react-three/fiber"
 import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/components/rendering/TileRenderer"
-import { useCycle, useSnapshots } from "@/lib/contexts"
+import { useCycle, useTimeline } from "@/lib/contexts"
 import { isOre } from "@/util/constants"
+import { processMapChanges } from "@/util/deltas"
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -31,7 +32,7 @@ type MarsRoverProps = ThreeElements["group"] & {
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
   const cycle = useCycle()
-  const { snapshots } = useSnapshots()
+  const timeline = useTimeline()
 
   const gap = TILE_GAP
   const rotateDuration = 300
@@ -72,13 +73,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   }
 
   useEffect(() => {
-    const snapshot = snapshots.get(cycle.currentTick)
-    const prevsnapshot = snapshots.get(cycle.currentTick - 1)
-    if (!snapshot) return
+    const map = timeline.map;
+    if (!timeline.map) return
 
-    const rover = snapshot.rover
-    const map = snapshot.fields;
-    const prevmap = prevsnapshot?.fields;
+    const rover = timeline.rover
+    const prevmap = [...map]
+    processMapChanges(prevmap, timeline.deltas[cycle.currentTick].moves, -1);
 
     const targetPos = new THREE.Vector3(
       rover.position.x * gap,
@@ -103,7 +103,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const rotationChanged =
       Math.abs(shortestAngleDelta(startRotY, targetRotY)) > 0.001
 
-    const mining = (prevmap ? isOre(prevmap[rover.position.y][rover.position.x].tile) : false) && !isOre(map[rover.position.y][rover.position.x].tile)
+    const mining = (prevmap ? isOre(prevmap[rover.position.y][rover.position.x]) : false) && !isOre(map[rover.position.y][rover.position.x])
 
     const doRotate = rotationChanged
     const doMine = mining

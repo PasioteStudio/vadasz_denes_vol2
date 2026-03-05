@@ -1,0 +1,22 @@
+import { Tile } from "@/util/constants"
+import { Log, Position, RoverT } from "./RoverContextTypes"
+
+export type MapTimelineContextT = {
+    map: Tile[][],
+    deltas: Delta[],
+    rover: RoverT,
+}
+
+export type Delta = {
+    moves: Move[]
+    inventoryChanges: InventoryChange[],
+    energy: number,
+    logsAdded: Log[]
+}
+
+export type Move = (Position|"mine"|"wait")
+export type InventoryChange = {
+    mode: "add"|"remove",
+    ore: Tile.Yellow | Tile.Green | Tile.Blue,
+    amount: number
+}

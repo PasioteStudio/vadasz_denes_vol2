@@ -1,11 +1,10 @@
 "use client"
-import { useCycle, useSnapshots, useUIHelper } from "@/lib/contexts";
+import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 import { MouseEvent, useState } from "react";
 
 export default function BatteryDisplayer() {
     const { currentTick } = useCycle();
-    const snapshots = useSnapshots().snapshots;
-    const energy = snapshots.get(currentTick)?.rover.energy ?? 0;
+    const energy = useTimeline().rover.energy;
     const [position, setPosition] = useState({ x: -100, y: -100 });
     const { resting, restingOpacity } = useUIHelper();
 

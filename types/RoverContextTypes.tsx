@@ -1,5 +1,4 @@
 import { SPEED, Tile } from "@/util/constants"
-import { Field, MapSnapshot } from "./MapTypes"
 
 export type Position = {
     x: number,
@@ -12,16 +11,10 @@ export type Item = {
 export type Log = {
     message: string,
 }
-export type RoverAction = {
-    action: "mine" | "move" | "wait",
-    target?: Field,
-    speed?: SPEED
-}
 export type RoverT = {
     position: Position
     logs: Log[],
     inventory: Item[],
     startingPosition: Position
     energy: number
-    currentAction: RoverAction
 }

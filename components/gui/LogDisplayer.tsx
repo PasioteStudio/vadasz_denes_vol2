@@ -1,11 +1,11 @@
 "use client"
 
-import { useCycle, useSnapshots, useUIHelper } from "@/lib/contexts";
+import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 import { useMemo } from "react";
 
 export default function LogDisplayer() {
     const { currentTick } = useCycle();
-    const logs = useSnapshots().snapshots.get(currentTick)?.rover.logs ?? [];
+    const logs = useTimeline().rover.logs;
     const { resting, restingOpacity } = useUIHelper();
     const { logsToDisplay, freshLogs } = useMemo(() => {
         const ordered = [...logs].reverse();

@@ -12,8 +12,6 @@ export type CycleContextT = {
         speed: 1|2|-1|-2,
         setSpeed: (s: 1|2|-1|-2) => void
     }
-    isInAnimation: boolean,
-    setIsInAnimation: (state: boolean)=>void,
     timeLimit: number,
     lastDirection: -1|1,
     t: RefObject<number>,

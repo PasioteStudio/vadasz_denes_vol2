@@ -1,4 +1,4 @@
-import { useCycle, useSnapshots } from '@/lib/contexts'
+import { useCycle, useTimeline } from '@/lib/contexts'
 import { Tile } from '@/util/constants'
 import React, { useEffect, useMemo, useState } from 'react'
 
@@ -8,7 +8,7 @@ export type InvenotryPopupType = {
 
 const InventoryPopup = ({ onClose }: InvenotryPopupType) => {
   const {currentTick} = useCycle();
-  const inventory = useSnapshots().snapshots.get(currentTick)!.rover.inventory;
+  const inventory = useTimeline().rover.inventory;
   const [items, setItems] = useState({
     y: 0,
     g: 0,

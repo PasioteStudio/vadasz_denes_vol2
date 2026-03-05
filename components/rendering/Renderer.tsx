@@ -1,4 +1,4 @@
-import { useCycle, useSnapshots } from '@/lib/contexts';
+import { useCycle, useTimeline } from '@/lib/contexts';
 import { MarsRover } from '@/Prefabs/MarsRover';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
@@ -17,7 +17,7 @@ const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
   const { currentTick, timeOfDay } = useCycle();
-  const snapshots = useSnapshots();
+  const timeline = useTimeline();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
   const [direction, setDirection] = useState<Position>({ x: 0, y: 110 });
@@ -26,8 +26,8 @@ export const Renderer = () => {
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
 
-  const map = snapshots.snapshots.get(currentTick)?.fields;
-  const rover = snapshots.snapshots.get(currentTick)?.rover;
+  const map = timeline.map;
+  const rover = timeline.rover;
   const GAP = TILE_GAP;
 
   const jumpToRoverOnMove = false;
@@ -144,9 +144,9 @@ export const Renderer = () => {
           ref={cameraRef}
           makeDefault
           position={[
-            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
+            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : timeline.rover.position.x ?? 0) * GAP,
             CAM_HEIGHT, 
-            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]}
+            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : timeline.rover.position.y ?? 0) * GAP]}
           rotation={[pitch, yaw, 0]}
           fov={fov}
         />
@@ -155,9 +155,9 @@ export const Renderer = () => {
         <DayNightDirectionalLights />
 
         <MapRenderer map={map!} camPos={[
-            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
+            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : timeline.rover.position.x ?? 0) * GAP,
             CAM_HEIGHT, 
-            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
+            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : timeline.rover.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
 
         {rover && <MarsRover onSelect={showInventory} />}
         

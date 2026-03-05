@@ -11,14 +11,13 @@ import { isOre, vectorValues,Tile,VectorField, WeightPoint } from "@/util/consta
 import {Graph,astar} from "@/util/astar"
 import {createVectorMapFromWeights} from "@/util/map"
 import { getNextStep, isDay, isThereAWay, stuck, TookAnotherStep} from "@/util/path"
-import { useSnapshots } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 import { Dispatch, SetStateAction } from "react";
-import { Field, MapSnapshot } from "@/types/MapTypes";
 import { calculateTile } from "./tile";
+import { Delta } from "@/types/MapTimelineContextTypes";
 
 
-export function makePath(iterations:number,mapSnapShot:Field[][],snapshotsSetter:Dispatch<SetStateAction<Map<Number, MapSnapshot>>>) {
+export function makePath(iterations:number,map: Tile[][],deltasSetter:Dispatch<SetStateAction<Delta[]>>) {
     //Initialize maps
     let start:Position = {x:0,y:0};
     let mapConstraints:{width:number,height:number} = {width:0,height:0};

@@ -1,7 +1,5 @@
 import { Position } from "@/types/RoverContextTypes";
-import { Tile, VectorField, WeightPoint } from "./constants";
-import { Field, MapSnapshot } from "@/types/MapTypes";
-import { Dispatch, SetStateAction } from "react";
+import { WeightPoint } from "./constants";
 
 /**
  * Find the nearest ore from a given position using Euclidean distance

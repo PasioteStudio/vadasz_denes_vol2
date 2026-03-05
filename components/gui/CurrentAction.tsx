@@ -1,22 +1,18 @@
 "use client"
 
-import { useCycle, useSnapshots, useUIHelper } from "@/lib/contexts";
+import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 
 export default function CurrentAction() {
     const { currentTick } = useCycle();
-    const snap = useSnapshots().snapshots.get(currentTick);
+    const currentAction = "TODO FROM DELTAS"
     const { resting, restingOpacity } = useUIHelper();
-    if (!snap) return null;
-
 
     const actionMap: Record<string, string> = {
         move: "mozgás",
         mine: "bányászás",
         wait: "alapjárat",
     };
-
-    const currentAction = snap.rover.currentAction;
-    const pos = snap.rover.position;
+    const pos = useTimeline().rover.position;
 
     return (
         <div
@@ -31,7 +27,7 @@ export default function CurrentAction() {
             style={{ opacity: resting ? restingOpacity / 100 : 1 }}
         >
             <p className="text-sm font-semibold my-0">Jelenleg:</p>
-            <p className="text-sm mb-3 my-0">{actionMap[currentAction.action] ?? currentAction.action}</p>
+            <p className="text-sm mb-3 my-0">{actionMap[currentAction] ?? currentAction}</p>
             <p className="text-xs">Pozíció: {pos.x} ; {pos.y}</p>
             <p className="text-xs">fogyasztás: TODO</p>
         </div>
