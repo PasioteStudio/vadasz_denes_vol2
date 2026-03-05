@@ -10,6 +10,7 @@ import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
+import { WindParticles } from '@/Prefabs/Particles/WindParticle';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -159,6 +160,7 @@ export const Renderer = () => {
             direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
 
         {rover && <MarsRover onSelect={showInventory} />}
+        
       </Canvas>
 
       {isInventoryOpen && (
