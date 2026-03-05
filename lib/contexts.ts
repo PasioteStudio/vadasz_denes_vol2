@@ -1,7 +1,7 @@
 "use client"
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { MapTimelineContextT } from "@/types/MapTimelineContextTypes";
-import { RoverAction, RoverT } from "@/types/RoverContextTypes";
+import { RoverT } from "@/types/RoverContextTypes";
 import { UIHelperContextT } from "@/types/UIHelperContextTypes";
 import { createContext, useContext } from "react";
 
@@ -10,9 +10,6 @@ export const DefaultRoverContextObject: RoverT = {
     logs: [],
     inventory: [],
     startingPosition: { x: 0, y: 0 },
-    currentAction: {
-        action: "wait",
-    },
     energy: 0
 }
 export const DefaultCycleContextObject: CycleContextT = {
@@ -35,6 +32,7 @@ export const DefaultTimelineContextObject: MapTimelineContextT = {
     map: [],
     deltas: [],
     rover: DefaultRoverContextObject,
+    startingPoint: {x:0,y:0}
 }
 
 export const DefaultUIHelperContextObject: UIHelperContextT = {

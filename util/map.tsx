@@ -107,3 +107,15 @@ export function createVectorMapFromWeights(
 export const isValidMap = (map: Tile[][]): boolean => {
   return map.length > 0 && map.find(row => row.find(field => field == Tile.Start)) != undefined;
 }
+
+export const getStartingPoint = (map:Tile[][]):Position => {
+  const position: Position = {x:0,y:0}
+  for(let y = 0; y < map.length; y++){
+    for(let x = 0; x < map[y].length; x++){
+      if(map[y][x] == Tile.Start){
+        return {x: x, y:y}
+      }
+    }
+  }
+  return position
+}

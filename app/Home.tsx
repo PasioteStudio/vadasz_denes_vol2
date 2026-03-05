@@ -10,6 +10,7 @@ import { deepCopy } from "@/util/path";
 import { Delta } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
+import { getStartingPoint } from "@/util/map";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit">>({
@@ -28,6 +29,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const [map, setMap] = useState<Tile[][]>([]);
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [rover, setRover] = useState<RoverT>();
+  const startingPoint = getStartingPoint(initialMap)
 
   const setTickTo = (t: number) => {
     // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
@@ -85,7 +87,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     if(deltas.length > 0) return //dont run it twice
     const start = async () => {
         const start = new Date()
-        const {path} = makePath(timeLimit,deepCopy(map),setDeltas);
+        const {path} = makePath(timeLimit,deepCopy(initialMap),setDeltas);
         const end = new Date()
         console.log("time: ",end.getTime()-start.getTime())
         console.log("deltas: ", deltas)
@@ -116,6 +118,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         deltas: deltas,
         map: map,
         rover: rover ?? DefaultRoverContextObject,
+        startingPoint: startingPoint,
       }}>
         <Renderer /> {/* THIS WILL HAVE THE THREEJS CANVAS LATER ON */}
         <GUI />
