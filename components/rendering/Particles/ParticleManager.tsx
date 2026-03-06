@@ -17,8 +17,8 @@ export function ParticleManager() {
     }
   }, [scene])
 
-  useFrame(() => {
-    dustRef.current?.update()
+  useFrame((_,delta) => {
+    dustRef.current?.update(delta)
   })
 
   return null

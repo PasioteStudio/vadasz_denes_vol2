@@ -14,9 +14,9 @@ export class Dust {
 
     for (let i = 0; i < this.dustCount; i++) {
 
-      positions[i * 3] = (Math.random() - 0.5) * 100 
-      positions[i * 3 + 1] = Math.random() * 100
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 100
+      positions[i * 3] = -10 + (Math.random() - 0.5) * 30 
+      positions[i * 3 + 1] = 10 + (Math.random() - 0.5) * 2
+      positions[i * 3 + 2] = -15 + (Math.random() - 0.5) * 30
 
       // random esési sebesség
       this.velocities[i] = 0.05 + Math.random() * 0.1
@@ -38,23 +38,23 @@ export class Dust {
     scene.add(this.points)
   }
 
-  update() {
+  update(delta:number) {
 
     const pos = this.geometry.attributes.position.array as Float32Array
-
+    const d = delta*100 // nem tudom, miért nem 1000, de rendben.
     for (let i = 0; i < this.dustCount; i++) {
 
       // lefelé esik
-      pos[i * 3 + 1] -= this.velocities[i]
+      pos[i * 3 + 1] -= this.velocities[i] * d
 
       // oldalra fújja a szél
-      pos[i * 3] += 0.1
+      pos[i * 3] += 0.1 * d
 
       if (pos[i * 3 + 1] < -100) {
 
-        pos[i * 3 + 1] = 0
-        pos[i * 3] = (Math.random() - 0.5) * 100
-        pos[i * 3 + 2] = (Math.random() - 0.5) * 100
+        pos[i * 3 + 1] = 10
+        pos[i * 3] = -10 + (Math.random() - 0.5) * 30
+        pos[i * 3 + 2] = -15 + (Math.random() - 0.5) * 30
 
       }
 
