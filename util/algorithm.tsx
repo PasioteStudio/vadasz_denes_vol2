@@ -3,7 +3,7 @@ import { Graph, astar } from "@/util/astar"
 import { getNextStep, isDay, isThereAWay, stuck, TookAnotherStep } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile } from "./tile";
-import { Delta } from "@/types/MapTimelineContextTypes";
+import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
 import { solve } from "./salesman"
 import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
@@ -90,8 +90,12 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
         const {x,y} = final_path[i].position;
         deltas.push({
             energy: -1 + (isDay(i) ? 10 : 0),
-            inventoryChanges: [],
-            logsAdded: [{ message: "Állás itt: TODO" }],
+            inventoryChanges: (final_path[i].action == "mine" ? [{
+                amount:1,
+                mode: "add",
+                ore: map[y][x],
+            } as InventoryChange ]: []),
+            logsAdded: [{ message: "Állás itt: TODO" }], // TODO
             moves: [{
                 from: i == 0 ? start : final_path[i - 1].position,
                 to: final_path[i].position,

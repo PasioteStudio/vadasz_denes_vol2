@@ -15,6 +15,7 @@ export const processPositionChanges = (startPos: Position, delta: Move[], direct
 export const processInventoryChanges = (startInv: Item[], delta: InventoryChange[], direction: -1 | 1): Item[] => {
     const deltas = direction == 1 ? [...delta] : [...delta].reverse()
     let newInv = [...startInv];
+    console.log(newInv, delta);
     deltas.forEach(d => {
         if ((d.mode == "add" && direction == 1)
             || (d.mode == "remove" && direction == -1)) { // add item

@@ -63,8 +63,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     const cTick = cycle.currentTick;
     const direction = tTick < cTick ? -1 : 1;
     const deltasToExecute = direction == -1 ?
-      deltas.filter((d, i) => i <= cTick && i > tTick) // TODO check up on these lines, they may cause problems with the current relations
-      : deltas.filter((d, i) => i > cTick && i <= tTick); // TODO
+      deltas.filter((d, i) => i <= cTick && i > tTick) 
+      : deltas.filter((d, i) => i > cTick && i <= tTick);
 
     let position: Position = { ...rover!.position }
     let inventory: Item[] = [...rover!.inventory]
@@ -75,7 +75,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let newMap = map.map(row => [...row]);
 
     deltasToExecute.forEach(d => {
-      energy += d.energy * direction;
+      energy += d.energy * direction; // TODO ez nem helyes így, mert ha pl 100-on volt nappal, akkor visszafelé levonja a nap töltését is.
       energy = clamp(energy, 0, 100);
       position = processPositionChanges(position, d.moves, direction)
       inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
