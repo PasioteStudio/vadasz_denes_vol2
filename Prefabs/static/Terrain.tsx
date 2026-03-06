@@ -31,7 +31,7 @@ export function Terrain(props: ThreeElements['group']) {
     useGLTF('/Modells/terrain.glb') as unknown as GLTFResult
   return (
     //méretét felvettem meg pozícionálás.
-    <group {...props} dispose={null} position={[10,-2,-60]} rotation={[0,0.1,0]}  scale={10}>
+    <group {...props} dispose={null} position={[10,-2,-60]} rotation={[0,0,0]}  scale={10}>
       <mesh
         castShadow
         receiveShadow

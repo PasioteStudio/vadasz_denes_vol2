@@ -47,16 +47,16 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     return <>
         <Canvas style={{ width: '100vw', height: '100vh' }} camera={
             {
-                position: [0, 0, 4],
+                position: [-7, 2, -11],
                 fov: 50,
-                rotation: [0, 0, 0]
+                rotation: [-0.2, 0, 0]
             }} className={`bg-[#351818]`} shadows>
 
             <directionalLight intensity={1} position={[0,5,5]} color={0xcd5c5c} />
             <directionalLight intensity={0.6} position={[0,10,2]} color={0xffffff} castShadow shadow-bias={0.0001} shadow-normalBias={0.000001} />
             <ambientLight intensity={1} color={0x420D09} />
            
-            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.5, 0, 0]} scale={0.6} />
+            <StaticRover rotation={[0.1, 3.4, -0.15]} position={[-2.3, -0.1, -20]} scale={0.8} />
 
             <Terrain receiveShadow />
             <ParticleManager></ParticleManager>
