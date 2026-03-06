@@ -2,7 +2,7 @@ import { isOre, vectorValues, Tile, WeightPoint } from "@/util/constants";
 import { Graph, astar } from "@/util/astar"
 import { getNextStep, isDay, isThereAWay, stuck, TookAnotherStep } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
-import { calculateTile } from "./tile";
+import { calculateTile, tileToString } from "./tile";
 import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
 import { solve } from "./salesman"
 import { findNearestOre } from "./ore";
@@ -95,7 +95,8 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
                 mode: "add",
                 ore: map[y][x],
             } as InventoryChange ]: []),
-            logsAdded: [{ message: "Állás itt: TODO" }], // TODO
+            logsAdded: [{ message: final_path[i].action == "mine" ? `Bányászás: ${tileToString(map[y][x])}` : 
+            `Mozgás ide: ${final_path[i].position.x}, ${final_path[i].position.y}` }],
             moves: [{
                 from: i == 0 ? start : final_path[i - 1].position,
                 to: final_path[i].position,

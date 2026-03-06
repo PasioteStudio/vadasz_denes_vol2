@@ -19,6 +19,17 @@ export const toTile = (char: string): Tile => {
     }
 }
 
+export const tileToString = (tile: Tile):string => {
+  switch(tile){
+        case Tile.Blue: return "Kék Ásvány" ;
+        case Tile.Yellow: return "Sárga Ásvány" ;
+        case Tile.Green: return "Zöld Ásvány" ;
+        case Tile.Obstacle: return "Akadály" ;
+        case Tile.Start: return "Kezdő Mező" ;
+        default: return "Üres";
+    }
+}
+
 /**
  * Returns true if the points are in distance of each other otherwise returns false
  * @param {Position} point1

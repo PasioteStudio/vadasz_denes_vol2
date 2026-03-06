@@ -1,6 +1,7 @@
 import { Delta, InventoryChange, Move } from "@/types/MapTimelineContextTypes"
 import { Item, Log, Position } from "@/types/RoverContextTypes"
 import { Tile } from "./constants"
+import { clamp } from "three/src/math/MathUtils.js"
 
 export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
@@ -79,4 +80,14 @@ export const processMapChanges = (startMap: Tile[][], roverMoves: Move[], direct
     }
 
     return newMap;
+}
+
+export const getEnergyForTick = (tick: number, deltas: Delta[]): number => {
+    const energyDeltas = deltas.slice(0,tick).map(d => d.energy);
+    let energy = 100;
+
+    for(let i = 0; i < energyDeltas.length; i++) {
+        energy = clamp(energy+energyDeltas[i],0,100);
+    }
+    return energy
 }
