@@ -6,6 +6,7 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Terrain } from "@/Prefabs/static/Terrain";
 import { Tile } from "@/util/constants";
+import { ParticleManager } from "@/components/rendering/Particles/ParticleManager";
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Tile[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
@@ -59,10 +60,11 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                 <boxGeometry args={[0.5,0.5,0.5]} />
                 <meshStandardMaterial color={'orange'} />
             </mesh> */}
-
+           
             <StaticRover rotation={[0.5,-2.8, 0]} position={[1.6, 0, 0]} scale={0.6} castShadow />
             {/* Terrain betétele */}
             <Terrain receiveShadow castShadow />
+            <ParticleManager></ParticleManager>
         </Canvas>
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden bg-linear-90 from-black/10 from-40% to-60% to-transparent">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">

@@ -176,8 +176,8 @@ export const Renderer = () => {
         <MapRenderer map={map!} camPos={camPos} rover={rover!} camH={CAM_HEIGHT} />
 
         {rover && <MarsRover onSelect={showInventory} />}
-
-        <ParticleManager />
+        {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
+        {/* <ParticleManager /> */}
 
 
 
