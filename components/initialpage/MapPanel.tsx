@@ -1,4 +1,4 @@
-import { Field } from "@/types/MapTypes";
+import { Tile } from "@/util/constants";
 import { generateMap, isValidMap, readMap } from "@/util/map";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,9 +9,9 @@ export default function MapPanel(
     }: {
         current: {
             option?: "upload" | "default" | "random",
-            loadedMap?: Field[][]
+            loadedMap?: Tile[][]
         },
-        setter: (option: "upload" | "default" | "random", loadedMap: Field[][]) => void
+        setter: (option: "upload" | "default" | "random", loadedMap: Tile[][]) => void
     }
 ) {
     const fileInput = useRef<HTMLInputElement | null>(null);
@@ -19,7 +19,7 @@ export default function MapPanel(
 
     const selectDefault = async () => {
         if (current.option === "default") return;
-        const loadedMap: Field[][] = await readMap("/mars_map_50x50.csv");
+        const loadedMap: Tile[][] = await readMap("/mars_map_50x50.csv");
         setter("default", loadedMap);
     };
 
@@ -37,7 +37,7 @@ export default function MapPanel(
         const file = e.target.files?.[0];
         if (!file) return;
         const text = await file.text();
-        const loadedMap: Field[][] = await readMap(text, true);
+        const loadedMap: Tile[][] = await readMap(text, true);
         console.log(loadedMap);
         if(!isValidMap(loadedMap)) {
             setError("Helytelen tartalmú fájl.");

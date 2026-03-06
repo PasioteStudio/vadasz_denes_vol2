@@ -2,15 +2,15 @@
 import MapPanel from "@/components/initialpage/MapPanel";
 import TimeLimitPanel from "@/components/initialpage/TimeLimitPanel";
 import { StaticRover } from "@/Prefabs/static/staticRover";
-import { Field } from "@/types/MapTypes";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Terrain } from "@/Prefabs/static/Terrain";
-export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Field[][]) => void }) {
+import { Tile } from "@/util/constants";
+export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Tile[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
     const [selectedMapOption, setMapOption] = useState<"upload" | "default" | "random">();
-    const [loadedMap, setLoadedMap] = useState<Field[][]>();
+    const [loadedMap, setLoadedMap] = useState<Tile[][]>();
     const [selectedTimeLimit, setSelectedTimeLimit] = useState<number>(48);
     const [validInputs, setValidInputs] = useState(false);
     const [currentPanel, setPanel] = useState<"map" | "time">("map");
@@ -20,7 +20,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
         "map": <MapPanel current={{
             loadedMap: loadedMap,
             option: selectedMapOption,
-        }} setter={(option: "upload" | "default" | "random", loadedMap: Field[][]) => {
+        }} setter={(option: "upload" | "default" | "random", loadedMap: Tile[][]) => {
             setMapOption(option);
             setLoadedMap(loadedMap);
         }} />,

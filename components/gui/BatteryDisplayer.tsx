@@ -1,34 +1,67 @@
 "use client"
-import { useCycle, useSnapshots, useUIHelper } from "@/lib/contexts"
+import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 import { MouseEvent, useState } from "react";
 
 export default function BatteryDisplayer() {
-    const {currentTick} = useCycle()
-    const snapshots = useSnapshots().snapshots;
-    const energy = snapshots.get(currentTick)!.rover.energy;
+    const energy = useTimeline().rover.energy;
     const [position, setPosition] = useState({ x: -100, y: -100 });
-    const {resting, restingOpacity} = useUIHelper();
+    const { resting, restingOpacity } = useUIHelper();
+
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         setPosition({ x: e.clientX, y: e.clientY });
     };
-    return <div className={`fixed top-2 left-2 h-2/24 w-3/12 flex items-center justify-center group`} onMouseMove={(e) => { handleMouseMove(e) }} onMouseOut={() => { setPosition({ x: -100, y: -100 }) }}
-    style={{
-        opacity: resting ? restingOpacity/100 : 1
-    }}>
-        <img src="/battery.png" className=" h-full mr-2" />
-        <div className="h-6/12 grow overflow-hidden flex justify-start gap-[0.5vw]">
-            {Array.from({ length: Math.round(energy / 10) }).map((x, i) => <div key={i} className="w-1/10 min-w-2 h-full bg-green-900"></div>)}
-        </div>
-        <div className={`hidden group-hover:block absolute top-full left-full px-2 rounded-sm`} style={{
-            position: 'fixed',
-            left: `${position.x + 30}px`,
-            top: `${position.y + 30}px`,
-            pointerEvents: 'none',
-            transform: 'translate(-50%, -50%)',
-            background: `linear-gradient(90deg, #0d542b ${(energy/100)*100}%, transparent)`
-        }}
+
+    const segments = 10;
+    const fullSegments = Math.floor((energy / 100) * segments);
+    const partialSegmentFraction = (energy / 100) * segments - fullSegments;
+
+    return (
+        <div
+            className="fixed top-2 left-2 w-48 h-10 flex items-center p-2 bg-[#1e1e2f]/90 border border-[#ff4500] rounded-lg shadow-lg group"
+            style={{ opacity: resting ? restingOpacity / 100 : 1 }}
+            onMouseMove={handleMouseMove}
+            onMouseOut={() => setPosition({ x: -100, y: -100 })}
         >
-            <span>{energy}/100</span>
+            {/* Battery icon */}
+            <img src="/battery.png" className="h-full mr-2" />
+
+            {/* Battery segments */}
+            <div className="flex grow h-4 justify-start rounded bg-[#0b1a0f] overflow-hidden gap-1">
+                {Array.from({ length: segments }).map((_, i) => {
+                    if (i < fullSegments) {
+                        // Fully filled segments
+                        return <div key={i} className="flex-1 h-full rounded-sm bg-[#0f9d58]"></div>;
+                    } else if (i === fullSegments && partialSegmentFraction > 0) {
+                        // Partial segment: inner div controls width
+                        return (
+                            <div key={i} className="flex-1 h-full rounded-sm bg-[#143222] relative overflow-hidden">
+                                <div
+                                    className="h-full bg-[#0f9d58] rounded-sm"
+                                    style={{ width: `${partialSegmentFraction * 100}%` }}
+                                ></div>
+                            </div>
+                        );
+                    } else {
+                        // Empty segments
+                        return <div key={i} className="flex-1 h-full rounded-sm bg-[#143222]"></div>;
+                    }
+                })}
+            </div>
+
+            {/* Tooltip on hover */}
+            <div
+                className="hidden group-hover:flex items-center justify-center px-2 py-1 rounded-sm text-xs font-mono text-[#ffdda0] shadow-md"
+                style={{
+                    position: "fixed",
+                    left: `${position.x + 15}px`,
+                    top: `${position.y + 25}px`,
+                    pointerEvents: "none",
+                    background: "#1e1e2f",
+                    border: "1px solid #ff4500",
+                }}
+            >
+                {energy}/100
+            </div>
         </div>
-    </div>
+    );
 }

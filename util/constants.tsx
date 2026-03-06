@@ -67,8 +67,3 @@ export class Rover {
 
 
 }
-
-export const ROVER_ANIMATION = {
-  rotate: 0.25,
-  move: 0.35,
-} as const

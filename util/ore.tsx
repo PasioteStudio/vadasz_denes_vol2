@@ -1,7 +1,5 @@
 import { Position } from "@/types/RoverContextTypes";
-import { Tile, VectorField, WeightPoint } from "./constants";
-import { Field, MapSnapshot } from "@/types/MapTypes";
-import { Dispatch, SetStateAction } from "react";
+import { WeightPoint } from "./constants";
 
 /**
  * Find the nearest ore from a given position using Euclidean distance
@@ -14,7 +12,7 @@ export function findNearestOre(
   currentX: number,
   currentY: number,
   oreMap: WeightPoint[]
-): Position {
+): {x:number,y:number,distance:number} {
   let nearest: Position = { x: currentX, y: currentY }; 
   let minDistance = Infinity;
 
@@ -29,5 +27,5 @@ export function findNearestOre(
     }
   });
 
-  return nearest;
+  return {...nearest,distance:minDistance};
 }

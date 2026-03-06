@@ -1,4 +1,4 @@
-import { useCycle, useSnapshots } from '@/lib/contexts';
+import { useCycle, useTimeline } from '@/lib/contexts';
 import { MarsRover } from '@/Prefabs/MarsRover';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
@@ -10,51 +10,68 @@ import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
+
 import { ParticleManager } from './Particles/ParticleManager';
+
+
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { currentTick, timeOfDay } = useCycle();
-  const snapshots = useSnapshots();
+  const { timeOfDay } = useCycle();
+  const timeline = useTimeline();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
-  const [direction, setDirection] = useState<Position>({ x: 0, y: 110 });
+  const GAP = TILE_GAP;
+
+  const [direction, setDirection] = useState<Position>({
+    x: timeline.startingPoint.x * GAP,
+    y: timeline.startingPoint.y * GAP + 110,
+  });
+  const hasInitializedCamera = useRef(false);
+  useEffect(() => {
+    if (hasInitializedCamera.current) return;
+    if (timeline.startingPoint.x === 0 && timeline.startingPoint.y === 0) return;
+    setDirection({
+      x: timeline.startingPoint.x * GAP,
+      y: timeline.startingPoint.y * GAP + 110,
+    });
+    hasInitializedCamera.current = true;
+  }, [timeline.startingPoint]);
   const [fov, setFov] = useState<number>(10);
   const [isInventoryOpen, setInventoryOpen] = useState(false);
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
-  const map = snapshots.snapshots.get(currentTick)?.fields;
-  const rover = snapshots.snapshots.get(currentTick)?.rover;
-
-  const GAP = TILE_GAP;
+  const map = timeline.map;
+  const rover = timeline.rover;
 
   const jumpToRoverOnMove = false;
   //snap to rover
   useEffect(() => {
-    if(!jumpToRoverOnMove) return;
-    setDirection({ x: 0, y: 110 })
+    if (!jumpToRoverOnMove) return;
+    setDirection({
+      x: rover.position.x * GAP,
+      y: rover.position.y * GAP,
+    })
   }, [rover])
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);
-
 
   useEffect(() => {
     directionRef.current = direction;
   }, [direction]);
 
   //LOOK AROUND
-  // Camera rotation state (in radians)
-  const [yaw, setYaw] = useState(0); // left/right
-  const [pitch, setPitch] = useState(-0.5); // up/down, default -0.5 for initial tilt
+  const [yaw, setYaw] = useState(0);
+  const [pitch, setPitch] = useState(-0.5);
   const isDragging = useRef(false);
   const lastMouse = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
-  // Mouse-based camera rotation
+
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0) return; // Only left button
+      if (e.button !== 0) return;
       isDragging.current = true;
       lastMouse.current = { x: e.clientX, y: e.clientY };
     };
@@ -62,16 +79,14 @@ export const Renderer = () => {
       isDragging.current = false;
     };
     const handleMouseMove = (e: MouseEvent) => {
-      if(!cameraRotationEnabled) return;
+      if (!cameraRotationEnabled) return;
       if (!isDragging.current) return;
       const dx = e.clientX - lastMouse.current.x;
       const dy = e.clientY - lastMouse.current.y;
       lastMouse.current = { x: e.clientX, y: e.clientY };
-      // Sensitivity factors
       setYaw((prev) => prev - dx * 0.005);
       setPitch((prev) => {
         const next = prev - dy * 0.005;
-        // Clamp pitch to avoid flipping
         return Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, next));
       });
     };
@@ -88,15 +103,14 @@ export const Renderer = () => {
 
   //INVENTORY TOGGLE
   const showInventory = () => {
-  setInventoryOpen(prev => !prev);
-};
+    setInventoryOpen(prev => !prev);
+  };
   //INVENTORY TOGGLE
-
 
   // keyboard-based camera movement
   useEffect(() => {
     if (isInventoryOpen) return;
-    const speed = 40; // units per second
+    const speed = 40;
     let lastTime = Date.now();
     let animFrameId: number;
 
@@ -131,13 +145,18 @@ export const Renderer = () => {
       setFov((prev) => Math.max(10, Math.min(13, prev + e.deltaY * 0.01)));
     };
     const handleCameraToggle = (e: KeyboardEvent) => {
-      if(e.key.toLowerCase() == "f") setCamRotEnabled(p => !p);
+      if (e.key.toLowerCase() == "f") setCamRotEnabled(p => !p);
     }
     window.addEventListener('wheel', handleScroll);
     window.addEventListener('keydown', handleCameraToggle);
-    return () => {window.removeEventListener('wheel', handleScroll);window.removeEventListener('keydown', handleCameraToggle)};
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener('keydown', handleCameraToggle);
+    };
   }, []);
 
+
+  const camPos: [number, number, number] = [direction.x, CAM_HEIGHT, direction.y];
 
 
   return (
@@ -146,24 +165,22 @@ export const Renderer = () => {
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault
-          position={[
-            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
-            CAM_HEIGHT, 
-            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]}
+          position={camPos}
           rotation={[pitch, yaw, 0]}
           fov={fov}
         />
 
-        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666}/>
+        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
         <DayNightDirectionalLights />
 
-        <MapRenderer map={map!} camPos={[
-            direction.x + (jumpToRoverOnMove ? (rover?.position.x ?? 0) : snapshots.snapshots.get(0)!.rover?.position.x ?? 0) * GAP,
-            CAM_HEIGHT, 
-            direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
+        <MapRenderer map={map!} camPos={camPos} rover={rover!} camH={CAM_HEIGHT} />
 
         {rover && <MarsRover onSelect={showInventory} />}
+
         <ParticleManager />
+
+
+
       </Canvas>
 
       {isInventoryOpen && (

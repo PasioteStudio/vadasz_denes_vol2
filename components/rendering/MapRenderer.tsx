@@ -1,10 +1,10 @@
 import { groupTilesByType } from "@/util/tileGrouping";
 import { useMemo } from "react";
 import { InstancedTileGroup } from "./InstancedTileGroup";
-import { Position, RoverT } from "@/types/RoverContextTypes";
-import { Field } from "@/types/MapTypes";
+import { RoverT } from "@/types/RoverContextTypes";
 import { TILE_GAP } from "./TileRenderer";
 import { clampNum } from "@/util/math";
+import { Tile } from "@/util/constants";
 
 type Bounds = { minRow: number; maxRow: number; minCol: number; maxCol: number };
 const VISIBLE_ROWS = 26;
@@ -20,7 +20,7 @@ export default function MapRenderer({
     rover,
     camH,
 }: {
-    map: Field[][],
+    map: Tile[][],
     camPos: [number, number, number],
     rover: RoverT,
     camH: number,
