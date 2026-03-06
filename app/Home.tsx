@@ -12,6 +12,7 @@ import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
 import { getStartingPoint } from "@/util/map";
 import { time } from "console";
+import { clamp } from "three/src/math/MathUtils.js";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit">>({
@@ -75,6 +76,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
     deltasToExecute.forEach(d => {
       energy += d.energy * direction;
+      energy = clamp(energy, 0, 100);
       position = processPositionChanges(position, d.moves, direction)
       inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
       logs = processLogChanges(logs, d.logsAdded, direction)

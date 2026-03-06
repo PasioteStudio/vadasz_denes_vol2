@@ -96,7 +96,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
                 from: i == 0 ? start : final_path[i - 1].position,
                 to: final_path[i].position,
                 mode: final_path[i].action,
-                ore: (final_path[i].action == "mine" ? map[x][y] : undefined)
+                ore: (final_path[i].action == "mine" ? map[y][x] : undefined)
             }],
         })
     }
