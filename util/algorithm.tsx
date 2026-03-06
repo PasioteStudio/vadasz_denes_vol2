@@ -87,6 +87,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
     final_path = [...final_path,...go_home]
     //setting all the values
     for (let i = 0; i < final_path.length; i++) {
+        const {x,y} = final_path[i].position;
         deltas.push({
             energy: -1 + (isDay(i) ? 10 : 0),
             inventoryChanges: [],
@@ -95,6 +96,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
                 from: i == 0 ? start : final_path[i - 1].position,
                 to: final_path[i].position,
                 mode: final_path[i].action,
+                ore: (final_path[i].action == "mine" ? map[x][y] : undefined)
             }],
         })
     }
