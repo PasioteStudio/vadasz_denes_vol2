@@ -58,6 +58,10 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     totalDuration: 0,
     startTime: 0,
   })
+  const hasAdvancedTick = useRef(false);
+  useEffect(() => {
+    hasAdvancedTick.current = false;
+  }, [cycle.currentTick]);
 
   const { nodes, materials, animations } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
@@ -197,7 +201,14 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       elapsed > tickPlan.current.totalDuration
       && cycle.player.playing == "playing"
     ) {
-      cycle.setTick(cycle.currentTick + (cycle.player.speed < 0 ? -1 : 1));
+      if (
+        elapsed > tickPlan.current.totalDuration &&
+        cycle.player.playing == "playing" &&
+        !hasAdvancedTick.current
+      ) {
+        hasAdvancedTick.current = true;
+        cycle.setTick(cycle.currentTick + (cycle.player.speed < 0 ? -1 : 1));
+      }
     }
   })
 
