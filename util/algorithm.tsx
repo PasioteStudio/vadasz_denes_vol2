@@ -7,8 +7,18 @@ import { Delta } from "@/types/MapTimelineContextTypes";
 import { solve } from "./salesman"
 import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
+import { Dispatch, SetStateAction } from "react";
 
-export function makePath(iterations: number, map: Tile[][]): { path: Position[], deltas: Delta[] } {
+enum TimeComplexity {
+    FAST = 0.99999,
+    REGULAR = 0.99999993,
+    SLOW = 0.999999999
+}
+
+export function makePath(iterations: number, map: Tile[][],time_complexity?:TimeComplexity): { path: Position[], deltas: Delta[] } {
+    if(!time_complexity){
+        time_complexity = TimeComplexity.REGULAR
+    }
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };
@@ -26,8 +36,6 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
             update_able_map.push({ x: x, y: y, weight: isOre(field) ? vectorValues.ore : 0 })
         })
     })
-
-    const my_path: Position[] = [start]
     deltas.push({
         energy: 0,
         inventoryChanges: [],
@@ -47,7 +55,7 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
         my_path = [...final_path,...my_path]
         
         //salesman
-        const {ordered_path} = salesmanSolver(my_path.filter(i=>i.action == "mine").map(i=>i.position),obstacle_map,start)
+        const {ordered_path} = salesmanSolver(my_path.filter(i=>i.action == "mine").map(i=>i.position),obstacle_map,start,time_complexity)
         final_path = ordered_path
 
         let column:Position = ordered_path[ordered_path.length - 1].position
@@ -66,18 +74,29 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
     go_home = temp_go_home
     final_path = [...final_path,...go_home]
     //setting all the values
-
-
-    //waiting
-    for (let i = my_path.length; i < iterations; i++) {
-        my_path.push(my_path[i - 1])
+    for (let i = 0; i < final_path.length; i++) {
         deltas.push({
             energy: -1 + (isDay(i) ? 10 : 0),
             inventoryChanges: [],
             logsAdded: [{ message: "Állás itt: TODO" }],
             moves: [{
-                from: my_path[i - 1],
-                to: my_path[i - 1],
+                from: i == 0 ? start : final_path[i - 1].position,
+                to: final_path[i].position,
+                mode: final_path[i].action,
+            }],
+        })
+    }
+
+    //waiting
+    for (let i = final_path.length; i < iterations; i++) {
+        final_path.push(final_path[i - 1])
+        deltas.push({
+            energy: -1 + (isDay(i) ? 10 : 0),
+            inventoryChanges: [],
+            logsAdded: [{ message: "Állás itt: TODO" }],
+            moves: [{
+                from: final_path[i - 1].position,
+                to: final_path[i - 1].position,
                 mode: "wait",
             }],
         })
@@ -91,9 +110,10 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
 export function salesmanSolver(
     mine_positions: Position[],
     obstacle_map: (0 | 1)[][],
-    start: Position
+    start: Position,
+    time_complexity:TimeComplexity
 ): { ordered_path: { action: "move" | "mine", position: Position }[] } {
-    const solution = solve(mine_positions, 0.99999993, undefined, undefined, true);
+    const solution = solve(mine_positions, time_complexity, undefined, undefined, true);
     const ordered_points = solution.map((i: number) => mine_positions[i]);
     const ordered_path: { action: "move" | "mine", position: Position }[] = []
     let current = start

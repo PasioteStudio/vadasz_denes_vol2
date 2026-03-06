@@ -94,17 +94,24 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     if (deltas.length > 0) return //dont run it twice
+    //NOW I SEE IT, IDIOT TWICE, NOT INCLUDED THE STATE TO THE DEPENDENCY, IT WILL BE ALWAYS THE INITIAL VALUE
+    setDeltas([{
+        energy: 0,
+        inventoryChanges: [],
+        logsAdded: [],
+        moves: [{ from: {x:0,y:0}, to: {x:0,y:0}, mode: "wait" }]
+    }])
     const start = async () => {
       const start = new Date()
       const path = makePath(timeLimit, deepCopy(initialMap));
-      setDeltas(path.deltas);
+      setDeltas(path.deltas); //IDIOT, the algorithm is slow, so the time we're gonna set the deltas, it's already re-rendered
       const end = new Date()
       console.log("time: ", end.getTime() - start.getTime())
       console.log("deltas: ", path.deltas)
       console.log("path:", path.path)
     }
     start()
-  }, [initialMap])
+  }, [deltas, initialMap])
 
 
   return (
