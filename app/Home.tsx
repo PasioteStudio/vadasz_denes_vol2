@@ -11,6 +11,7 @@ import { Delta } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
 import { getStartingPoint } from "@/util/map";
+import { time } from "console";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit">>({
@@ -95,13 +96,21 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
     if (deltas.length > 0) return //dont run it twice
     //NOW I SEE IT, IDIOT TWICE, NOT INCLUDED THE STATE TO THE DEPENDENCY, IT WILL BE ALWAYS THE INITIAL VALUE
-    setDeltas([{
-        energy: 0,
-        inventoryChanges: [],
-        logsAdded: [],
-        moves: [{ from: {x:0,y:0}, to: {x:0,y:0}, mode: "wait" }]
-    }])
-    const start = async () => {
+    let isZero = false
+    setDeltas(prev=>{
+      if(prev.length == 0){
+        isZero=true
+        return [{
+            energy: 0,
+            inventoryChanges: [],
+            logsAdded: [],
+            moves: [{ from: {x:0,y:0}, to: {x:0,y:0}, mode: "wait" }]
+        }]
+      }
+      return prev
+    })
+    if(!isZero) return
+    const start = async()=>{
       const start = new Date()
       const path = makePath(timeLimit, deepCopy(initialMap));
       setDeltas(path.deltas); //IDIOT, the algorithm is slow, so the time we're gonna set the deltas, it's already re-rendered
@@ -111,7 +120,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       console.log("path:", path.path)
     }
     start()
-  }, [deltas, initialMap])
+  }, [initialMap])
 
 
   return (

@@ -70,8 +70,10 @@ export function makePath(iterations: number, map: Tile[][],time_complexity?:Time
         console.log("salesman",ordered_path)
         console.log("regular",my_path.map(i=>i.position))
     }
-    final_path = temp_final_path
-    go_home = temp_go_home
+    if(temp_final_path.length != 0){
+        final_path = temp_final_path
+        go_home = temp_go_home
+    }
     final_path = [...final_path,...go_home]
     //setting all the values
     for (let i = 0; i < final_path.length; i++) {
