@@ -50,20 +50,15 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
                 position: [0, 0, 4],
                 fov: 50,
                 rotation: [0, 0, 0]
-            }} className={`bg-[#342A2A]`}>
+            }} className={`bg-[#351818]`} shadows>
 
-            {/* <ambientLight intensity={0.1} color={0xb0261c} /> */}
-            {/* <spotLight position={[2, 5, -4]} intensity={70} /> */}
-            <directionalLight intensity={1} position={[5,5,5]} color={0xffffff} />
-
-            {/* <mesh scale={1} position={[0,0,-2]} rotation={[1,1,1]}>
-                <boxGeometry args={[0.5,0.5,0.5]} />
-                <meshStandardMaterial color={'orange'} />
-            </mesh> */}
+            <directionalLight intensity={1} position={[0,5,5]} color={0xcd5c5c} />
+            <directionalLight intensity={0.6} position={[0,10,2]} color={0xffffff} castShadow shadow-bias={0.0001} shadow-normalBias={0.000001} />
+            <ambientLight intensity={1} color={0x420D09} />
            
-            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.6, 0, 0]} scale={0.6} castShadow />
-            {/* Terrain betétele */}
-            <Terrain receiveShadow castShadow />
+            <StaticRover rotation={[0.5,-2.8, 0]} position={[1.5, 0, 0]} scale={0.6} />
+
+            <Terrain receiveShadow />
             <ParticleManager></ParticleManager>
         </Canvas>
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden bg-linear-90 from-black/10 from-40% to-60% to-transparent">
