@@ -40,7 +40,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   });
 
   const setTickTo = useCallback((t: number) => {
-    // after we run the algorithm, we'll generate the snapshots there. now all we need is to load them when requested
     try {
       const actualTick = Math.max(0, Math.min(deltas.length-1, t));
       if (actualTick == cycle.currentTick) return;
@@ -95,9 +94,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     setMap(newMap)
   }, [deltas, rover])
 
-  useEffect(() => { //INIT: start the algorithm and create snapshots. for now. TODO: get input for stuff... maybe this should be on the main page instead of the layout... maybe everything should be moved..
-    if (deltas.length > 0) return //dont run it twice
-    //NOW I SEE IT, IDIOT TWICE, NOT INCLUDED THE STATE TO THE DEPENDENCY, IT WILL BE ALWAYS THE INITIAL VALUE
+  useEffect(() => {
+    if (deltas.length > 0) return
     let isZero = false
     setDeltas(prev=>{
       if(prev.length == 0){
@@ -115,7 +113,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     const start = async()=>{
       const start = new Date()
       const path = makePath(timeLimit, deepCopy(initialMap));
-      setDeltas(path.deltas); //IDIOT, the algorithm is slow, so the time we're gonna set the deltas, it's already re-rendered
+      setDeltas(path.deltas);
       const end = new Date()
       console.log("time: ", end.getTime() - start.getTime())
       console.log("deltas: ", path.deltas)
@@ -148,7 +146,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         rover: rover ?? DefaultRoverContextObject,
         startingPoint: startingPoint,
       }}>
-        <Renderer /> {/* THIS WILL HAVE THE THREEJS CANVAS LATER ON */}
+        <Renderer />
         <GUI />
       </MapTimeLineContext.Provider>
     </CycleContext.Provider>
