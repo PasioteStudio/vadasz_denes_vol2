@@ -4,7 +4,10 @@ import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 
 export default function CurrentAction() {
     const { currentTick } = useCycle();
-    const currentAction = "TODO FROM DELTAS"
+    const deltas = useTimeline().deltas;
+    if(deltas.length == 0) return;
+    const moves = deltas[deltas.length-1].moves;
+    const currentAction = moves[moves.length-1];
     const { resting, restingOpacity } = useUIHelper();
 
     const actionMap: Record<string, string> = {
@@ -18,7 +21,7 @@ export default function CurrentAction() {
         <div
             className={`
         fixed top-1/4 right-2
-        w-36 p-2
+        w-max p-2
         bg-[#1e1e2f]/90 border border-[#ff4500]
         rounded-lg shadow-lg
         text-[#ffdda0] font-mono
@@ -26,10 +29,10 @@ export default function CurrentAction() {
       `}
             style={{ opacity: resting ? restingOpacity / 100 : 1 }}
         >
-            <p className="text-sm font-semibold my-0">Jelenleg:</p>
-            <p className="text-sm mb-3 my-0">{actionMap[currentAction] ?? currentAction}</p>
-            <p className="text-xs">Pozíció: {pos.x} ; {pos.y}</p>
-            <p className="text-xs">fogyasztás: TODO</p>
+            <p className="text-sm w-max font-semibold my-0">Jelenleg:</p>
+            <p className="text-sm w-max mb-3 my-0">{actionMap[currentAction.mode] ?? currentAction.mode}</p>
+            <p className="text-xs w-max">Cél Pozíció: {pos.x}, {pos.y}</p>
+            <p className="text-xs w-max">fogyasztás: TODO</p>
         </div>
     );
 }

@@ -7,7 +7,7 @@ import { Renderer } from "@/components/rendering/Renderer";
 import { Tile } from "@/util/constants";
 import { makePath } from "@/util/algorithm";
 import { deepCopy } from "@/util/path";
-import { Delta } from "@/types/MapTimelineContextTypes";
+import { Delta, Move } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { getEnergyForTick, processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
 import { getStartingPoint } from "@/util/map";
@@ -143,7 +143,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         deltas: deltas,
         map: map,
         rover: rover ?? DefaultRoverContextObject,
-        startingPoint: startingPoint,
+        startingPoint: startingPoint
       }}>
         <Renderer />
         <GUI />
