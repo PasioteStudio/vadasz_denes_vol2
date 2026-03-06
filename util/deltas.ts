@@ -74,9 +74,7 @@ export const processMapChanges = (startMap: Tile[][], roverMoves: Move[], direct
     let newMap = startMap.map(row => [...row]);
 
     for (const d of deltas) {
-        console.log("move:", d.mode, "ore:", d.ore, "from:", d.from)
         if (d.mode != "mine" || d.ore === undefined) continue;
-        console.log("APPLYING mine at", d.from, "setting to", direction == 1 ? Tile.Empty : d.ore)
         newMap[d.from.y][d.from.x] = direction == 1 ? Tile.Empty : d.ore;
     }
 

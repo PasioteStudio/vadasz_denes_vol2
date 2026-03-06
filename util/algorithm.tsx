@@ -111,7 +111,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
         deltas.push({
             energy: -1 + (isDay(i) ? 10 : 0),
             inventoryChanges: [],
-            logsAdded: [{ message: "Állás itt: TODO" }],
+            logsAdded: [{ message: "Várakozás..." }],
             moves: [{
                 from: final_path[i - 1].position,
                 to: final_path[i - 1].position,
