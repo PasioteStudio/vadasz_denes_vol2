@@ -10,6 +10,7 @@ import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
+import { ParticleManager } from './Particles/ParticleManager';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -137,6 +138,8 @@ export const Renderer = () => {
     return () => {window.removeEventListener('wheel', handleScroll);window.removeEventListener('keydown', handleCameraToggle)};
   }, []);
 
+
+
   return (
     <>
       <Canvas style={{ width: '100vw', height: '100vh' }} shadows>
@@ -160,6 +163,7 @@ export const Renderer = () => {
             direction.y + (jumpToRoverOnMove ? (rover?.position.y ?? 0) : snapshots.snapshots.get(0)!.rover?.position.y ?? 0) * GAP]} rover={rover!} camH={CAM_HEIGHT}/>
 
         {rover && <MarsRover onSelect={showInventory} />}
+        <ParticleManager />
       </Canvas>
 
       {isInventoryOpen && (
