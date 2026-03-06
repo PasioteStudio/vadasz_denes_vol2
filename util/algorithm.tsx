@@ -65,7 +65,9 @@ export function makePath(iterations: number, map: Tile[][]): { path: Position[],
     final_path = temp_final_path
     go_home = temp_go_home
     final_path = [...final_path,...go_home]
-    
+    //setting all the values
+
+
     //waiting
     for (let i = my_path.length; i < iterations; i++) {
         my_path.push(my_path[i - 1])
