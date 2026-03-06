@@ -15,9 +15,21 @@ enum TimeComplexity {
     SLOW = 0.999999999
 }
 
-export function makePath(iterations: number, map: Tile[][],time_complexity?:TimeComplexity): { path: Position[], deltas: Delta[] } {
-    if(!time_complexity){
-        time_complexity = TimeComplexity.REGULAR
+export function makePath(iterations: number, map: Tile[][],complexity?:TimeComplexity): { path: Position[], deltas: Delta[] } {
+    if(!complexity){
+        complexity = TimeComplexity.REGULAR
+    }
+    let time_complexity = 0;
+    switch(complexity){
+        case TimeComplexity.FAST:
+            time_complexity = Math.max(0.999/0.99999,Math.min(1,iterations / 200)) * 0.99999 //0.999 - 0.99999
+            break;
+        case TimeComplexity.REGULAR:
+            time_complexity = Math.max(0.99999/0.99999993,Math.min(1,iterations / 200)) * 0.99999993 //0.99999 - 0.99999993
+            break;
+        case TimeComplexity.SLOW:
+            time_complexity = Math.max(0.99999993/0.999999999,Math.min(1,iterations / 200)) * 0.999999999 //0.99999993 - 0.999999999
+            break;
     }
     const deltas: Delta[] = [];
 
@@ -67,8 +79,6 @@ export function makePath(iterations: number, map: Tile[][],time_complexity?:Time
         const astarpath = astar.search(graphWithWeight, startNode, endNode);
         go_home = astarpath.map(tile=>{return {action:"move",position:{x:tile.y,y:tile.x}}})
         
-        console.log("salesman",ordered_path)
-        console.log("regular",my_path.map(i=>i.position))
     }
     if(temp_final_path.length != 0){
         final_path = temp_final_path
