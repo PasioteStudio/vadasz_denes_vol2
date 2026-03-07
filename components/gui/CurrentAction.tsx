@@ -7,8 +7,8 @@ export default function CurrentAction() {
     const deltas = useTimeline().deltas;
     if(deltas.length == 0) return;
     const moves = deltas[deltas.length-1].moves;
-    const currentAction = moves[moves.length-1];
     const { resting, restingOpacity } = useUIHelper();
+    const currentAction = moves[moves.length-1];
 
     const actionMap: Record<string, string> = {
         move: "mozgás",
