@@ -17,7 +17,6 @@ export const processPositionChanges = (startPos: Position, delta: Move[], direct
 export const processInventoryChanges = (startInv: Item[], delta: InventoryChange[], direction: -1 | 1): Item[] => {
     const deltas = direction == 1 ? [...delta] : [...delta].reverse()
     let newInv = [...startInv];
-    console.log(newInv, delta);
     deltas.forEach(d => {
         if ((d.mode == "add" && direction == 1)
             || (d.mode == "remove" && direction == -1)) { // add item
@@ -77,12 +76,14 @@ export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], rove
 
     for (const d of deltas) {
         if (d.mode != "mine" || d.ore === undefined) continue;
-        const prevEntry = {...newMap[d.from.y][d.from.x]};
-        console.log(prevEntry)
+        const prevEntry = {...newMap[d.to.y][d.to.x]};
+        if(prevEntry[2]===null){
+            prevEntry[2] = randomTileFrom(Tile.Empty)
+        }
         newMap[d.from.y][d.from.x] = [
             direction == 1,
             prevEntry[1],
-            prevEntry[2] != null ? prevEntry[2] : randomTileFrom(Tile.Empty)
+            prevEntry[2]
         ]
     }
 

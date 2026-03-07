@@ -92,12 +92,10 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   }, [deltas, rover])
 
   useEffect(() => {
-    if (deltas.length > 0) return
+    if (deltas.length > 1) return
     setFlavoredMap(generateFlavoredMap(map));
-    let isZero = true // ez mi, pápus? flase-ra volt állítva, így semmi sem ment tovább
     setDeltas(prev=>{
       if(prev.length == 0){
-        isZero=true
         return [{
             energy: 0,
             inventoryChanges: [],
@@ -107,7 +105,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }
       return prev
     })
-    if(!isZero) return
     const start = new Date()
     const worker = new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' })
     console.log("here")
