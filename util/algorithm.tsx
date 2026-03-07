@@ -9,6 +9,7 @@ import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
 
 enum TimeComplexity {
+    MINIMAL = 0.999,
     FAST = 0.99999,
     REGULAR = 0.99999993,
     SLOW = 0.999999999
@@ -23,14 +24,18 @@ const max_stack = 5
 export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): Promise<{ path: Position[], deltas: Delta[] }> {
     let time_complexity = 0;
     switch(complexity){ //converting path size 0-200
+        case TimeComplexity.MINIMAL:
         case TimeComplexity.FAST:
-            time_complexity = Math.max(0.999/0.99999,Math.min(1,iterations / 200)) * 0.99999 //0.999 - 0.99999
+            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,Math.min(1,iterations / 200)) * TimeComplexity.FAST //0.999 - 0.99999
+            time_complexity = (time_complexity - (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2) * -1 + (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2 //0.99999 - 0.999
             break;
         case TimeComplexity.REGULAR:
-            time_complexity = Math.max(0.99999/0.99999993,Math.min(1,iterations / 200)) * 0.99999993 //0.99999 - 0.99999993
+            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,Math.min(1,iterations / 200)) * TimeComplexity.REGULAR //0.99999 - 0.99999993
+            time_complexity = (time_complexity - (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2) * -1 + (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2 //0.99999993 - 0.99999
             break;
         case TimeComplexity.SLOW:
-            time_complexity = Math.max(0.99999993/0.999999999,Math.min(1,iterations / 200)) * 0.999999999 //0.99999993 - 0.999999999
+            time_complexity = Math.max(TimeComplexity.REGULAR/TimeComplexity.SLOW,Math.min(1,iterations / 200)) * TimeComplexity.SLOW //0.99999993 - 0.999999999
+            time_complexity = (time_complexity - (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2) * -1 + (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2 //0.999999999 - 0.99999993
             break;
     }
     const deltas: Delta[] = [];
@@ -88,7 +93,7 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
         //console.log("path",my_path)
 
     }
-    console.log(current_stack)
+    //if the algorith ran more than once and the last one isnt valid, then replace it
     if(temp_final_path.length != 0 && final_path.length + go_home.length > iterations){
         final_path = temp_final_path
         go_home = temp_go_home
