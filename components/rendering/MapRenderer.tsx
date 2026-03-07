@@ -7,8 +7,8 @@ import { clampNum } from "@/util/math";
 import { Tile } from "@/util/constants";
 
 type Bounds = { minRow: number; maxRow: number; minCol: number; maxCol: number };
-const VISIBLE_ROWS = 26;
-const VISIBLE_COLS = 27;
+const VISIBLE_ROWS = 30;
+const VISIBLE_COLS = 30;
 const RADIUS_ROWS = Math.floor(VISIBLE_ROWS / 2);
 const RADIUS_COLS = Math.floor(VISIBLE_COLS / 2);
 const rxOffset = RADIUS_COLS / 2;

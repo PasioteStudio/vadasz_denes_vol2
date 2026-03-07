@@ -9,7 +9,7 @@ import { WaterTile } from "@/Prefabs/WaterTile";
 import { RareTile } from "@/Prefabs/RareTile";
 import { BaseTile } from "@/Prefabs/BaseTile";
 
-export const TILE_GAP = 2.2;
+export const TILE_GAP = 2.1;
 
 interface TileRendererProps {
   tile: Tile
