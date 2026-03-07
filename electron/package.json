@@ -1,12 +1,13 @@
 {
   "name": "vadasz_denes_vol2",
   "main": "main.js",
+  "description": "Vadász Dénes program",
   "author": {
-    "name": "Attila Pope",
-    "email": "szopdleafaszom@pasiotestudio.hu",
+    "name": "SzigMakik",
+    "email": "boss@pasiotestudio.hu",
     "url": "https://pasiotestudio.hu"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "package": "electron-builder -w --x64"
@@ -20,13 +21,23 @@
     "electron-builder": "^26.8.1"
   },
   "build": {
-    "appId": "vadasz.denes.atemzy",
+    "appId": "vadasz.denes.szigmakik",
     "productName": "Vadász Dénes",
-    "copyright": "Copyright © 2026 Pasiote Studio",
+    "compression":"maximum",
+    "releaseInfo":{
+      "releaseDate":"2026.03.07",
+      "releaseName":"Vadász Dénes",
+      "releaseNotes":"Version 0.2.0"
+    },
+    "extraMetadata":"Vadász Dénes program",
+    "electronLanguages":"hu",
+    "copyright": "Copyright © 2026 SzigMakik",
+    "icon": "./favicon.ico",
     "publish": {
       "provider": "github",
-      "owner": "Attila Pope",
+      "owner": "SzigMakik",
       "repo": "vadasz_denes_vol2"
-    }
+    },
+    "asar": true
   }
 }
