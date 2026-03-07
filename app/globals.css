@@ -4,7 +4,28 @@
   --background: #0a0a0a;
   --foreground: #ededed;
 }
+::-webkit-scrollbar {
+  width: 20px;
+  height: 20px; /* for horizontal scrollbars */
+}
 
+::-webkit-scrollbar-track {
+  background: #1e1e2faa;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff4500;
+}
+
+::-webkit-scrollbar-button {
+  display: none
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ff4500 #1e1e2faa;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

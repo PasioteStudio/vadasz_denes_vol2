@@ -95,7 +95,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
                 mode: "add",
                 ore: map[y][x],
             } as InventoryChange ]: []),
-            logsAdded: [{ message: final_path[i].action == "mine" ? `Bányászás: ${tileToString(map[y][x])}` : 
+            logsAdded: [{ message: final_path[i].action == "mine" ? `+1 ${tileToString(map[y][x])}` : 
             `Mozgás ide: ${final_path[i].position.x}, ${final_path[i].position.y}` }],
             moves: [{
                 from: i == 0 ? start : final_path[i - 1].position,

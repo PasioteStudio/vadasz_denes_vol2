@@ -13,8 +13,9 @@ function FreshLog({ message }: { message: string }) {
 
     return (
         <span className={`
-            text-[0.8vw] font-mono wrap-break-word text-[#ffdda0] text-center block
+            text-[1dwvw] font-mono wrap-break-word text-[#ffdda0] text-center block
             transition-all duration-300 ease-out
+            text-shadow-lg text-shadow-black
             ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
         `}>
             {message}
@@ -33,7 +34,7 @@ export default function LogDisplayer() {
     }, [logs]);
 
     const renderLog = (log: { message: string }, i: number) => (
-        <span key={i} className="text-[0.8vw] font-mono wrap-break-word text-[#ffdda0] text-center">
+        <span key={i} className="text-[0.8vw] font-mono wrap-break-word text-[#ffdda0]">
             {log.message}
         </span>
     );
@@ -43,15 +44,15 @@ export default function LogDisplayer() {
             <div
                 className="
                     fixed bottom-2 right-2
-                    w-28 h-32 p-2
+                    w-[20vw] h-32 p-2
                     bg-[#1e1e2f]/90
                     border border-[#ff4500]
                     rounded-lg shadow-lg
                     flex flex-col gap-1
-                    overflow-y-auto overflow-x-hidden
+                    overflow-y-scroll overflow-x-hidden
                     text-xs font-mono text-[#ffdda0]
                     duration-200
-                    hover:w-96 hover:h-[60vh]
+                    hover:h-[50vh]
                 "
                 style={{ opacity: resting ? restingOpacity / 100 : 1 }}
             >
