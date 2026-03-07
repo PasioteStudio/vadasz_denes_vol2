@@ -94,7 +94,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => {
     if (deltas.length > 0) return
     setFlavoredMap(generateFlavoredMap(map));
-    let isZero = false
+    let isZero = true // ez mi, pápus? flase-ra volt állítva, így semmi sem ment tovább
     setDeltas(prev=>{
       if(prev.length == 0){
         isZero=true
