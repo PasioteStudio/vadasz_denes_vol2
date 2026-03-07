@@ -88,7 +88,7 @@ export function makePath(iterations: number, map: Tile[][],time_complexity:TimeC
     if(temp_final_path.length != 0 && final_path.length + go_home.length > iterations){
         final_path = temp_final_path
         go_home = temp_go_home
-    }else if(final_path.length + go_home.length > iterations){ //algorith ran only once and the last one (the only one) isnt valid
+    }else if(temp_final_path.length == 0 && final_path.length + go_home.length > iterations){ //algorith ran only once and the last one (the only one) isnt valid
         final_path = weight_based_path
     }
     final_path = [...final_path,...go_home]
