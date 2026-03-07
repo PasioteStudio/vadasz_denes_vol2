@@ -9,10 +9,10 @@ import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
 
 enum TimeComplexity {
-    MINIMAL = 0.999,
-    FAST = 0.99999,
+    MINIMAL = 0.999999,
+    FAST = 0.9999999,
     REGULAR = 0.99999993,
-    SLOW = 0.999999999
+    SLOW = 0.99999999
 }
 
 interface Action {
@@ -21,22 +21,19 @@ interface Action {
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): Promise<{ path: Position[], deltas: Delta[] }> {
+export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): { path: Position[], deltas: Delta[] } {
     let time_complexity = 0;
     let path_interval = Math.min(1,iterations / 200)//path size [0,200] (capped at 200)
     switch(complexity){ //converting path size to a time complexity
         case TimeComplexity.MINIMAL:
         case TimeComplexity.FAST:
-            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,path_interval) * TimeComplexity.FAST //path 0 = [0.999,0.99999] = 200
-            time_complexity = (time_complexity - (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2) * -1 + (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2 //[0.99999,0.999]
+            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,path_interval) * TimeComplexity.FAST //path 0 = [0.999999,0.9999999] = 200
             break;
         case TimeComplexity.REGULAR:
-            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,path_interval) * TimeComplexity.REGULAR //[0.99999,0.99999993]
-            time_complexity = (time_complexity - (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2) * -1 + (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2 //[0.99999993,0.99999]
+            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,path_interval) * TimeComplexity.REGULAR //[0.9999999,0.99999993]
             break;
         case TimeComplexity.SLOW:
             time_complexity = Math.max(TimeComplexity.REGULAR/TimeComplexity.SLOW,path_interval) * TimeComplexity.SLOW //[0.99999993,0.999999999]
-            time_complexity = (time_complexity - (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2) * -1 + (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2 //[0.999999999,0.99999993]
             break;
     }
     const deltas: Delta[] = [];
@@ -67,6 +64,7 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
     let go_home:Action[] = [];
     let temp_final_path:Action[] = [];
     let temp_go_home:Action[] = [];
+    let weight_based_path:Action[] = []
     let current_stack = 0
     while(final_path.length + (final_path.length < 1 ? 0 : findNearestOre(final_path[final_path.length - 1].position.x,final_path[final_path.length - 1].position.y,update_able_map).distance) +  go_home.length < iterations && current_stack < max_stack){
         current_stack++
@@ -75,10 +73,16 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
 
         //weight based path
         let {my_path} = estimatePathWithWeight(obstacle_map,update_able_map,final_path.length < 1 ? start : final_path[final_path.length - 1].position,start,iterations - final_path.length)
+        //check if the calculated path collected the same ores like the previous calculation
+        const current_ores = my_path.filter(i=>i.action == "mine")
+        const prev_ores = weight_based_path.filter(i=>i.action == "mine")
+        if(current_ores.length == prev_ores.length)break;
+
         my_path = [...final_path,...my_path]
+        weight_based_path = deepCopy(my_path)
         
         //salesman
-        const {ordered_path} = salesmanSolver(my_path.filter(i=>i.action == "mine").map(i=>i.position),obstacle_map,start,time_complexity)
+        const {ordered_path} = salesmanSolver(current_ores.map(i=>i.position),obstacle_map,start,time_complexity)
         final_path = ordered_path
 
         let column:Position = ordered_path[ordered_path.length - 1].position
@@ -98,6 +102,8 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
     if(temp_final_path.length != 0 && final_path.length + go_home.length > iterations){
         final_path = temp_final_path
         go_home = temp_go_home
+    }else if(final_path.length + go_home.length > iterations){ //algorith ran only once and the last one (the only one) isnt valid
+        final_path = weight_based_path
     }
     final_path = [...final_path,...go_home]
     //setting all the values
@@ -136,7 +142,7 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
         })
     }
 
-    return new Promise((resolve)=>{resolve({ path: final_path.map(i=>i.position), deltas })})
+    return { path: final_path.map(i=>i.position), deltas }
 }
 
 // Salesman solver: given a set of ore positions, returns an optimally ordered

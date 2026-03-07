@@ -111,7 +111,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       return prev
     })
     if(!isZero) return
-    const start = async()=>{
+    const start = () =>{
       const start = new Date()
       worker.current.postMessage({
         type: "makePath",

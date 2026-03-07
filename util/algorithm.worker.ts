@@ -11,12 +11,12 @@ interface MakePathRequest {
   complexity?: number;
 }
 
-self.onmessage = async (event: MessageEvent) => {
+self.onmessage = (event: MessageEvent) => {
   const data = event.data as MakePathRequest;
   if (data.type === "makePath") {
     try {
       // Call makePath and post result back
-      const result = await makePath(data.iterations, data.map, data.complexity);
+      const result = makePath(data.iterations, data.map, data.complexity);
       self.postMessage({ type: "makePathResult", result });
     } catch (error) {
       self.postMessage({ type: "error", error: error instanceof Error ? error.message : String(error) });
