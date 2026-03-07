@@ -28,7 +28,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
   });
-  const worker = useRef(new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' }))
   const t = useRef(0);
   const startingPoint = getStartingPoint(initialMap)
   const [map, setMap] = useState<Tile[][]>(initialMap);
@@ -113,12 +112,13 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     if(!isZero) return
     const start = () =>{
       const start = new Date()
-      worker.current.postMessage({
+      const worker = new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' })
+      worker.postMessage({
         type: "makePath",
         iterations:timeLimit,
         map:deepCopy(initialMap)
       });
-      worker.current.onmessage = (event) => {
+      worker.onmessage = (event) => {
         if (event.data.type === "makePathResult") {
           const end = new Date()
           console.log("time: ", end.getTime() - start.getTime())
@@ -129,7 +129,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         } else if (event.data.type === "error") {
           console.error("Worker error:", event.data.error);
         }
-        worker.current.terminate();
+        worker.terminate();
       };
     }
     start()
