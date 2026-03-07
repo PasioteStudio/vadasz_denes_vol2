@@ -8,7 +8,7 @@ import { Tile } from "@/util/constants";
 import { Delta, Move } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { getEnergyForTick, processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
-import { getStartingPoint } from "@/util/map";
+import { generateFlavoredMap, getStartingPoint } from "@/util/map";
 import { clamp } from "three/src/math/MathUtils.js";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
@@ -27,6 +27,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const t = useRef(0);
   const startingPoint = getStartingPoint(initialMap)
   const [map, setMap] = useState<Tile[][]>(initialMap);
+  const [flavoredMap, setFlavoredMap] = useState<[boolean, Tile, Tile|null][][]>([])
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [rover, setRover] = useState<RoverT>({
     energy: 100,
@@ -68,7 +69,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let logs: Log[] = [...rover!.logs];
 
 
-    let newMap = map.map(row => [...row]);
+    let newMap = flavoredMap.map(row => [...row]);
 
     deltasToExecute.forEach(d => {
       energy = getEnergyForTick(cTick, deltas);
@@ -87,11 +88,12 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         position: position,
       }
     })
-    setMap(newMap)
+    setFlavoredMap(newMap)
   }, [deltas, rover])
 
   useEffect(() => {
     if (deltas.length > 0) return
+    setFlavoredMap(generateFlavoredMap(map));
     let isZero = false
     setDeltas(prev=>{
       if(prev.length == 0){
@@ -150,7 +152,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         deltas: deltas,
         map: map,
         rover: rover ?? DefaultRoverContextObject,
-        startingPoint: startingPoint
+        startingPoint: startingPoint,
+        flavoredMap: flavoredMap,
       }}>
         <Renderer />
         <GUI />

@@ -20,7 +20,7 @@ export default function MapRenderer({
     rover,
     camH,
 }: {
-    map: Tile[][],
+    map: [boolean, Tile, Tile|null][][],
     camPos: [number, number, number],
     rover: RoverT,
     camH: number,

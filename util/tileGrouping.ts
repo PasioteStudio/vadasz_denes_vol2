@@ -10,7 +10,7 @@ export interface TilePositionGroup {
  * Used for efficient instanced rendering
  */
 export function groupTilesByType(
-  map: Tile[][],
+  map: [boolean, Tile, Tile|null][][],
   bounds: {
     minRow: number;
     maxRow: number;
@@ -41,7 +41,8 @@ export function groupTilesByType(
 
   for (let row = safeMinRow; row <= safeMaxRow; row++) {
     for (let col = safeMinCol; col <= safeMaxCol; col++) {
-      const field = map[row]?.[col];
+      const currentRecord = map[row]?.[col];
+      const field = currentRecord[0] ? currentRecord[2]! : currentRecord[1];
       if (field === undefined) continue;
 
       const tileType = field;

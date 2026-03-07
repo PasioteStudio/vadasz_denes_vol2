@@ -32,7 +32,8 @@ export const DefaultTimelineContextObject: MapTimelineContextT = {
     map: [],
     deltas: [],
     rover: DefaultRoverContextObject,
-    startingPoint: {x:0,y:0}
+    startingPoint: {x:0,y:0},
+    flavoredMap: []
 }
 
 export const DefaultUIHelperContextObject: UIHelperContextT = {

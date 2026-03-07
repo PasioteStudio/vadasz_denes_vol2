@@ -43,7 +43,7 @@ export const Renderer = () => {
   const [isInventoryOpen, setInventoryOpen] = useState(false);
   const [cameraRotationEnabled, setCamRotEnabled] = useState(false);
 
-  const map = timeline.map;
+  const map = timeline.flavoredMap;
   const rover = timeline.rover;
 
   const jumpToRoverOnMove = false;

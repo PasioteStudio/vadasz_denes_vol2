@@ -2,6 +2,7 @@ import { Delta, InventoryChange, Move } from "@/types/MapTimelineContextTypes"
 import { Item, Log, Position } from "@/types/RoverContextTypes"
 import { Tile } from "./constants"
 import { clamp } from "three/src/math/MathUtils.js"
+import { randomTileFrom } from "./map"
 
 export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
@@ -70,13 +71,18 @@ export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction:
     return newLogs;
 }
 
-export const processMapChanges = (startMap: Tile[][], roverMoves: Move[], direction: -1 | 1): Tile[][] => {
+export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], roverMoves: Move[], direction: -1 | 1): [boolean, Tile, Tile|null][][] => {
     const deltas = direction == 1 ? [...roverMoves] : [...roverMoves].reverse()
     let newMap = startMap.map(row => [...row]);
 
     for (const d of deltas) {
         if (d.mode != "mine" || d.ore === undefined) continue;
-        newMap[d.from.y][d.from.x] = direction == 1 ? Tile.Empty : d.ore;
+        const prevEntry = newMap[d.from.y][d.from.x];
+        newMap[d.from.y][d.from.x] = [
+            direction == 1,
+            prevEntry[1],
+            prevEntry[2] != null ? prevEntry[2] : randomTileFrom(Tile.Empty)
+        ]
     }
 
     return newMap;

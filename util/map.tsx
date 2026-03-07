@@ -122,13 +122,14 @@ export const getStartingPoint = (map: Tile[][]): Position => {
 }
 
 
-export const generateFlavoredMap = (map: Tile[][]): [Tile, Tile|null][][] => {
-  const falvoredMap: [Tile, Tile|null][][] = [];
+export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][][] => {
+  const falvoredMap: [boolean, Tile, Tile|null][][] = [];
   for (let y = 0; y < map.length; y++) {
     falvoredMap.push([]);
     for (let x = 0; x < map.length; x++) {
       const tiletype = map[y][x];
       falvoredMap[y].push([
+        false,
         randomTileFrom(tiletype),
         null,
       ])
@@ -137,7 +138,7 @@ export const generateFlavoredMap = (map: Tile[][]): [Tile, Tile|null][][] => {
   return falvoredMap;
 }
 
-const randomTileFrom = (t: Tile): Tile => { 
+export const randomTileFrom = (t: Tile): Tile => { 
   let int = 6;
   let range: [number, number] = [0, 0];
 
