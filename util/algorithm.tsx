@@ -66,8 +66,9 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
         current_stack++
         temp_final_path = final_path
         temp_go_home = go_home
-        //METHOD 2: go with the flow ~
-        let {my_path} = estimatePathWithWeight(obstacle_map,update_able_map,start,final_path.length < 1 ? start : final_path[final_path.length - 1].position,iterations - final_path.length)
+
+        //weight based path
+        let {my_path} = estimatePathWithWeight(obstacle_map,update_able_map,final_path.length < 1 ? start : final_path[final_path.length - 1].position,start,iterations - final_path.length)
         my_path = [...final_path,...my_path]
         
         //salesman
@@ -87,7 +88,8 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
         //console.log("path",my_path)
 
     }
-    if(temp_final_path.length != 0){
+    console.log(current_stack)
+    if(temp_final_path.length != 0 && final_path.length + go_home.length > iterations){
         final_path = temp_final_path
         go_home = temp_go_home
     }
