@@ -23,19 +23,20 @@ interface Action {
 const max_stack = 5
 export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): Promise<{ path: Position[], deltas: Delta[] }> {
     let time_complexity = 0;
-    switch(complexity){ //converting path size 0-200
+    let path_interval = Math.min(1,iterations / 200)//path size [0,200] (capped at 200)
+    switch(complexity){ //converting path size to a time complexity
         case TimeComplexity.MINIMAL:
         case TimeComplexity.FAST:
-            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,Math.min(1,iterations / 200)) * TimeComplexity.FAST //0.999 - 0.99999
-            time_complexity = (time_complexity - (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2) * -1 + (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2 //0.99999 - 0.999
+            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,path_interval) * TimeComplexity.FAST //path 0 = [0.999,0.99999] = 200
+            time_complexity = (time_complexity - (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2) * -1 + (TimeComplexity.FAST + TimeComplexity.MINIMAL) / 2 //[0.99999,0.999]
             break;
         case TimeComplexity.REGULAR:
-            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,Math.min(1,iterations / 200)) * TimeComplexity.REGULAR //0.99999 - 0.99999993
-            time_complexity = (time_complexity - (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2) * -1 + (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2 //0.99999993 - 0.99999
+            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,path_interval) * TimeComplexity.REGULAR //[0.99999,0.99999993]
+            time_complexity = (time_complexity - (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2) * -1 + (TimeComplexity.REGULAR + TimeComplexity.FAST) / 2 //[0.99999993,0.99999]
             break;
         case TimeComplexity.SLOW:
-            time_complexity = Math.max(TimeComplexity.REGULAR/TimeComplexity.SLOW,Math.min(1,iterations / 200)) * TimeComplexity.SLOW //0.99999993 - 0.999999999
-            time_complexity = (time_complexity - (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2) * -1 + (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2 //0.999999999 - 0.99999993
+            time_complexity = Math.max(TimeComplexity.REGULAR/TimeComplexity.SLOW,path_interval) * TimeComplexity.SLOW //[0.99999993,0.999999999]
+            time_complexity = (time_complexity - (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2) * -1 + (TimeComplexity.SLOW + TimeComplexity.REGULAR) / 2 //[0.999999999,0.99999993]
             break;
     }
     const deltas: Delta[] = [];
