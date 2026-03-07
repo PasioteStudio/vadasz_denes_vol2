@@ -14,6 +14,7 @@ import { getStartingPoint } from "@/util/map";
 import { time } from "console";
 import { clamp } from "three/src/math/MathUtils.js";
 
+
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit">>({
     currentTick: 0,
@@ -27,6 +28,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
   });
+  const worker = useRef(new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' }))
   const t = useRef(0);
   const startingPoint = getStartingPoint(initialMap)
   const [map, setMap] = useState<Tile[][]>(initialMap);
@@ -111,12 +113,24 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     if(!isZero) return
     const start = async()=>{
       const start = new Date()
-      const path = makePath(timeLimit, deepCopy(initialMap));
-      setDeltas(path.deltas);
-      const end = new Date()
-      console.log("time: ", end.getTime() - start.getTime())
-      console.log("deltas: ", path.deltas)
-      console.log("path:", path.path)
+      worker.current.postMessage({
+        type: "makePath",
+        iterations:timeLimit,
+        map:deepCopy(initialMap)
+      });
+      worker.current.onmessage = (event) => {
+        if (event.data.type === "makePathResult") {
+          const end = new Date()
+          console.log("time: ", end.getTime() - start.getTime())
+          const path = event.data.result;
+          console.log("deltas: ", path.deltas)
+          console.log("path:", path.path)
+          setDeltas(path.deltas);
+        } else if (event.data.type === "error") {
+          console.error("Worker error:", event.data.error);
+        }
+        worker.current.terminate();
+      };
     }
     start()
   }, [initialMap])

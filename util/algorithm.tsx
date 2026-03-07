@@ -7,7 +7,6 @@ import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
 import { solve } from "./salesman"
 import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
-import { Dispatch, SetStateAction } from "react";
 
 enum TimeComplexity {
     FAST = 0.99999,
@@ -15,12 +14,15 @@ enum TimeComplexity {
     SLOW = 0.999999999
 }
 
-export function makePath(iterations: number, map: Tile[][],complexity?:TimeComplexity): { path: Position[], deltas: Delta[] } {
-    if(!complexity){
-        complexity = TimeComplexity.REGULAR
-    }
+interface Action {
+    action:"move"|"mine",
+    position:Position
+}
+
+const max_stack = 5
+export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): Promise<{ path: Position[], deltas: Delta[] }> {
     let time_complexity = 0;
-    switch(complexity){
+    switch(complexity){ //converting path size 0-200
         case TimeComplexity.FAST:
             time_complexity = Math.max(0.999/0.99999,Math.min(1,iterations / 200)) * 0.99999 //0.999 - 0.99999
             break;
@@ -55,15 +57,17 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
         moves: [{ from: start, to: start, mode: "wait" }]
     })
 
-    let final_path:{action:"move"|"mine",position:Position}[] = [];
-    let go_home:{action:"move"|"mine",position:Position}[] = [];
-    let temp_final_path:{action:"move"|"mine",position:Position}[] = [];
-    let temp_go_home:{action:"move"|"mine",position:Position}[] = [];
-    while(final_path.length + (final_path.length < 1 ? 0 : findNearestOre(final_path[final_path.length - 1].position.x,final_path[final_path.length - 1].position.y,update_able_map).distance) +  go_home.length < iterations){
+    let final_path:Action[] = [];
+    let go_home:Action[] = [];
+    let temp_final_path:Action[] = [];
+    let temp_go_home:Action[] = [];
+    let current_stack = 0
+    while(final_path.length + (final_path.length < 1 ? 0 : findNearestOre(final_path[final_path.length - 1].position.x,final_path[final_path.length - 1].position.y,update_able_map).distance) +  go_home.length < iterations && current_stack < max_stack){
+        current_stack++
         temp_final_path = final_path
         temp_go_home = go_home
         //METHOD 2: go with the flow ~
-        let {my_path} = estimatePathWithWeight(map,obstacle_map,update_able_map,start,final_path.length < 1 ? start : final_path[final_path.length - 1].position,iterations - final_path.length)
+        let {my_path} = estimatePathWithWeight(obstacle_map,update_able_map,start,final_path.length < 1 ? start : final_path[final_path.length - 1].position,iterations - final_path.length)
         my_path = [...final_path,...my_path]
         
         //salesman
@@ -79,6 +83,9 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
         const astarpath = astar.search(graphWithWeight, startNode, endNode);
         go_home = astarpath.map(tile=>{return {action:"move",position:{x:tile.y,y:tile.x}}})
         
+        //console.log("salesman",ordered_path)
+        //console.log("path",my_path)
+
     }
     if(temp_final_path.length != 0){
         final_path = temp_final_path
@@ -121,7 +128,7 @@ export function makePath(iterations: number, map: Tile[][],complexity?:TimeCompl
         })
     }
 
-    return { path: final_path.map(i=>i.position), deltas }
+    return new Promise((resolve)=>{resolve({ path: final_path.map(i=>i.position), deltas })})
 }
 
 // Salesman solver: given a set of ore positions, returns an optimally ordered
@@ -131,10 +138,10 @@ export function salesmanSolver(
     obstacle_map: (0 | 1)[][],
     start: Position,
     time_complexity:TimeComplexity
-): { ordered_path: { action: "move" | "mine", position: Position }[] } {
+): { ordered_path: Action[] } {
     const solution = solve(mine_positions, time_complexity, undefined, undefined, true);
     const ordered_points = solution.map((i: number) => mine_positions[i]);
-    const ordered_path: { action: "move" | "mine", position: Position }[] = []
+    const ordered_path: Action[] = []
     let current = start
 
     for (let i = 0; i < ordered_points.length; i++) {
@@ -153,14 +160,13 @@ export function salesmanSolver(
 // Estimates a path using the vector field weight system, starting from `start` heading toward `end`.
 // Returns a list of move/mine actions without generating deltas — used as input for salesmanSolver.
 export function estimatePathWithWeight(
-    map: Tile[][],
     obstacle_map: (0 | 1)[][],
     update_able_map: WeightPoint[],
     start: Position,
     end: Position,
     iterations: number
-): { my_path: { action: "mine" | "move", position: Position }[] } {
-    const my_path: { action: "mine" | "move", position: Position }[] = []
+): { my_path: Action[] } {
+    const my_path: Action[] = []
     let column = calculateTile(update_able_map, start.x, start.y)
     let we_are_stuck = false;
     let have_to_go_back = false
@@ -189,10 +195,6 @@ export function estimatePathWithWeight(
             const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
             if (tile_id !== null) {
                 we_are_stuck = false
-                const tileY = Math.floor(tile_id / map[0].length);
-                const tileX = tile_id % map[0].length;
-                map = deepCopy(map)
-                map[tileY][tileX] = Tile.Empty
                 update_able_map[tile_id].weight = 0
                 my_path.push({ action: "move", position: { x: column.x, y: column.y } })
                 my_path.push({ action: "mine", position: { x: column.x, y: column.y } })
@@ -220,10 +222,6 @@ export function estimatePathWithWeight(
         const tile_id_temp = update_able_map.findIndex(tile => tile.y == column.y && tile.x == column.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
         if (tile_id !== null) {
-            const tileY = Math.floor(tile_id / map[0].length);
-            const tileX = tile_id % map[0].length;
-            map = deepCopy(map)
-            map[tileY][tileX] = Tile.Empty
             update_able_map[tile_id].weight = 0
             my_path.push({ action: "move", position: { x: column.x, y: column.y } })
             my_path.push({ action: "mine", position: { x: column.x, y: column.y } })

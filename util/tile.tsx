@@ -1,5 +1,5 @@
 import { Position } from "@/types/RoverContextTypes";
-import { Tile } from "./constants";
+import { Tile, VectorField } from "./constants";
 import { octantToStep } from "./path";
 import { WeightPoint } from "./constants";
 
@@ -41,7 +41,14 @@ export function isInDistance(point1:Position,point2:Position,distance:number):bo
   return Math.abs(point1.x - point2.x) <= distance && Math.abs(point1.y - point2.y) <= distance
 }
 
-export function calculateTile(weightPoints:WeightPoint[],x:number,y:number){
+/**
+ * Returns the VectorField of the point
+ * @param {WeightPoint[]} weightPoints
+ * @param {number} x
+ * @param {number} y
+ * @returns {VectorField} VectorField
+ */
+export function calculateTile(weightPoints:WeightPoint[],x:number,y:number) : VectorField{
   let totalInfluence = 0;
   let weightedPosX = 0;
   let weightedPosY = 0;
