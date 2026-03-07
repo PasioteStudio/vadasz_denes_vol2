@@ -105,7 +105,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const rotationChanged =
       Math.abs(shortestAngleDelta(startRotY, targetRotY)) > 0.001
 
-    const mining = false //TODO
+    const moves = timeline.deltas[cycle.currentTick].moves
+    const currentMove = moves[moves.length-1] // TODO ez majd ha több move lesz egy deltában, mert gyorsabban megy, akkor majd mindig egyesével átmegy az elvégzendő mozdulatokon a rover
+    const mining = currentMove.mode == "mine"
 
     const doRotate = rotationChanged
     const doMine = mining
