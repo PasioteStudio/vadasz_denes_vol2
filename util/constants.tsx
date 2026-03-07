@@ -28,6 +28,18 @@ export enum Tile {
     "Yellow",
     "Green",
     "Start",
+    "EV1",
+    "EV2",
+    "EV3",
+    "BV1",
+    "BV2",
+    "BV3",
+    "YV1",
+    "YV2",
+    "YV3",
+    "GV1",
+    "GV2",
+    "GV3",
 }
 export const vectorValues={
     ore:1
