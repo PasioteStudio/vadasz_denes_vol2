@@ -4,18 +4,20 @@ import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 
 export default function CurrentAction() {
     const { currentTick } = useCycle();
-    const deltas = useTimeline().deltas;
-    if(deltas.length == 0) return;
-    const moves = deltas[deltas.length-1].moves;
+    const { deltas, rover } = useTimeline();
     const { resting, restingOpacity } = useUIHelper();
-    const currentAction = moves[moves.length-1];
+
+    if (deltas.length === 0) return null;
+
+    const moves = deltas[deltas.length - 1].moves;
+    const currentAction = moves[moves.length - 1];
+    const pos = rover.position;
 
     const actionMap: Record<string, string> = {
         move: "mozgás",
         mine: "bányászás",
         wait: "alapjárat",
     };
-    const pos = useTimeline().rover.position;
 
     return (
         <div
