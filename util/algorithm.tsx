@@ -21,7 +21,7 @@ interface Action {
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][],time_complexity:TimeComplexity = TimeComplexity.REGULAR): { path: Position[], deltas: Delta[] } {
+export function makePath(iterations: number, map: Tile[][],time_complexity:TimeComplexity = TimeComplexity.FAST): { path: Position[], deltas: Delta[] } {
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };

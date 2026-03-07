@@ -77,7 +77,8 @@ export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], rove
 
     for (const d of deltas) {
         if (d.mode != "mine" || d.ore === undefined) continue;
-        const prevEntry = newMap[d.from.y][d.from.x];
+        const prevEntry = {...newMap[d.from.y][d.from.x]};
+        console.log(prevEntry)
         newMap[d.from.y][d.from.x] = [
             direction == 1,
             prevEntry[1],
