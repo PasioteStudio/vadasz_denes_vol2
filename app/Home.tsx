@@ -110,11 +110,13 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     if(!isZero) return
     const start = new Date()
     const worker = new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' })
+    console.log("here")
     worker.postMessage({
       type: "makePath",
       iterations:timeLimit,
       map:initialMap
     });
+    console.log("here")
     worker.onmessage = (event) => {
       if (event.data.type === "makePathResult") {
         const end = new Date()
@@ -128,6 +130,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }
       worker.terminate();
     };
+    console.log("here")
   }, [initialMap])
 
 

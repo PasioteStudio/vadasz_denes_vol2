@@ -143,6 +143,9 @@ export const randomTileFrom = (t: Tile): Tile => {
   let range: [number, number] = [0, 0];
 
   switch (t) {
+    case Tile.Start: 
+      range = [5,6];
+      break;
     case Tile.Empty:
       range = [6, 9];
       break;
