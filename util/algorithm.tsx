@@ -21,21 +21,7 @@ interface Action {
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][],complexity:TimeComplexity = TimeComplexity.REGULAR): { path: Position[], deltas: Delta[] } {
-    let time_complexity = 0;
-    let path_interval = Math.min(1,iterations / 200)//path size [0,200] (capped at 200)
-    switch(complexity){ //converting path size to a time complexity
-        case TimeComplexity.MINIMAL:
-        case TimeComplexity.FAST:
-            time_complexity = Math.max(TimeComplexity.MINIMAL/TimeComplexity.FAST,path_interval) * TimeComplexity.FAST //path 0 = [0.999999,0.9999999] = 200
-            break;
-        case TimeComplexity.REGULAR:
-            time_complexity = Math.max(TimeComplexity.FAST/TimeComplexity.REGULAR,path_interval) * TimeComplexity.REGULAR //[0.9999999,0.99999993]
-            break;
-        case TimeComplexity.SLOW:
-            time_complexity = Math.max(TimeComplexity.REGULAR/TimeComplexity.SLOW,path_interval) * TimeComplexity.SLOW //[0.99999993,0.999999999]
-            break;
-    }
+export function makePath(iterations: number, map: Tile[][],time_complexity:TimeComplexity = TimeComplexity.REGULAR): { path: Position[], deltas: Delta[] } {
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };
@@ -73,12 +59,12 @@ export function makePath(iterations: number, map: Tile[][],complexity:TimeComple
 
         //weight based path
         let {my_path} = estimatePathWithWeight(obstacle_map,update_able_map,final_path.length < 1 ? start : final_path[final_path.length - 1].position,start,iterations - final_path.length)
+        my_path = [...final_path,...my_path]
         //check if the calculated path collected the same ores like the previous calculation
         const current_ores = my_path.filter(i=>i.action == "mine")
         const prev_ores = weight_based_path.filter(i=>i.action == "mine")
         if(current_ores.length == prev_ores.length)break;
 
-        my_path = [...final_path,...my_path]
         weight_based_path = deepCopy(my_path)
         
         //salesman

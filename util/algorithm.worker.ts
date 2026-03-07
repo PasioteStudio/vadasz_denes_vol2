@@ -22,4 +22,6 @@ self.onmessage = (event: MessageEvent) => {
       self.postMessage({ type: "error", error: error instanceof Error ? error.message : String(error) });
     }
   }
+  //destroy worker after task is done
+    self.close();
 };
