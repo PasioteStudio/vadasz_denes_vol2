@@ -56,7 +56,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
             <directionalLight intensity={0.6} position={[-2,5,7]} color={0xffffff} castShadow shadow-bias={0.0001} shadow-normalBias={0.000001} />
             <ambientLight intensity={1} color={0x420D09} />
            
-            <StaticRover rotation={[0.1, 3.4, -0.15]} position={[-2.3, -0.1, -20]} scale={0.8} />
+            <StaticRover rotation={[0.1, 3.4, -0.1]} position={[-3.3, -0.1, -20]} scale={0.8} />
 
             <Terrain receiveShadow />
             <ParticleManager></ParticleManager>
