@@ -162,7 +162,7 @@ export const Renderer = () => {
   return (
     <>
       <Canvas style={{ width: '100vw', height: '100vh' }} shadows 
-      className={`bg-[#351818]`}>
+      className={`bg-[#1b0000]`}>
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault

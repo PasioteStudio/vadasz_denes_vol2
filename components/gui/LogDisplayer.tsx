@@ -3,7 +3,14 @@
 import { useTimeline, useUIHelper } from "@/lib/contexts";
 import { useMemo, useEffect, useState } from "react";
 
-function FreshLog({ message }: { message: string }) {
+function getLogColor(message: string): string {
+    if (message.includes("Kék")) return "text-cyan-500";
+    if (message.includes("Zöld")) return "text-green-600";
+    if (message.includes("Sárga")) return "text-orange-500";
+    return "text-[#ffdda0]";
+}
+
+function FreshLog({ message, color }: { message: string; color: string }) {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -13,15 +20,25 @@ function FreshLog({ message }: { message: string }) {
 
     return (
         <span className={`
-            text-[1dwvw] font-mono wrap-break-word text-[#ffdda0] text-center block
+            text-[1dwvw] font-mono wrap-break-word text-center block
             transition-all duration-300 ease-out
             text-shadow-lg text-shadow-black
+            ${color}
             ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
         `}>
             {message}
         </span>
     );
 }
+
+const renderLog = (log: { message: string }, i: number) => {
+    const color = getLogColor(log.message);
+    return (
+        <span key={i} className={`text-[0.8vw] font-mono wrap-break-word ${color}`}>
+            {log.message}
+        </span>
+    );
+};
 
 export default function LogDisplayer() {
     const logs = useTimeline().rover.logs;
@@ -32,12 +49,6 @@ export default function LogDisplayer() {
         const fresh = logs.slice(Math.max(logs.length - 4, 0)).reverse();
         return { logsToDisplay: ordered, freshLogs: fresh };
     }, [logs]);
-
-    const renderLog = (log: { message: string }, i: number) => (
-        <span key={i} className="text-[0.8vw] font-mono wrap-break-word text-[#ffdda0]">
-            {log.message}
-        </span>
-    );
 
     return (
         <>
@@ -69,7 +80,8 @@ export default function LogDisplayer() {
             >
                 {freshLogs.map((log, i) => {
                     const ageKey = logs.length - 1 - i;
-                    return <FreshLog key={ageKey} message={log.message} />;
+                    const color = getLogColor(log.message);
+                    return <FreshLog key={ageKey} message={log.message} color={color} />;
                 })}
             </div>
         </>
