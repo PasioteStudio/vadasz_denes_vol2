@@ -10,12 +10,13 @@ export class Dust {
   lowerBound: number
   radius: number
 
-  constructor(scene: THREE.Scene, radius = 30, offset: [number, number, number] = [0,0,0], lowerBound: number = -20) {
+  constructor(scene: THREE.Scene, dustcount:number=2000, radius = 30, offset: [number, number, number] = [0,0,0], lowerBound: number = -20) {
     //random pozíció és sebesség
     const positions = new Float32Array(this.dustCount * 3)
     this.velocities = new Float32Array(this.dustCount)
     this.lowerBound = lowerBound
     this.offset = offset
+    this.dustCount = dustcount
 
     this.radius = radius
 
