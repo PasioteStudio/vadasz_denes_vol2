@@ -27,7 +27,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const t = useRef(0);
   const startingPoint = getStartingPoint(initialMap)
   const [map, setMap] = useState<Tile[][]>(initialMap);
-  const [flavoredMap, setFlavoredMap] = useState<[boolean, Tile, Tile|null][][]>([])
+  const flavoredMap = useRef<[boolean, Tile, Tile|null][][]>([])
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [rover, setRover] = useState<RoverT>({
     energy: 100,
@@ -69,7 +69,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let logs: Log[] = [...rover!.logs];
 
 
-    let newMap = flavoredMap.map(row => [...row]);
+    let newMap = flavoredMap.current.map(row => [...row]);
 
     deltasToExecute.forEach(d => {
       energy = getEnergyForTick(cTick, deltas);
@@ -88,12 +88,12 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         position: position,
       }
     })
-    setFlavoredMap(newMap)
+    flavoredMap.current = newMap;
   }, [deltas, rover])
 
   useEffect(() => {
     if (deltas.length > 1) return
-    setFlavoredMap(generateFlavoredMap(map));
+    flavoredMap.current = generateFlavoredMap(map);
     setDeltas(prev=>{
       if(prev.length == 0){
         return [{
@@ -153,7 +153,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         map: map,
         rover: rover ?? DefaultRoverContextObject,
         startingPoint: startingPoint,
-        flavoredMap: flavoredMap,
+        flavoredMap: flavoredMap.current,
       }}>
         <Renderer />
         <GUI />
