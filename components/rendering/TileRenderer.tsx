@@ -39,9 +39,9 @@ export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
       return <GoldTile position={position} castShadow receiveShadow />
     case Tile.Start:
       return <BaseTile position={position} castShadow receiveShadow />
-    default: {
-      const PickedTile = normalTiles[getTileIndex(x, y)]
-      return <PickedTile position={position} castShadow receiveShadow />
-    }
+    default: 
+
+      return <NormalTile  position={position} castShadow receiveShadow />
+    
   }
 }
