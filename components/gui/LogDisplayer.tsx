@@ -1,11 +1,31 @@
 "use client"
 
-import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
-import { useMemo } from "react";
+import { useTimeline, useUIHelper } from "@/lib/contexts";
+import { useMemo, useEffect, useState } from "react";
+
+function FreshLog({ message }: { message: string }) {
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const id = requestAnimationFrame(() => setVisible(true));
+        return () => cancelAnimationFrame(id);
+    }, []);
+
+    return (
+        <span className={`
+            text-[0.8vw] font-mono wrap-break-word text-[#ffdda0] text-center block
+            transition-all duration-300 ease-out
+            ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
+        `}>
+            {message}
+        </span>
+    );
+}
 
 export default function LogDisplayer() {
     const logs = useTimeline().rover.logs;
     const { resting, restingOpacity } = useUIHelper();
+
     const { logsToDisplay, freshLogs } = useMemo(() => {
         const ordered = [...logs].reverse();
         const fresh = logs.slice(Math.max(logs.length - 4, 0)).reverse();
@@ -20,41 +40,36 @@ export default function LogDisplayer() {
 
     return (
         <>
-            {/* Bottom-right log panel (minimized → expands on hover) */}
             <div
                 className="
-          fixed bottom-2 right-2
-          w-28 h-32
-          p-2
-          bg-[#1e1e2f]/90
-          border border-[#ff4500]
-          rounded-lg
-          shadow-lg
-          flex flex-col
-          gap-1
-          overflow-y-auto
-          overflow-x-hidden
-          text-xs font-mono
-          text-[#ffdda0]
-          duration-200
-          hover:w-96 hover:h-[60vh]
-        "
+                    fixed bottom-2 right-2
+                    w-28 h-32 p-2
+                    bg-[#1e1e2f]/90
+                    border border-[#ff4500]
+                    rounded-lg shadow-lg
+                    flex flex-col gap-1
+                    overflow-y-auto overflow-x-hidden
+                    text-xs font-mono text-[#ffdda0]
+                    duration-200
+                    hover:w-96 hover:h-[60vh]
+                "
                 style={{ opacity: resting ? restingOpacity / 100 : 1 }}
             >
                 {logsToDisplay.map(renderLog)}
             </div>
 
-            {/* Floating recent logs above the main panel */}
             <div
                 className="fixed bottom-[18vh] left-1/2 -translate-x-1/2 w-[30vw] flex flex-col gap-0.5 overflow-hidden"
                 style={{
                     maskImage: "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
-                    WebkitMaskImage:
-                        "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
-                    opacity: resting ? restingOpacity / 100 : 1
+                    WebkitMaskImage: "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                    opacity: resting ? restingOpacity / 100 : 1,
                 }}
             >
-                {freshLogs.map(renderLog)}
+                {freshLogs.map((log, i) => {
+                    const ageKey = logs.length - 1 - i;
+                    return <FreshLog key={ageKey} message={log.message} />;
+                })}
             </div>
         </>
     );
