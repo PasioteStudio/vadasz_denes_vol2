@@ -1,6 +1,7 @@
 import { Tile, WeightPoint, VectorField } from "./constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
+import { TILE_REGISTRY } from "./tileRegistry";
 
 export function generateMap(): Tile[][] {
   const mapConstraints = {
@@ -46,7 +47,7 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
     await fetch(URL).then(res => res.text()).then(async (data) => {
       lines = data.split("\n").filter(line => line.trim() != "");
     })
-  } else{
+  } else {
     lines = URL.split("\n").filter(line => line.trim() != "");
   }
   const map: Tile[][] = [];
@@ -108,14 +109,53 @@ export const isValidMap = (map: Tile[][]): boolean => {
   return map.length > 0 && map.find(row => row.find(field => field == Tile.Start)) != undefined;
 }
 
-export const getStartingPoint = (map:Tile[][]):Position => {
-  const position: Position = {x:0,y:0}
-  for(let y = 0; y < map.length; y++){
-    for(let x = 0; x < map[y].length; x++){
-      if(map[y][x] == Tile.Start){
-        return {x: x, y:y}
+export const getStartingPoint = (map: Tile[][]): Position => {
+  const position: Position = { x: 0, y: 0 }
+  for (let y = 0; y < map.length; y++) {
+    for (let x = 0; x < map[y].length; x++) {
+      if (map[y][x] == Tile.Start) {
+        return { x: x, y: y }
       }
     }
   }
   return position
 }
+
+
+export const generateFlavoredMap = (map: Tile[][]): [Tile, Tile|null][][] => {
+  const falvoredMap: [Tile, Tile|null][][] = [];
+  for (let y = 0; y < map.length; y++) {
+    falvoredMap.push([]);
+    for (let x = 0; x < map.length; x++) {
+      const tiletype = map[y][x];
+      falvoredMap[y].push([
+        randomTileFrom(tiletype),
+        null,
+      ])
+    }
+  }
+  return falvoredMap;
+}
+
+const randomTileFrom = (t: Tile): Tile => { 
+  let int = 6;
+  let range: [number, number] = [0, 0];
+
+  switch (t) {
+    case Tile.Empty:
+      range = [6, 9];
+      break;
+    case Tile.Blue:
+      range = [9, 12];
+      break;
+    case Tile.Yellow:
+      range = [12, 15];
+      break;
+    case Tile.Green:
+      range = [15, 18];
+      break;
+  }
+
+  int = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+  return int as Tile;
+};
