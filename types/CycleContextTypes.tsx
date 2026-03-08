@@ -13,6 +13,6 @@ export type CycleContextT = {
         setSpeed: (s: 1|2|-1|-2) => void
     }
     timeLimit: number,
-    direction: -1|1,
+    direction: RefObject<-1|1>,
     t: RefObject<number>,
 }
