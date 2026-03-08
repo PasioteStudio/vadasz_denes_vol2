@@ -10,12 +10,12 @@ interface TileProps {
 
 type GLTFResult = GLTF & {
   nodes: {
-    Plane002: THREE.Mesh
-    Plane002_1: THREE.Mesh
+    high: THREE.Mesh
+    Plane: THREE.Mesh
   }
   materials: {
-    ['Material.005']: THREE.MeshStandardMaterial
     ['Material.006']: THREE.MeshStandardMaterial
+    ['Material.001']: THREE.MeshStandardMaterial
   }
 }
 
@@ -23,18 +23,18 @@ export function RareTile(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/räriteten.glb') as unknown as GLTFResult
   return (
-    <group {...props} dispose={null} scale={[1, 1, 1]}>
+    <group {...props} dispose={null}>
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes.Plane002.geometry}
-        material={materials['Material.005']}
+        geometry={nodes.high.geometry}
+        material={materials['Material.006']}
       />
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes.Plane002_1.geometry}
-        material={materials['Material.006']}
+        geometry={nodes.Plane.geometry}
+        material={materials['Material.001']}
       />
     </group>
   )
