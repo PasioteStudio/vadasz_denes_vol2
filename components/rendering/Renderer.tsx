@@ -12,6 +12,7 @@ import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
 
 import { ParticleManager } from './Particles/ParticleManager';
+import { RareTile } from '@/Prefabs/RareTile';
 
 
 
@@ -182,7 +183,7 @@ export const Renderer = () => {
         {/* <ParticleManager /> */}
 
 
-
+        <RareTile></RareTile>
       </Canvas>
 
       {isInventoryOpen && (
