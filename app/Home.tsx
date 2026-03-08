@@ -12,14 +12,14 @@ import { generateFlavoredMap, getStartingPoint } from "@/util/map";
 import { clamp } from "three/src/math/MathUtils.js";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
-  const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit">>({
+  const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "direction">>({
     currentTick: 0,
     timeOfDay: "day",
     setTick: (t: number) => { setTickTo(t) },
     day: 16 * 2,
     night: 8 * 2,
-    lastDirection: 1,
   });
+  const cycleDirection = useRef<-1|1>(1);
   const [player, setPlayer] = useState({
     speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
@@ -47,7 +47,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
           ...p,
           currentTick: actualTick,
           timeOfDay: t % 48 >= 32 ? "night" : "day",
-          lastDirection: t < cycle.currentTick ? -1 : 1,
         }
       })
       recalculateSnapshots(actualTick);
@@ -58,8 +57,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   const recalculateSnapshots = useCallback((tTick: number) => {
     const cTick = cycle.currentTick;
-    const direction = tTick < cTick ? -1 : 1;
-    const deltasToExecute = direction == -1 ?
+    cycleDirection.current = tTick < cTick ? -1 : 1;
+    const deltasToExecute = cycleDirection.current == -1 ?
       deltas.filter((d, i) => i <= cTick && i > tTick) 
       : deltas.filter((d, i) => i > cTick && i <= tTick);
 
@@ -73,10 +72,10 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
     deltasToExecute.forEach(d => {
       energy = getEnergyForTick(cTick, deltas);
-      position = processPositionChanges(position, d.moves, direction)
-      inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
-      logs = processLogChanges(logs, d.logsAdded, direction)
-      newMap = processMapChanges(newMap, d.moves, direction)
+      position = processPositionChanges(position, d.moves, cycleDirection.current)
+      inventory = processInventoryChanges(inventory, d.inventoryChanges, cycleDirection.current)
+      logs = processLogChanges(logs, d.logsAdded, cycleDirection.current)
+      newMap = processMapChanges(newMap, d.moves, cycleDirection.current)
     })
 
     setRover(p => {
@@ -145,7 +144,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       day: cycle.day,
       night: cycle.night,
       timeLimit: timeLimit,
-      lastDirection: cycle.lastDirection,
+      direction: cycleDirection.current,
       t: t,
     }}>
       <MapTimeLineContext.Provider value={{

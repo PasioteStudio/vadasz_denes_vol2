@@ -46,10 +46,15 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     target: new THREE.Vector3()
   })
 
+  const rotation = useRef({
+    start: 0,
+    target: 0,
+  })
+
   const elapsed = useRef(0);
 
   // Persisted position/rotation state (world values, updated each tick)
-  
+
   const { nodes, materials, animations } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
@@ -62,32 +67,57 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     return delta
   }
 
-  useEffect(()=>{ // tick change -> set new plan
-    position.current.start = position.current.target;
-
+  //TODO this will have to be improved when the multi movement ticks come into play
+  useEffect(() => { // tick change -> set new plan
     const delta = timeline.deltas[cycle.currentTick]
     const moves = delta.moves;
-    const last  = moves[moves.length - 1];
+    const d = cycle.direction == 1 ? moves[moves.length - 1] : moves[0];
 
-    position.current.target = new THREE.Vector3(last.to.x*gap, 1, last.to.y*gap);
+    const targetPos = new THREE.Vector3(d.to.x * gap, 1, d.to.y * gap);
+
+    // POSITION
+    position.current.start = position.current.target;
+    position.current.target = targetPos;
+
+
+    // ROTATION
+    rotation.current.start = rotation.current.target;
+
+    if (position.current.start.distanceTo(position.current.target) != 0) {
+      const dir = new THREE.Vector3()
+        .subVectors(position.current.target, position.current.start)
+        .normalize()
+      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
+    }
+
     cycle.t.current = 0;
     elapsed.current = 0;
     totalDuration.current = 300;
   }, [cycle.currentTick])
 
-  useFrame((_, delta)=>{
-    elapsed.current += delta;
-    cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
-    
+  useFrame((_, delta) => {
+    elapsed.current += delta * 1000;
 
+    cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
+
+
+    // POSITION
     const newPos = new THREE.Vector3(
       lerp(position.current.start.x, position.current.target.x, cycle.t.current),
       1,
       lerp(position.current.start.z, position.current.target.z, cycle.t.current)
     );
-    group.current.position.set(newPos.x, newPos.y, newPos.z); 
+    group.current.position.x = newPos.x;
+    group.current.position.y = 0.8;
+    group.current.position.z = newPos.z;
+
+
+    // ROTATION
+    const rotDiff = shortestAngleDelta(rotation.current.start, rotation.current.target)
+    let newRotY = rotation.current.start + rotDiff * cycle.t.current
+    group.current.rotation.y = newRotY;
   })
-  
+
 
   return (
     <group
