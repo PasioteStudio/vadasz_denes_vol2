@@ -36,10 +36,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const timeline = useTimeline()
 
   const gap = TILE_GAP
-  const rotateDuration = 300
-  const mineDuration = 300
-  const moveDuration = 300
-  const totalDuration = useRef(600);
+  const actionDurations = new Map<"mine" | "move" | "rotate", number>([
+    ["mine", 300],
+    ["move", 300],
+    ["rotate", 300],
+  ])
+  const totalDuration = useRef(100);
 
   const position = useRef({
     start: new THREE.Vector3(),
@@ -50,6 +52,11 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     start: 0,
     target: 0,
   })
+
+  const tickPlan = useRef<{ step: number, plan: { mode: "move" | "rotate" | "mine", duration: number }[] }>({
+    step: 0,
+    plan: []
+  });
 
   const elapsed = useRef(0);
 
@@ -72,8 +79,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     const delta = timeline.deltas[cycle.currentTick]
     const moves = delta.moves;
     const d = cycle.direction == 1 ? moves[moves.length - 1] : moves[0];
+    const targetPos = new THREE.Vector3(d.to.x * gap, 0.8, d.to.y * gap);
 
-    const targetPos = new THREE.Vector3(d.to.x * gap, 1, d.to.y * gap);
+    let hasToRotate = false, hasToMove = false, hasToMine = false;
 
     // POSITION
     position.current.start = position.current.target;
@@ -84,38 +92,100 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     rotation.current.start = rotation.current.target;
 
     if (position.current.start.distanceTo(position.current.target) != 0) {
+      hasToMove = true;
       const dir = new THREE.Vector3()
         .subVectors(position.current.target, position.current.start)
         .normalize()
-      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
+
+        rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
+        hasToRotate = rotation.current.start != rotation.current.target;
     }
+
+    hasToMine = delta.moves.find(m => m.mode == "mine") !== undefined || false; // TODO ezt újra kell dolgozni, ha több move van egy tickben.
 
     cycle.t.current = 0;
     elapsed.current = 0;
-    totalDuration.current = 300;
-  }, [cycle.currentTick])
+    totalDuration.current = 0;
+    tickPlan.current.step = 0;
+    tickPlan.current.plan = [];
+    if (hasToRotate) {
+      tickPlan.current.plan.push({
+        mode: "rotate",
+        duration: actionDurations.get("rotate")!
+      });
+    }
+    if (hasToMove) {
+      tickPlan.current.plan.push({
+        mode: "move",
+        duration: actionDurations.get("move")!
+      });
+    }
+    if (hasToMine) {
+      tickPlan.current.plan.push({
+        mode: "mine",
+        duration: actionDurations.get("mine")!
+      });
+    }
+
+    console.log(tickPlan, targetPos)
+
+    tickPlan.current.plan.forEach(p => totalDuration.current += actionDurations.get(p.mode)!)
+  }, [cycle.currentTick, timeline.deltas])
 
   useFrame((_, delta) => {
+    if (cycle.currentTick == 0) {
+      const start = timeline.deltas[0].moves[0].to;
+      group.current.position.x = start.x * gap;
+      group.current.position.y = 0.8;
+      group.current.position.z = start.y * gap;
+    }
     elapsed.current += delta * 1000;
 
     cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
-
-
+    const plan = tickPlan.current.plan;
+    if(plan.length == 0) return;
     // POSITION
-    const newPos = new THREE.Vector3(
-      lerp(position.current.start.x, position.current.target.x, cycle.t.current),
+    const stepIndex = tickPlan.current.step;
+    const step = plan[stepIndex];
+
+    // total duration of previous steps
+    const prevDuration = plan
+      .slice(0, stepIndex)
+      .reduce((sum, s) => sum + s.duration, 0);
+
+    // normalized progress of the current step
+    const progress = Math.min(
       1,
-      lerp(position.current.start.z, position.current.target.z, cycle.t.current)
+      Math.max(0, (elapsed.current - prevDuration) / step.duration)
     );
-    group.current.position.x = newPos.x;
-    group.current.position.y = 0.8;
-    group.current.position.z = newPos.z;
 
+    // MOVE
+    if (step.mode === "move") {
+      const newPos = new THREE.Vector3(
+        lerp(position.current.start.x, position.current.target.x, progress),
+        1,
+        lerp(position.current.start.z, position.current.target.z, progress)
+      );
 
-    // ROTATION
-    const rotDiff = shortestAngleDelta(rotation.current.start, rotation.current.target)
-    let newRotY = rotation.current.start + rotDiff * cycle.t.current
-    group.current.rotation.y = newRotY;
+      group.current.position.set(newPos.x, 0.8, newPos.z);
+    }
+
+    // ROTATE
+    if (step.mode === "rotate") {
+      const rotDiff = shortestAngleDelta(
+        rotation.current.start,
+        rotation.current.target
+      );
+
+      const newRotY = rotation.current.start + rotDiff * progress;
+      group.current.rotation.y = newRotY;
+    }
+
+    // advance step
+    if (elapsed.current > prevDuration + step.duration) {
+      tickPlan.current.step = Math.min(stepIndex + 1, plan.length - 1);
+    }
+
   })
 
 
