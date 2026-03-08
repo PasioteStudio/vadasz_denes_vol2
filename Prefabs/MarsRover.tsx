@@ -10,6 +10,7 @@ import { TILE_GAP } from "@/components/rendering/TileRenderer"
 import { useCycle, useTimeline } from "@/lib/contexts"
 import { isOre } from "@/util/constants"
 import { processMapChanges } from "@/util/deltas"
+import { lerp } from "three/src/math/MathUtils.js"
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -38,34 +39,19 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const rotateDuration = 300
   const mineDuration = 300
   const moveDuration = 300
+  const totalDuration = useRef(600);
+
+  const position = useRef({
+    start: new THREE.Vector3(),
+    target: new THREE.Vector3()
+  })
+
+  const elapsed = useRef(0);
 
   // Persisted position/rotation state (world values, updated each tick)
-  const currentPos = useRef(new THREE.Vector3())
-  const currentRotY = useRef(0)
-
-  // Per-tick animation plan
-  const tickPlan = useRef({
-    startPos: new THREE.Vector3(),
-    targetPos: new THREE.Vector3(),
-    startRotY: 0,
-    targetRotY: 0,
-    rotate: false,
-    mine: false,
-    move: false,
-    rotateDuration: 0,
-    mineDuration: 0,
-    moveDuration: 0,
-    totalDuration: 0,
-    startTime: 0,
-  })
-  const hasAdvancedTick = useRef(false);
-  useEffect(() => {
-    hasAdvancedTick.current = false;
-  }, [cycle.currentTick]);
-
+  
   const { nodes, materials, animations } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
-  const { actions } = useAnimations(animations, group)
 
   function normalizeAngle(angle: number) {
     return Math.atan2(Math.sin(angle), Math.cos(angle))
@@ -76,143 +62,32 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     return delta
   }
 
-  useEffect(() => {
-    const map = timeline.map;
-    if (!timeline.map) return
+  useEffect(()=>{ // tick change -> set new plan
+    position.current.start = position.current.target;
 
-    const rover = timeline.rover
+    const delta = timeline.deltas[cycle.currentTick]
+    const moves = delta.moves;
+    const last  = moves[moves.length - 1];
 
-    const targetPos = new THREE.Vector3(
-      rover.position.x * gap,
-      0.77,
-      rover.position.y * gap
-    )
-
-    const startPos = currentPos.current.clone()
-    const startRotY = currentRotY.current
-
-    // Determine if position actually changed
-    const positionChanged = !startPos.equals(targetPos)
-
-    // Compute target rotation from movement direction (only if moving)
-    let targetRotY = startRotY
-    if (positionChanged) {
-      const dx = targetPos.x - startPos.x
-      const dz = targetPos.z - startPos.z
-      targetRotY = Math.atan2(dx, dz)
-    }
-
-    const rotationChanged =
-      Math.abs(shortestAngleDelta(startRotY, targetRotY)) > 0.001
-
-    const moves = timeline.deltas[cycle.currentTick].moves
-    const currentMove = moves[moves.length-1] // TODO ez majd ha több move lesz egy deltában, mert gyorsabban megy, akkor majd mindig egyesével átmegy az elvégzendő mozdulatokon a rover
-    const mining = currentMove.mode == "mine"
-
-    const doRotate = rotationChanged
-    const doMine = mining
-    const doMove = positionChanged
-
-    const rDur = doRotate ? rotateDuration / Math.abs(cycle.player.speed) : 0
-    const mDur = doMine ? mineDuration / Math.abs(cycle.player.speed) : 0
-    const mvDur = doMove ? moveDuration / Math.abs(cycle.player.speed) : 0
-    const total = rDur + mDur + mvDur
-
-    tickPlan.current = {
-      startPos,
-      targetPos,
-      startRotY,
-      targetRotY,
-      rotate: doRotate,
-      mine: doMine,
-      move: doMove,
-      rotateDuration: rDur,
-      mineDuration: mDur,
-      moveDuration: mvDur,
-      totalDuration: total,
-      startTime: Date.now(),
-    }
-
-    // Update persisted state to this tick's target (we are now "here")
-    currentPos.current.copy(targetPos)
-    currentRotY.current = targetRotY
-
-    cycle.t.current = 0
+    position.current.target = new THREE.Vector3(last.to.x*gap, 1, last.to.y*gap);
+    cycle.t.current = 0;
+    elapsed.current = 0;
+    totalDuration.current = 300;
   }, [cycle.currentTick])
 
-  useFrame(() => {
-    if (!group.current) return
+  useFrame((_, delta)=>{
+    elapsed.current += delta;
+    cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
+    
 
-    const plan = tickPlan.current
-    const now = Date.now()
-    const elapsed = now - plan.startTime
-
-    const globalT = plan.totalDuration > 0
-      ? Math.min(elapsed / plan.totalDuration, 1)
-      : 1
-    cycle.t.current = globalT
-
-    const rotateEnd = plan.rotateDuration
-    const mineEnd = rotateEnd + plan.mineDuration
-    const moveEnd = mineEnd + plan.moveDuration
-
-    // --- ROTATION PHASE ---
-    let rotY: number
-    if (!plan.rotate) {
-      // No rotation this tick — stay at target
-      rotY = plan.targetRotY
-    } else if (elapsed >= rotateEnd) {
-      // Rotation phase complete — snap to target
-      rotY = plan.targetRotY
-    } else {
-      // Inside rotation phase
-      const phaseT = elapsed / rotateEnd
-      const delta = shortestAngleDelta(plan.startRotY, plan.targetRotY)
-      rotY = plan.startRotY + delta * phaseT
-    }
-    group.current.rotation.y = rotY - Math.PI / 2
-
-    // --- MINE PHASE --- (no visual, just time passing)
-    const posY = 0.77
-
-    // --- MOVE PHASE ---
-    let posX: number
-    let posZ: number
-    if (!plan.move) {
-      // No movement this tick — stay at target
-      posX = plan.targetPos.x
-      posZ = plan.targetPos.z
-    } else if (elapsed < mineEnd) {
-      // Move phase hasn't started yet — stay at start
-      posX = plan.startPos.x
-      posZ = plan.startPos.z
-    } else if (elapsed >= moveEnd) {
-      // Move phase complete — snap to target
-      posX = plan.targetPos.x
-      posZ = plan.targetPos.z
-    } else {
-      // Inside move phase
-      const phaseElapsed = elapsed - mineEnd
-      const phaseT = phaseElapsed / plan.moveDuration
-      posX = THREE.MathUtils.lerp(plan.startPos.x, plan.targetPos.x, phaseT)
-      posZ = THREE.MathUtils.lerp(plan.startPos.z, plan.targetPos.z, phaseT)
-    }
-
-    group.current.position.set(posX, posY, posZ)
-    if (
-      elapsed > tickPlan.current.totalDuration
-      && cycle.player.playing == "playing"
-    ) {
-      if (
-        elapsed > tickPlan.current.totalDuration &&
-        cycle.player.playing == "playing" &&
-        !hasAdvancedTick.current
-      ) {
-        hasAdvancedTick.current = true;
-        cycle.setTick(cycle.currentTick + (cycle.player.speed < 0 ? -1 : 1));
-      }
-    }
+    const newPos = new THREE.Vector3(
+      lerp(position.current.start.x, position.current.target.x, cycle.t.current),
+      1,
+      lerp(position.current.start.z, position.current.target.z, cycle.t.current)
+    );
+    group.current.position.set(newPos.x, newPos.y, newPos.z); 
   })
+  
 
   return (
     <group

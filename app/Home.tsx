@@ -54,7 +54,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     } catch (e) {
       console.log("hiba") //TODO handle error or smth
     }
-  }, [deltas, map]);
+  }, [deltas, map, cycle.currentTick]);
 
   const recalculateSnapshots = useCallback((tTick: number) => {
     const cTick = cycle.currentTick;
