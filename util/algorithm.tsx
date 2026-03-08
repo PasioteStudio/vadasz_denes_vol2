@@ -47,7 +47,7 @@ function buildTileIndex(update_able_map: WeightPoint[]): Map<string, number> {
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.SLOW): { path: Position[], deltas: Delta[] } {
+export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.FAST): { path: Position[], deltas: Delta[] } {
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };
@@ -206,16 +206,10 @@ export function estimatePathWithWeight(
 
     while ((have_to_go_back || isThereAWay(column)) && my_path.length < iterations) {
         if (have_to_go_back) {
-            const graphWithWeight = new Graph(obstacle_map.map((rows) =>
-                rows.map((tile) => tile === 1 ? 0 : 1)),
-                { diagonal: true });
-            const startNode = graphWithWeight.grid[column.y][column.x];
-            const endNode = graphWithWeight.grid[end.y][end.x];
-            const astarpath = astar.search(graphWithWeight, startNode, endNode);
-            if (astarpath.length < 1) break
-            column = calculateTile(update_able_map, astarpath[0].y, astarpath[0].x)
-            my_path.push({ action: "move", position: { x: column.x, y: column.y } })
-            continue
+            // Stop here — makePath will append the go_home A* path itself.
+            // Walking home step-by-step here caused the go-home segment to appear
+            // twice in the final path (once from this loop, once from go_home append).
+            break
         }
 
         let next_column = calculateTile(update_able_map, column.x + column.endPoint.relative_x, column.y + column.endPoint.relative_y)
