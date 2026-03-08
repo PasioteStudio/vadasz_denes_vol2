@@ -89,13 +89,10 @@ export function createVectorMapFromWeights(
         vectorMap[y][x] = {
           x,
           y,
-          //vector: { dx: 0, dy: 0 },
-          magnitude: 0,
           endPoint: {
             relative_x: 0,
             relative_y: 0,
-          },
-          angleDeg360: 0,
+          }
         };
         continue
       }

@@ -32,17 +32,17 @@ function Path(points, distanceFunc, keepEnd) {
 Path.prototype.initializeOrder = function() {
   // A loop is about 3x faster than using a spread operator.
   this.order = new Array(this.points.length);
-  for (var i = 0; i < this.order.length; i++) this.order[i] = i;
+  for (let i = 0; i < this.order.length; i++) this.order[i] = i;
 }
 /**
  * Calculates the distance for all the points.
  */
 Path.prototype.initializeDistances = function() {
   this.distances = new Array(this.points.length * this.points.length);
-  for(var i = 0; i < this.points.length; i++) {
+  for(let i = 0; i < this.points.length; i++) {
     // Optimization: Starting at i+1 avoids repeats and identity distances.
     // We just need to make sure we don't access the empty cells later.
-    for(var j = i + 1; j < this.points.length; j++) {
+    for(let j = i + 1; j < this.points.length; j++) {
       this.distances[j + i * this.points.length] = this.distanceFunc(this.points[i], this.points[j]);
     }
   }
@@ -60,8 +60,8 @@ Path.prototype.initializeDistances = function() {
  * @param {*} temp The current temperature of the algorithm.
  */
 Path.prototype.change = function(temp) {
-  var i = this.randomPos(), j = this.randomPos();
-  var delta = this.delta_distance(i, j);
+  const i = this.randomPos(), j = this.randomPos();
+  const delta = this.delta_distance(i, j);
   if (delta < 0 || Math.random() < Math.exp(-delta / temp)) {
     this.swap(i,j);
   }
@@ -72,7 +72,7 @@ Path.prototype.change = function(temp) {
  * @param {*} j The second index to swap.
  */
 Path.prototype.swap = function(i,j) {
-  var tmp = this.order[i];
+  const tmp = this.order[i];
   this.order[i] = this.order[j];
   this.order[j] = tmp;
 };
@@ -88,11 +88,11 @@ Path.prototype.swap = function(i,j) {
  * @returns The change in path distance if i and j were swapped.
  */
 Path.prototype.delta_distance = function(i, j) {
-  var jm1 = this.index(j-1),
+  const jm1 = this.index(j-1),
       jp1 = this.index(j+1),
       im1 = this.index(i-1),
       ip1 = this.index(i+1);
-  var s = 
+  let s = 
       this.distance(jm1, i  )
     + this.distance(i  , jp1)
     + this.distance(im1, j  )
@@ -130,7 +130,7 @@ Path.prototype.distance = function(i, j) {
   if (i === j) return 0; // Identity.
 
   // Ensure low is actually lower.
-  var low = this.order[i], high = this.order[j];
+  let low = this.order[i], high = this.order[j];
   if (low > high) { low = this.order[j]; high = this.order[i]; }
 
   return this.distances[low * this.points.length + high] || 0;
@@ -148,11 +148,11 @@ Path.prototype.randomPos = function() {
  *  Given a list of points and the distances between each pair of points,
  *  what is the shortest possible route that visits each point exactly
  *  once and returns to the origin point?
- *
  * @param {Point[]} points The points that the path will have to visit.
  * @param {number} [temp_coeff=0.999] changes the convergence speed of the algorithm. Smaller values (0.9) work faster but give poorer solutions, whereas values closer to 1 (0.99999) work slower, but give better solutions.
  * @param {Function} [callback=undefined] An optional callback to be called after each iteration.
  * @param {Function} [callback=euclidean] An optional argument to specify how distances are calculated. The function takes two Point objects as arguments and returns a number for distance. Defaults to simple Euclidean distance calculation.
+ * @param {number} numberOfSeconds default is 30 seconds
  *
  * @returns {number[]} An array of indexes in the original array. Indicates in which order the different points are visited.
  *
@@ -165,23 +165,27 @@ Path.prototype.randomPos = function() {
  * var ordered_points = solution.map(i => points[i]);
  * // ordered_points now contains the points, in the order they ought to be visited.
  **/
-export function solve(points, temp_coeff = 0.999, callback, distance = euclidean, keep_end = false) {
-  var path = new Path(points, distance, keep_end);
+export function solve(points, temp_coeff = 0.999, callback, distance = euclidean, keep_end = false, numberOfSeconds = 10) {
+  const path = new Path(points, distance, keep_end);
   // Optimization: If there is only one point in the list, there is no path.
   if (points.length < 2) return path.order;
   // Optimization: If the user would provide a bad input, end immediately.
-  if (temp_coeff >= 1 || temp_coeff <= 0) return path.order;
+  if(temp_coeff >= 1) temp_coeff = 0.9999999999;
+  if(numberOfSeconds <= 0) numberOfSeconds = 10;
+  else if(numberOfSeconds >= 60*2) numberOfSeconds = 60*2;
+  if (temp_coeff <= 0) return path.order;
 
   // Create a temperature coefficient.
   if (!temp_coeff)
     temp_coeff = 1 - Math.exp(-10 - Math.min(points.length,1e6)/1e5);
-  var hasCallback = typeof(callback) === "function";
-
-  for (var temperature = 100 * distance(path.access(0), path.access(1));
+  const hasCallback = typeof(callback) === "function";
+  const startTime = new Date().getTime();
+  for (let temperature = 100 * distance(path.access(0), path.access(1));
            temperature > 1e-6;
            temperature *= temp_coeff) {
     path.change(temperature);
     if (hasCallback) callback(path.order);
+    if (new Date().getTime() - startTime > numberOfSeconds * 1000) break;
   }
   return path.order;
 };
@@ -195,7 +199,7 @@ export function solve(points, temp_coeff = 0.999, callback, distance = euclidean
  * @returns {number} The Euclidean distance between p and q
  */
 function euclidean(p, q) {
-  var dx = p.x - q.x, dy = p.y - q.y;
+  const dx = p.x - q.x, dy = p.y - q.y;
   return Math.sqrt(dx*dx + dy*dy);
 }
 
