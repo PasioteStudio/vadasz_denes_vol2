@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "electron-forge start",
     "lint": "eslint"
   },
   "dependencies": {

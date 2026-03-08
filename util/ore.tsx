@@ -23,5 +23,5 @@ export function findNearestOre(
       nearest = { x: ore.x, y: ore.y };
     }
   });
-  return {...nearest,distance:minDistance};
+  return {...nearest,distance:(minDistance === Infinity ? 0 : minDistance)};
 }
