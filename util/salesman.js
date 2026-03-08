@@ -143,6 +143,9 @@ Path.prototype.randomPos = function() {
   return 1 + Math.floor(Math.random() * (this.points.length - (this.keepEnd ? 2 : 1)));
 };
 
+const maximumSeconds = 10;
+const optimizatedPathLength = 75;
+const clampTempCoeff = 9;
 /**
  * Solves the following problem:
  *  Given a list of points and the distances between each pair of points,
@@ -165,16 +168,19 @@ Path.prototype.randomPos = function() {
  * var ordered_points = solution.map(i => points[i]);
  * // ordered_points now contains the points, in the order they ought to be visited.
  **/
-export function solve(points, temp_coeff = 0.999, callback, distance = euclidean, keep_end = false, numberOfSeconds = 10) {
+export function solve(points, temp_coeff = 0.999, callback, distance = euclidean, keep_end = false, numberOfSeconds = -1) {
   const path = new Path(points, distance, keep_end);
   // Optimization: If there is only one point in the list, there is no path.
   if (points.length < 2) return path.order;
   // Optimization: If the user would provide a bad input, end immediately.
-  if(temp_coeff >= 1) temp_coeff = 0.9999999999;
-  if(numberOfSeconds <= 0) numberOfSeconds = 10;
-  else if(numberOfSeconds >= 60*2) numberOfSeconds = 60*2;
-  if (temp_coeff <= 0) return path.order;
-
+  // points 0-75 to number of seconds 0-60, with a default of 30 seconds and 0.999 for temp_coeff.
+  if(numberOfSeconds == -1 || !numberOfSeconds || typeof numberOfSeconds !== "number") numberOfSeconds = Math.floor(Math.min(points.length,optimizatedPathLength) * (maximumSeconds / optimizatedPathLength));
+  if(numberOfSeconds < 5) numberOfSeconds = 5;
+  else if(numberOfSeconds > maximumSeconds) numberOfSeconds = maximumSeconds;
+  if(temp_coeff >= 1 || temp_coeff <= 0){
+    temp_coeff = 1 - Math.exp(-(numberOfSeconds / maximumSeconds * 7) - Math.min(points.length / optimizatedPathLength * 7,clampTempCoeff));
+  }
+  
   // Create a temperature coefficient.
   if (!temp_coeff)
     temp_coeff = 1 - Math.exp(-10 - Math.min(points.length,1e6)/1e5);
@@ -183,6 +189,7 @@ export function solve(points, temp_coeff = 0.999, callback, distance = euclidean
   for (let temperature = 100 * distance(path.access(0), path.access(1));
            temperature > 1e-6;
            temperature *= temp_coeff) {
+
     path.change(temperature);
     if (hasCallback) callback(path.order);
     if (new Date().getTime() - startTime > numberOfSeconds * 1000) break;

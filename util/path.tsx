@@ -3,6 +3,7 @@ import { Position } from "@/types/RoverContextTypes";
 import { VectorField, WeightPoint } from "./constants"
 import { findNearestOre } from "./ore";
 import { DefaultCycleContextObject } from "@/lib/contexts";
+import { Action } from "./algorithm";
 
 export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
   0: { dx: 1, dy: 0 },
@@ -22,7 +23,6 @@ export const octantToStep: { [k: number]: { dx: number; dy: number } } = {
  * @param {number} fromY 
  * @param {number} toX ahová menni szeretnénk
  * @param {number} toY 
- * @param {(0|1)[][]} obstacle_map a térkép akadályokkal
  * @param {boolean} entire visszaadjuk-e az egész utat? (default: false)
  * @returns {{dx:(-1|0|1), dy:(-1|0|1)}} relatív lépés, `{dx:(-1|0|1), dy:(-1|0|1)}` típusban
  */
@@ -31,7 +31,6 @@ export function getNextStep(
   fromY: number,
   toX: number,
   toY: number,
-  obstacle_map: (0 | 1)[][],
   obstacleGraph: any,
   entire:boolean = false
 ): { dx: number; dy: number,entire_path?:Position[] } {
@@ -45,12 +44,13 @@ export function getNextStep(
     const nextY = fromY + directStep.dy;
 
     // Nézzük meg, hogy a közvetlen út járható e (1 = járható, 0 = akadály)
-    if (obstacle_map[nextY][nextX] === 1) return directStep;
+    if (obstacleGraph.grid[nextY][nextX].weight === 1) return directStep;
   }
 
   // Az út el van torlaszolva, használjuk az A* algoritmust egy alternatív út kereséséhez
   const startNode = obstacleGraph.grid[fromY][fromX];
   const endNode = obstacleGraph.grid[toY][toX];
+  endNode.weight = 1
   const path = astar.search(obstacleGraph, startNode, endNode);
 
   if (path && path.length > 0) {
@@ -63,12 +63,30 @@ export function getNextStep(
   }
   return { dx: 0, dy: 0 }; // Nincs út oda
 }
-
 /**
  * Be leszünk-e ragadva?
+ * @param {Position} column ahol tartózkodunk mző
+ * @param {Position} next_column a következő mező
+ * @param {Action[]} my_path az eddig megtett útt
+ * 
+ * @returns {boolean} `boolean`
+ */
+export function isStuck(
+  column: Position,
+  next_column: Position,
+  my_path: Action[],
+): boolean {
+  return my_path.slice(-2).filter(tile => 
+      (tile.position.x == next_column.x && tile.position.y == next_column.y) || 
+      (column.x == tile.position.x && tile.position.y == column.y)
+  ).length > 0
+}
+
+
+/**
+ * Funkció, ha be vagyunk ragadva
  * @param {Position} column ahol tartózkodunk
  * @param {WeightPoint[]} update_able_map a térkép ércekkel
- * @param {(0|1)[][]} [obstacle_map] a térkép akadályokkal
  * @param {Graph} [obstacleGraph] a 2d-s gráf az akadályokból
  * 
  * @returns {Position} `next_column_to_go` a következő mező, `Position` típusban
@@ -76,11 +94,10 @@ export function getNextStep(
 export function stuck(
   column: Position,
   update_able_map: WeightPoint[],
-  obstacle_map: (0 | 1)[][],
   obstacleGraph:any
 ): { next_column_to_go: Position } {
   const nearestOre = findNearestOre(column.x, column.y, update_able_map)
-  const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y, obstacle_map,obstacleGraph)
+  const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacleGraph)
   return { next_column_to_go: { x: column.x + step.dx, y: column.y + step.dy } }
 }
 
