@@ -74,6 +74,23 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     return delta
   }
 
+  useEffect(() => {
+    if (!timeline.deltas.length) return;
+
+    const start = timeline.deltas[0].moves[0].to;
+
+    const startVec = new THREE.Vector3(
+      start.x * gap,
+      0.8,
+      start.y * gap
+    );
+
+    position.current.start.copy(startVec);
+    position.current.target.copy(startVec);
+
+    group.current.position.copy(startVec);
+  }, [timeline.deltas]);
+
   //TODO this will have to be improved when the multi movement ticks come into play
   useEffect(() => { // tick change -> set new plan
     const delta = timeline.deltas[cycle.currentTick]
@@ -97,8 +114,8 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         .subVectors(position.current.target, position.current.start)
         .normalize()
 
-        rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
-        hasToRotate = rotation.current.start != rotation.current.target;
+      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
+      hasToRotate = rotation.current.start != rotation.current.target;
     }
 
     hasToMine = delta.moves.find(m => m.mode == "mine") !== undefined || false; // TODO ezt újra kell dolgozni, ha több move van egy tickben.
@@ -133,17 +150,11 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   }, [cycle.currentTick, timeline.deltas])
 
   useFrame((_, delta) => {
-    if (cycle.currentTick == 0) {
-      const start = timeline.deltas[0].moves[0].to;
-      group.current.position.x = start.x * gap;
-      group.current.position.y = 0.8;
-      group.current.position.z = start.y * gap;
-    }
     elapsed.current += delta * 1000;
 
     cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
     const plan = tickPlan.current.plan;
-    if(plan.length == 0) return;
+    if (plan.length == 0) return;
     // POSITION
     const stepIndex = tickPlan.current.step;
     const step = plan[stepIndex];
