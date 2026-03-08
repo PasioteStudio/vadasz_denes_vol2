@@ -16,10 +16,7 @@ export interface WeightPoint {
 export interface VectorField {
   x: number;
   y: number;
-  //vector: { dx: number; dy: number };  // direction and magnitude
-  magnitude: number;
   endPoint:{relative_x:number,relative_y:number}
-  angleDeg360: number;
 }
 export enum Tile {
     "Obstacle",
