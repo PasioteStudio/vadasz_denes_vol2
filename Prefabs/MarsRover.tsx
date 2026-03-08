@@ -96,7 +96,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   useEffect(() => { // tick change -> set new plan
     const delta = timeline.deltas[cycle.currentTick]
     const moves = delta.moves;
-    const d = cycle.direction.current == 1 ? moves[moves.length - 1] : moves[0];
+    const d = cycle.direction == 1 ? moves[moves.length - 1] : moves[0];
     const targetPos = new THREE.Vector3(d.to.x * gap, 0.8, d.to.y * gap);
 
     let hasToRotate = false, hasToMove = false, hasToMine = false;
@@ -115,7 +115,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         .subVectors(position.current.target, position.current.start)
         .normalize()
 
-      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction.current
+      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
       hasToRotate = rotation.current.start != rotation.current.target;
     }
 
@@ -197,7 +197,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       tickPlan.current.step = Math.min(stepIndex + 1, plan.length - 1);
 
       if(before == tickPlan.current.step && cycle.player.playing == "playing"){
-        cycle.setTick(cycle.currentTick + cycle.direction.current)
+        cycle.setTick(cycle.currentTick + cycle.direction)
       }
 
     }

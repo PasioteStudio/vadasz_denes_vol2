@@ -144,7 +144,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       day: cycle.day,
       night: cycle.night,
       timeLimit: timeLimit,
-      direction: cycleDirection,
+      direction: cycleDirection.current,
       t: t,
     }}>
       <MapTimeLineContext.Provider value={{
