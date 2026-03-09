@@ -57,7 +57,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
   const recalculateSnapshots = useCallback((tTick: number) => {
     const cTick = cycle.currentTick;
-    cycleDirection.current = tTick < cTick ? -1 : 1;
     const deltasToExecute = cycleDirection.current == -1 ?
       deltas.filter((d, i) => i <= cTick && i > tTick) 
       : deltas.filter((d, i) => i > cTick && i <= tTick);
@@ -128,7 +127,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       day: cycle.day,
       night: cycle.night,
       timeLimit: timeLimit,
-      direction: cycleDirection.current,
+      direction: cycleDirection,
       t: t,
     }}>
       <MapTimeLineContext.Provider value={{

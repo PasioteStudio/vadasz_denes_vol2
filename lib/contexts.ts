@@ -25,7 +25,7 @@ export const DefaultCycleContextObject: CycleContextT = {
         setSpeed: () => { },
     },
     timeLimit: 48,
-    direction: 1,
+    direction: {current: 1},
     t: {current: 0},
 }
 export const DefaultTimelineContextObject: MapTimelineContextT = {
