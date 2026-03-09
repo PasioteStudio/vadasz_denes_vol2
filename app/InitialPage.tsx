@@ -61,7 +61,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
             <Terrain receiveShadow />
             <ParticleManager></ParticleManager>
         </Canvas>
-        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden bg-linear-90 from-black/10 from-40% to-60% to-transparent">
+        <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden ">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
                 <h1 className={`text-center text-[5.5vw] bg-linear-to-r from-buttonicon to-misc1 bg-clip-text text-transparent translate-y-[200%] duration-500 ${delayDone && "translate-y-0!"}`}>The Rover v1.0</h1>
                 <div className={`w-9/12 grow py-[3vh] duration-500 opacity-0 translate-y-3/12 ${delayDone && "opacity-100 translate-y-0!"}`}>
