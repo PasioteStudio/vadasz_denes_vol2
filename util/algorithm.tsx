@@ -69,7 +69,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
 
         //nézzük meg, hogy ugyanannyi-e a két réc halmaz, és hogy ugyanaz-e, ha igen, akkor ne számoljunk tovább
         if(weight_based_path.length > 0)weight_based_path[0].action = "move2"
-        if (current_ores.length == prev_ores.length && final_path[0].action != "move2"){
+        if (current_ores.length == prev_ores.length && final_path.length > 0 && final_path[0].action != "move2"){
             break
         };
         
@@ -210,7 +210,7 @@ function estimatePath(
             current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
 
             my_path.push({ action: "move", position: { x: current_tile.x, y: current_tile.y } })
-            const tile_id_temp = update_able_map.findIndex(tile => tile.y == tile.y && tile.x == tile.x)
+            const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
             const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
             if (tile_id !== null) {
                 we_are_stuck = false
