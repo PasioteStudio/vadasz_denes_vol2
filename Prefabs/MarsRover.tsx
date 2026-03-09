@@ -41,7 +41,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     ["move", 300],
     ["rotate", 300],
   ])
-  const totalDuration = useRef(100);
+  const totalDuration = useRef(0);
 
   const position = useRef({
     start: new THREE.Vector3(),
@@ -154,7 +154,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
     const plan = tickPlan.current.plan;
-    if (plan.length == 0) return;
+    if (plan.length == 0) {
+      if(cycle.player.playing == "playing"){ // ne tiltsuk le a playert az első lépésről
+        cycle.setTick(cycle.currentTick + cycle.direction)
+      }
+      return;
+    }
     // POSITION
     const stepIndex = tickPlan.current.step;
     const step = plan[stepIndex];
@@ -197,9 +202,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     }
 
     // advance step
-    if (elapsed.current > prevDuration + step.duration) { // reverse this is bad
+    if (elapsed.current >= prevDuration + step.duration) {
       const before = tickPlan.current.step;
-      tickPlan.current.step = Math.max(0, Math.min(stepIndex + cycle.direction, plan.length - 1));
+      tickPlan.current.step = Math.max(0, Math.min(stepIndex + 1, plan.length - 1));
 
       if(before == tickPlan.current.step && cycle.player.playing == "playing"){
         cycle.setTick(cycle.currentTick + cycle.direction)
