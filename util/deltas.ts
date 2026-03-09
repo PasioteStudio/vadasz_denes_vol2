@@ -3,6 +3,7 @@ import { Item, Log, Position } from "@/types/RoverContextTypes"
 import { Tile } from "../lib/constants"
 import { clamp } from "three/src/math/MathUtils.js"
 import { randomTileFrom } from "./map"
+import { deepCopy } from "./path"
 
 export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
@@ -72,7 +73,7 @@ export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction:
 
 export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], roverMoves: Move[], direction: -1 | 1): [boolean, Tile, Tile|null][][] => {
     const deltas = direction == 1 ? [...roverMoves] : [...roverMoves].reverse()
-    let newMap = startMap.map(row => [...row]);
+    let newMap = startMap
 
     for (const d of deltas) {
         if (d.mode != "mine" || d.ore === undefined) continue;
