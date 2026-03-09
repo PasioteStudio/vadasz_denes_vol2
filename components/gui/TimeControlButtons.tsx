@@ -7,6 +7,7 @@ export default function TimeControlButtons() {
 
   const handleButton = (amount: 1 | 2 | -1 | -2) => {
     const isDouble = Math.abs(amount) === 2;
+    cycle.setDirection(amount > 0 ? 1 : -1)
 
     if (cycle.player.playing === "playing" || isDouble) {
       // Playing or double-step button: only set speed
@@ -14,7 +15,6 @@ export default function TimeControlButtons() {
     } else {
       // Paused + single-step: set speed AND adjust tick
       cycle.player.setSpeed(amount);
-      cycle.setDirection(amount > 0 ? 1 : -1)
       cycle.setTick(cycle.currentTick + amount);
     }
   };
