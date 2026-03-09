@@ -33,7 +33,7 @@ const InventoryPopup = ({ onClose }: InvenotryPopupType) => {
   return (
     <>
       <div className="fixed w-full h-full left-0 top-0 bg-linear-0 from-black/50 from-40% to-transparent">
-      <div className="w-3/12 absolute top-1/2 left-1/2 -translate-1/2 bg-gray-900 rounded-2xl px-10 py-4 pb-10">
+      <div className="w-3/12 min-w-md absolute top-1/2 left-1/2 -translate-1/2 bg-gray-900 rounded-2xl px-10 py-4 pb-10">
         <h2 className="text-center text-[2vw] font-bold mb-5">Ércek</h2>
 
         <button className="absolute top-0 right-0 rounded-tr-2xl bg-red-500 w-10 aspect-square rounded-bl-md cursor-pointer" onClick={onClose}>
