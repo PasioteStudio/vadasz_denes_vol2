@@ -1,4 +1,4 @@
-import { Tile } from "@/util/constants"
+import { Tile } from "@/lib/constants"
 import { Log, Position, RoverT } from "./RoverContextTypes"
 
 export type MapTimelineContextT = {

@@ -1,6 +1,6 @@
-import { astar } from "@/util/astar"
+import { astar } from "@/lib/astar"
 import { Position } from "@/types/RoverContextTypes";
-import { VectorField, WeightPoint } from "./constants"
+import { VectorField, WeightPoint } from "../lib/constants"
 import { findNearestOre } from "./ore";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { Action } from "./algorithm";
@@ -65,50 +65,48 @@ export function getNextStep(
 }
 /**
  * Be leszünk-e ragadva?
- * @param {Position} column ahol tartózkodunk mző
- * @param {Position} next_column a következő mező
+ * @param {VectorField} next_tile a következő mező
  * @param {Action[]} my_path az eddig megtett útt
  * 
  * @returns {boolean} `boolean`
  */
 export function isStuck(
-  column: Position,
-  next_column: Position,
+  next_tile: VectorField,
   my_path: Action[],
 ): boolean {
   return my_path.slice(-2).filter(tile => 
-      (tile.position.x == next_column.x && tile.position.y == next_column.y) || 
-      (column.x == tile.position.x && tile.position.y == column.y)
+      (tile.position.x == next_tile.x && tile.position.y == next_tile.y) || 
+      (next_tile.x + next_tile.endPoint.relative_x == tile.position.x && tile.position.y == next_tile.y + next_tile.endPoint.relative_y)
   ).length > 0
 }
 
 
 /**
  * Funkció, ha be vagyunk ragadva
- * @param {Position} column ahol tartózkodunk
+ * @param {Position} current_tile ahol tartózkodunk
  * @param {WeightPoint[]} update_able_map a térkép ércekkel
  * @param {Graph} [obstacleGraph] a 2d-s gráf az akadályokból
  * 
- * @returns {Position} `next_column_to_go` a következő mező, `Position` típusban
+ * @returns {Position} `next_tile_to_go` a következő mező, `Position` típusban
  */
 export function stuck(
-  column: Position,
+  current_tile: Position,
   update_able_map: WeightPoint[],
   obstacleGraph:any
-): { next_column_to_go: Position } {
-  const nearestOre = findNearestOre(column.x, column.y, update_able_map)
-  const step = getNextStep(column.x, column.y, nearestOre.x, nearestOre.y,obstacleGraph)
-  return { next_column_to_go: { x: column.x + step.dx, y: column.y + step.dy } }
+): { next_tile_to_go: Position } {
+  const nearestOre = findNearestOre(current_tile.x, current_tile.y, update_able_map)
+  const step = getNextStep(current_tile.x, current_tile.y, nearestOre.x, nearestOre.y,obstacleGraph)
+  return { next_tile_to_go: { x: current_tile.x + step.dx, y: current_tile.y + step.dy } }
 }
 
 /**
  * Visszaad egy logikai értéket
- * @param {VectorField} column ahol tartózkodunk
+ * @param {VectorField} current_tile ahol tartózkodunk
  * 
  * @returns {boolean} `boolean` mutat-e valahova a vektor?
  */
-export function isThereAWay(column: VectorField) {
-  return column.endPoint.relative_x != 0 || column.endPoint.relative_y != 0
+export function isThereAWay(current_tile: VectorField) {
+  return current_tile.endPoint.relative_x != 0 || current_tile.endPoint.relative_y != 0
 }
 
 /**

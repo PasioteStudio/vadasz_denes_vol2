@@ -1,4 +1,4 @@
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 import { generateMap, isValidMap, readMap } from "@/util/map";
 import { useEffect, useRef, useState } from "react";
 

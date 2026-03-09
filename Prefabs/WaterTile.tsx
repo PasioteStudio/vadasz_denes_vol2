@@ -10,12 +10,12 @@ interface TileProps {
 
 type GLTFResult = GLTF & {
   nodes: {
-    Plane001: THREE.Mesh
-    Plane001_1: THREE.Mesh
+    Plane: THREE.Mesh
+    Cylinder: THREE.Mesh
   }
   materials: {
-    ['Material.003']: THREE.MeshStandardMaterial
     ['Material.004']: THREE.MeshStandardMaterial
+    ['Material.008']: THREE.MeshStandardMaterial
   }
 }
 
@@ -24,18 +24,20 @@ export function WaterTile(props: ThreeElements['group']) {
   const { nodes, materials } =
     useGLTF('/Modells/kek.glb') as unknown as GLTFResult
   return (
-    <group {...props} dispose={null} scale={[1, 1, 1]}>
+    <group {...props} dispose={null}>
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes.Plane001.geometry}
-        material={materials['Material.003']}
+        geometry={nodes.Plane.geometry}
+        material={materials['Material.004']}
       />
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes.Plane001_1.geometry}
-        material={materials['Material.004']}
+        geometry={nodes.Cylinder.geometry}
+        material={materials['Material.008']}
+        position={[0, 10, 0]}
+        scale={0.1}
       />
     </group>
   )

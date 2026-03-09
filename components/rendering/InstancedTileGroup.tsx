@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { useGLTF } from '@react-three/drei';
 import { useRef, useLayoutEffect, useMemo } from 'react';
-import { Tile } from '@/util/constants';
+import { Tile } from '@/lib/constants';
 import { getTileModelPath, TILE_REGISTRY } from '@/util/tileRegistry';
 import type { GLTF } from 'three-stdlib';
 import type { ReactElement } from "react";

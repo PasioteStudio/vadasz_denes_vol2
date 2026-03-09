@@ -1,7 +1,7 @@
 // util/algorithm.worker.ts
 // Web Worker for makePath offloading
 import { makePath } from "./algorithm";
-import { Tile } from "./constants";
+import { Tile } from "../lib/constants";
 
 interface MakePathRequest {
   type: "makePath";

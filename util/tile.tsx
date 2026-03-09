@@ -1,7 +1,7 @@
 import { Position } from "@/types/RoverContextTypes";
-import { Tile, VectorField } from "./constants";
+import { Tile, VectorField } from "../lib/constants";
 import { octantToStep } from "./path";
-import { WeightPoint } from "./constants";
+import { WeightPoint } from "../lib/constants";
 
 /**
  * Átalakítja a `string` karakterláncot `enum` felsorolássá

@@ -1,4 +1,4 @@
-import { Tile } from './constants';
+import { Tile } from '../lib/constants';
 
 /**
  * Tile Registry: Maps Tile enum to GLTF model paths
@@ -16,14 +16,17 @@ export const TILE_REGISTRY: Record<Tile, string> = {
   [Tile.EV2]: '/Modells/normalmarssurface2.glb',
   [Tile.EV3]: '/Modells/normalmarssurface3.glb',
   [Tile.BV1]: '/Modells/kek.glb',
-  [Tile.BV2]: '/Modells/kek.glb',
-  [Tile.BV3]: '/Modells/kek.glb',
+  [Tile.BV2]: '/Modells/kek1.glb',
+  [Tile.BV3]: '/Modells/kek2.glb',
   [Tile.YV1]: '/Modells/arany.glb',
-  [Tile.YV2]: '/Modells/arany.glb',
-  [Tile.YV3]: '/Modells/arany.glb',
+  [Tile.YV2]: '/Modells/arany1.glb',
+  [Tile.YV3]: '/Modells/arany2.glb',
   [Tile.GV1]: '/Modells/räriteten.glb',
-  [Tile.GV2]: '/Modells/räriteten.glb',
-  [Tile.GV3]: '/Modells/räriteten.glb',
+  [Tile.GV2]: '/Modells/räriteten1.glb',
+  [Tile.GV3]: '/Modells/räriteten2.glb',
+  [Tile.OV1]: '/Modells/akadaly.glb',
+  [Tile.OV2]: '/Modells/akadaly1.glb',
+  [Tile.OV3]: '/Modells/akadaly2.glb',
 };
 
 /**

@@ -1,7 +1,8 @@
-import { Tile, WeightPoint, VectorField } from "./constants";
+import { Tile, WeightPoint, VectorField } from "../lib/constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
 import { TILE_REGISTRY } from "./tileRegistry";
+//import GPU from 'gpu.js/dist/gpu-browser.js';  // Or 'gpu.js' if auto-resolving
 
 export function generateMap(): Tile[][] {
   const mapConstraints = {
@@ -37,9 +38,11 @@ export function generateMap(): Tile[][] {
 }
 
 /**
+ * @async
  * Creates a map from a file using an URL
  * @param {string} URL the path to the file
- * @returns {Promise<Tile[][]>} map (Promise<Tile[][]>)
+ * @param {boolean} isText
+ * @returns {Promise<Tile[][]>} map `Promise<Tile[][]>`
  */
 export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
   let lines: string[] = [];
@@ -55,10 +58,10 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
     if (lines[i].trim() == "") continue;
     map.push([]);
     const currentRow = map[map.length - 1];
-    const fields = lines[i].trim().split(',').map((s, _i): Tile => {
+    const tiles = lines[i].trim().split(',').map((s, _i): Tile => {
       return toTile(s)
     })
-    fields.forEach(f => currentRow.push(f));
+    tiles.forEach(t => currentRow.push(t));
 
   }
   return map;
@@ -73,37 +76,36 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
  * @param {number} distance from which the tiles should be calculated. 0 means that only the standing one and the one that it points to
  * @returns {VectorField[][]} vector map (VectorField[][])
  */
-export function createVectorMapFromWeights(
+/*export function createVectorMapFromWeights(
   width: number,
   height: number,
   point: Position,
   weightPoints: WeightPoint[],
   distance?: number,
 ): VectorField[][] {
-  const vectorMap: VectorField[][] = Array(height)
-    .fill(null)
-    .map(() => Array(width));
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (!isInDistance({ y: y, x: x }, point, distance ? distance : 1)) {
-        vectorMap[y][x] = {
-          x,
-          y,
-          endPoint: {
-            relative_x: 0,
-            relative_y: 0,
-          }
-        };
-        continue
-      }
-      vectorMap[y][x] = calculateTile(weightPoints, x, y)
+  const gpu = new GPU();
+  
+  const multiplyMatrix = gpu.createKernel(function(this: any, point:Position, distance?:number) {
+    const x = this.thread.x;
+    const y = this.thread.y; 
+    
+    if (!isInDistance({ y: y, x: x }, point, distance ? distance : 1)) {
+      return {
+        x,
+        y,
+        endPoint: {
+          relative_x: 0,
+          relative_y: 0,
+        }
+      } as VectorField;
     }
-  }
-  return vectorMap;
-}
+    return calculateTile(weightPoints, x, y)
+  }).setOutput([height, width]);
+  return  multiplyMatrix(point, distance) as VectorField[][];
+}*/
 
 export const isValidMap = (map: Tile[][]): boolean => {
-  return map.length > 0 && map.find(row => row.find(field => field == Tile.Start)) != undefined;
+  return map.length > 0 && map.find(row => row.find(tile => tile == Tile.Start)) != undefined;
 }
 
 export const getStartingPoint = (map: Tile[][]): Position => {
@@ -142,6 +144,9 @@ export const randomTileFrom = (t: Tile): Tile => {
   switch (t) {
     case Tile.Start: 
       return 5 as Tile;
+    case Tile.Obstacle:
+      range = [18, 21];
+      break;
     case Tile.Empty:
       range = [6, 9];
       break;

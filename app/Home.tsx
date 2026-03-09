@@ -4,7 +4,7 @@ import { CycleContext, DefaultRoverContextObject, MapTimeLineContext } from "@/l
 import { CycleContextT } from "@/types/CycleContextTypes";
 import { GUI } from "@/components/gui/GUI";
 import { Renderer } from "@/components/rendering/Renderer";
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 import { Delta, Move } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { getEnergyForTick, processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
