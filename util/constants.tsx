@@ -37,6 +37,9 @@ export enum Tile {
     "GV1",
     "GV2",
     "GV3",
+    "OV1",
+    "OV2",
+    "OV3",
 }
 export const vectorValues={
     ore:1

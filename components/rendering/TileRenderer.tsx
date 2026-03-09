@@ -17,13 +17,6 @@ interface TileRendererProps {
   y: number
 }
 
-const normalTiles = [NormalTile, NormalTile1, NormalTile2, NormalTile3]
-
-// x és y alapján mindig ugyanazt az indexet adja vissza
-// re-render nem változtatja meg
-function getTileIndex(x: number, y: number): number {
-  return Math.abs((x * 73856093) ^ (y * 19349663)) % normalTiles.length
-}
 
 export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
   const position: [number, number, number] = [x * TILE_GAP, 0, y * TILE_GAP]

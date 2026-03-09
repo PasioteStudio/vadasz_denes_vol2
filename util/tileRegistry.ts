@@ -24,6 +24,9 @@ export const TILE_REGISTRY: Record<Tile, string> = {
   [Tile.GV1]: '/Modells/räriteten.glb',
   [Tile.GV2]: '/Modells/räriteten1.glb',
   [Tile.GV3]: '/Modells/räriteten2.glb',
+  [Tile.OV1]: '/Modells/akadaly.glb',
+  [Tile.OV2]: '/Modells/akadaly1.glb',
+  [Tile.OV3]: '/Modells/akadaly2.glb',
 };
 
 /**
