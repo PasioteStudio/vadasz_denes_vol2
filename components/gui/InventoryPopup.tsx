@@ -1,5 +1,5 @@
 import { useCycle, useTimeline } from '@/lib/contexts'
-import { Tile } from '@/util/constants'
+import { Tile } from '@/lib/constants'
 import React, { useEffect, useMemo, useState } from 'react'
 
 export type InvenotryPopupType = {

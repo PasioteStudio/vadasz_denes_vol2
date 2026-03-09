@@ -1,4 +1,4 @@
-import { Tile, WeightPoint, VectorField } from "./constants";
+import { Tile, WeightPoint, VectorField } from "../lib/constants";
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, isInDistance, toTile } from "./tile";
 import { TILE_REGISTRY } from "./tileRegistry";
@@ -57,10 +57,10 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
     if (lines[i].trim() == "") continue;
     map.push([]);
     const currentRow = map[map.length - 1];
-    const fields = lines[i].trim().split(',').map((s, _i): Tile => {
+    const tiles = lines[i].trim().split(',').map((s, _i): Tile => {
       return toTile(s)
     })
-    fields.forEach(f => currentRow.push(f));
+    tiles.forEach(t => currentRow.push(t));
 
   }
   return map;
@@ -105,7 +105,7 @@ export function createVectorMapFromWeights(
 }
 
 export const isValidMap = (map: Tile[][]): boolean => {
-  return map.length > 0 && map.find(row => row.find(field => field == Tile.Start)) != undefined;
+  return map.length > 0 && map.find(row => row.find(tile => tile == Tile.Start)) != undefined;
 }
 
 export const getStartingPoint = (map: Tile[][]): Position => {

@@ -1,4 +1,4 @@
-import { Tile } from './constants';
+import { Tile } from '../lib/constants';
 
 /**
  * Tile Registry: Maps Tile enum to GLTF model paths

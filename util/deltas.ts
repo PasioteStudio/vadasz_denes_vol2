@@ -1,6 +1,6 @@
 import { Delta, InventoryChange, Move } from "@/types/MapTimelineContextTypes"
 import { Item, Log, Position } from "@/types/RoverContextTypes"
-import { Tile } from "./constants"
+import { Tile } from "../lib/constants"
 import { clamp } from "three/src/math/MathUtils.js"
 import { randomTileFrom } from "./map"
 

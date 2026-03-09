@@ -1,4 +1,4 @@
-import { Tile } from "@/util/constants"
+import { Tile } from "@/lib/constants"
 import { BarrierTile } from "@/Prefabs/BarrierTile";
 import { NormalTile } from "@/Prefabs/NormalTile";
 import { NormalTile1 } from "@/Prefabs/NormalTile1";

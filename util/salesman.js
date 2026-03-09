@@ -156,6 +156,7 @@ const optimizatedPathLength = 75;
  * @param {Function} [callback=undefined] An optional callback to be called after each iteration.
  * @param {Function} [callback=euclidean] An optional argument to specify how distances are calculated. The function takes two Point objects as arguments and returns a number for distance. Defaults to simple Euclidean distance calculation.
  * @param {number} numberOfSeconds default is 30 seconds
+ * @param {TimeComplexity} time_complexity 
  *
  * @returns {number[]} An array of indexes in the original array. Indicates in which order the different points are visited.
  *
@@ -169,8 +170,8 @@ const optimizatedPathLength = 75;
  * // ordered_points now contains the points, in the order they ought to be visited.
  **/
 export function solve(points, temp_coeff = 0.999, callback, distance = euclidean, keep_end = false, numberOfSeconds = -1,time_complecity = TimeComplexity.FAST) {
-  let maxSeconds = time_complecity.toString().split(".")[0] * 1;
-  let maxTempCoeff = time_complecity.toString().split(".")[1] * 1;
+  const maxSeconds = Math.floor(time_complecity)
+  const maxTempCoeff = time_complecity.toLocaleString({style: "decimal", minimumFractionDigits: 5, maximumFractionDigits: 5}).split(".")[1] * 1;
   const path = new Path(points, distance, keep_end);
   // Optimization: If there is only one point in the list, there is no path.
   if (points.length < 2) return path.order;

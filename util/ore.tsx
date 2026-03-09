@@ -1,5 +1,5 @@
 import { Position } from "@/types/RoverContextTypes";
-import { WeightPoint } from "./constants";
+import { WeightPoint } from "../lib/constants";
 
 /**
  * Megtalálja a legközelebbi ércet az adott pontból euklideszi távolságot használva

@@ -4,7 +4,7 @@ import { InstancedTileGroup } from "./InstancedTileGroup";
 import { RoverT } from "@/types/RoverContextTypes";
 import { TILE_GAP } from "./TileRenderer";
 import { clampNum } from "@/util/math";
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 
 type Bounds = { minRow: number; maxRow: number; minCol: number; maxCol: number };
 const VISIBLE_ROWS = 30;

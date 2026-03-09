@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Home from "./Home";
 import InitialPage from "./InitialPage";
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 
 export default function App() {
     const [timeLimit, setTimeLimit] = useState(0);

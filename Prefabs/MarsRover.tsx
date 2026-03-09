@@ -8,7 +8,7 @@ import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/components/rendering/TileRenderer"
 import { useCycle, useTimeline } from "@/lib/contexts"
-import { isOre } from "@/util/constants"
+import { isOre } from "@/lib/constants"
 import { processMapChanges } from "@/util/deltas"
 
 type GLTFResult = GLTF & {

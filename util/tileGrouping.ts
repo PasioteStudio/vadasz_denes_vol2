@@ -1,4 +1,4 @@
-import { Tile } from '@/util/constants';
+import { Tile } from '@/lib/constants';
 
 export interface TilePositionGroup {
   tileType: Tile;
@@ -42,10 +42,10 @@ export function groupTilesByType(
   for (let row = safeMinRow; row <= safeMaxRow; row++) {
     for (let col = safeMinCol; col <= safeMaxCol; col++) {
       const currentRecord = map[row]?.[col];
-      const field = currentRecord[0] ? currentRecord[2]! : currentRecord[1];
-      if (field === undefined) continue;
+      const tile = currentRecord[0] ? currentRecord[2]! : currentRecord[1];
+      if (tile === undefined) continue;
 
-      const tileType = field;
+      const tileType = tile;
       if (!groups.has(tileType)) {
         groups.set(tileType, {
           tileType,

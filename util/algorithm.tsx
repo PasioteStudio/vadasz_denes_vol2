@@ -1,4 +1,4 @@
-import { isOre, vectorValues, Tile, WeightPoint } from "@/util/constants";
+import { isOre, vectorValues, Tile, WeightPoint } from "@/lib/constants";
 import { Graph, astar } from "@/util/astar"
 import { getNextStep, isDay, isStuck, isThereAWay, stuck } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
@@ -28,11 +28,11 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     const update_able_map: WeightPoint[] = []
 
     map.forEach((row, y) => {
-        row.forEach((field, x) => {
-            if (field == Tile.Start) start = { x: x, y: y }
-            if (obstacle_map.length < y + 1) obstacle_map.push([field == Tile.Obstacle ? 1 : 0])
-            else obstacle_map[y].push(field == Tile.Obstacle ? 0 : 1)
-            update_able_map.push({ x: x, y: y, weight: isOre(field) ? vectorValues.ore : 0 })
+        row.forEach((tile, x) => {
+            if (tile == Tile.Start) start = { x: x, y: y }
+            if (obstacle_map.length < y + 1) obstacle_map.push([tile == Tile.Obstacle ? 1 : 0])
+            else obstacle_map[y].push(tile == Tile.Obstacle ? 0 : 1)
+            update_able_map.push({ x: x, y: y, weight: isOre(tile) ? vectorValues.ore : 0 })
         })
     })
     const obstacleGraph = new Graph(obstacle_map, { diagonal: true });
@@ -89,10 +89,10 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         }else{
             final_path = my_path
         }
-        const column: Position = ordered_path[ordered_path.length - 1].position
-        const startNode = obstacleGraph.grid[column.y][column.x];
+        const tile: Position = ordered_path[ordered_path.length - 1].position
+        const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move", position: { x: tile.y, y: tile.x } } })
+        go_home = astarpath.map(tile => { return { action: "move", position: tile } })
         
         
     }
@@ -199,26 +199,26 @@ function estimatePath(
     withWeight: boolean = false
 ): { my_path: Action[] } {
     const my_path: Action[] = []
-    let column = calculateTile(update_able_map, start.x, start.y)
+    let current_tile = calculateTile(update_able_map, start.x, start.y)
     let we_are_stuck = false;
 
-    while (isThereAWay(column) && my_path.length < iterations) {
-        let next_column = calculateTile(update_able_map, column.x + column.endPoint.relative_x, column.y + column.endPoint.relative_y)
+    while (isThereAWay(current_tile) && my_path.length < iterations) {
+        let next_tile = calculateTile(update_able_map, current_tile.x + current_tile.endPoint.relative_x, current_tile.y + current_tile.endPoint.relative_y)
 
-        if (we_are_stuck || isStuck(next_column,withWeight ? my_path : [{action:"move",position:next_column}])) {
-            const { next_column_to_go } = stuck(column, update_able_map,obstacleGraph)
-            column = calculateTile(update_able_map, next_column_to_go.x, next_column_to_go.y)
+        if (we_are_stuck || isStuck(next_tile,withWeight ? my_path : [{action:"move",position:next_tile}])) {
+            const { next_tile_to_go } = stuck(current_tile, update_able_map,obstacleGraph)
+            current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
 
-            my_path.push({ action: "move", position: { x: column.x, y: column.y } })
-            const tile_id_temp = update_able_map.findIndex(tile => tile.y == column.y && tile.x == column.x)
+            my_path.push({ action: "move", position: { x: current_tile.x, y: current_tile.y } })
+            const tile_id_temp = update_able_map.findIndex(tile => tile.y == tile.y && tile.x == tile.x)
             const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
             if (tile_id !== null) {
                 we_are_stuck = false
                 update_able_map[tile_id].weight = 0
-                my_path.push({ action: "mine", position: { x: column.x, y: column.y } })
+                my_path.push({ action: "mine", position: { x: current_tile.x, y: current_tile.y } })
             }
 
-            const startNode = obstacleGraph.grid[column.y][column.x];
+            const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
             const astarpath = astar.search(obstacleGraph, startNode, endNode);
 
             //vissza kell-e mennünk?
@@ -227,22 +227,22 @@ function estimatePath(
         }
         
 
-        if (obstacleGraph.grid[next_column.y][next_column.x].weight === 0) {
-            const step = getNextStep(column.x, column.y, next_column.x + next_column.endPoint.relative_x, next_column.y + next_column.endPoint.relative_y,obstacleGraph)
-            next_column = calculateTile(update_able_map, column.x + step.dx, column.y + step.dy)
+        if (obstacleGraph.grid[next_tile.y][next_tile.x].weight === 0) {
+            const step = getNextStep(current_tile.x, current_tile.y, next_tile.x + next_tile.endPoint.relative_x, next_tile.y + next_tile.endPoint.relative_y,obstacleGraph)
+            next_tile = calculateTile(update_able_map, current_tile.x + step.dx, current_tile.y + step.dy)
         }
 
-        column = next_column
-        my_path.push({ action: "move", position: { x: column.x, y: column.y } })
+        current_tile = next_tile
+        my_path.push({ action: "move", position: { x: current_tile.x, y: current_tile.y } })
 
-        const tile_id_temp = update_able_map.findIndex(tile => tile.y == column.y && tile.x == column.x)
+        const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
         if (tile_id !== null) {
             update_able_map[tile_id].weight = 0
-            my_path.push({ action: "mine", position: { x: column.x, y: column.y } })
+            my_path.push({ action: "mine", position: { x: current_tile.x, y: current_tile.y } })
         }
 
-        const startNode = obstacleGraph.grid[column.y][column.x];
+        const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
 
         //vissza kell-e mennünk?

@@ -5,7 +5,7 @@ import LogDisplayer from "@/components/gui/LogDisplayer";
 import TimeControlButtons from "@/components/gui/TimeControlButtons";
 import { useTimeline } from "@/lib/contexts";
 
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 import { useEffect, useState } from "react";
 
 const toMapTile = (tile: Tile): string => {

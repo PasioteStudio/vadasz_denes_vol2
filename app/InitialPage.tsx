@@ -5,9 +5,9 @@ import { StaticRover } from "@/Prefabs/static/staticRover";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { Terrain } from "@/Prefabs/static/Terrain";
-import { Tile } from "@/util/constants";
+import { Tile } from "@/lib/constants";
 import { ParticleManager } from "@/components/rendering/Particles/ParticleManager";
-export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (fields: Tile[][]) => void }) {
+export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (tiles: Tile[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
     const [selectedMapOption, setMapOption] = useState<"upload" | "default" | "random">();
