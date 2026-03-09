@@ -76,7 +76,7 @@ export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], rove
 
     for (const d of deltas) {
         if (d.mode != "mine" || d.ore === undefined) continue;
-        const prevEntry = {...newMap[d.to.y][d.to.x]};
+        const prevEntry = newMap[d.to.y][d.to.x];
         if(prevEntry[2]===null){
             prevEntry[2] = randomTileFrom(Tile.Empty)
         }
