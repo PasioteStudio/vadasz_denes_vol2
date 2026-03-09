@@ -10,7 +10,7 @@ export default function DayNightDirectionalLights() {
     const lightRadius = 25 * TILE_GAP
     const orbitHeight = lightRadius / 3
 
-    const { currentTick, timeOfDay, day, night, t } = useCycle()
+    const { currentTick, timeOfDay, day, night, t, direction } = useCycle()
 
     // References to Three.js lights
     const sunRef = useRef<THREE.SpotLight>(null!)
@@ -54,57 +54,63 @@ export default function DayNightDirectionalLights() {
 
     // Smoothly interpolate each frame
     useFrame(() => {
-        tempPos.current.copy(startPos.current).lerp(targetPos.current, Math.min(t.current, 1))
+        const alpha = Math.min(t.current, 1)
+
+        if (direction === 1) {
+            tempPos.current.copy(startPos.current).lerp(targetPos.current, alpha)
+        } else {
+            tempPos.current.copy(targetPos.current).lerp(startPos.current, alpha)
+        }
 
         if (sunRef.current) sunRef.current.position.copy(tempPos.current)
         if (moonRef.current) moonRef.current.position.copy(tempPos.current)
     })
 
-        const SHADOW_RESOLUTION = 4096
-        const SHADOW_RADIUS = 2
-        const SHADOW_BIAS = -0.0001
-        const SHADOW_NORMAL_BIAS = 0.5
-        const SHADOW_RANGE = 300
-    
+    const SHADOW_RESOLUTION = 4096
+    const SHADOW_RADIUS = 2
+    const SHADOW_BIAS = -0.0001
+    const SHADOW_NORMAL_BIAS = 0.5
+    const SHADOW_RANGE = 300
+
 
     return (
         <>
-        {/* Sun */}
-        <directionalLight
-            ref={sunRef}
-            intensity={timeOfDay === "day" ? 2 : 0}
-            color={0xffffff}
-            castShadow={timeOfDay === "day"}
-            shadow-mapSize-width={SHADOW_RESOLUTION}
-            shadow-mapSize-height={SHADOW_RESOLUTION}
-            shadow-radius={SHADOW_RADIUS}
-            shadow-bias={SHADOW_BIAS}
-            shadow-normalBias={SHADOW_NORMAL_BIAS}
-            shadow-camera-near={0.1}
-            shadow-camera-far={SHADOW_RANGE}
-            shadow-camera-left={-SHADOW_RANGE}
-            shadow-camera-right={SHADOW_RANGE}
-            shadow-camera-top={SHADOW_RANGE}
-            shadow-camera-bottom={-SHADOW_RANGE}
-        />
+            {/* Sun */}
+            <directionalLight
+                ref={sunRef}
+                intensity={timeOfDay === "day" ? 2 : 0}
+                color={0xffffff}
+                castShadow={timeOfDay === "day"}
+                shadow-mapSize-width={SHADOW_RESOLUTION}
+                shadow-mapSize-height={SHADOW_RESOLUTION}
+                shadow-radius={SHADOW_RADIUS}
+                shadow-bias={SHADOW_BIAS}
+                shadow-normalBias={SHADOW_NORMAL_BIAS}
+                shadow-camera-near={0.1}
+                shadow-camera-far={SHADOW_RANGE}
+                shadow-camera-left={-SHADOW_RANGE}
+                shadow-camera-right={SHADOW_RANGE}
+                shadow-camera-top={SHADOW_RANGE}
+                shadow-camera-bottom={-SHADOW_RANGE}
+            />
 
             {/* Moon */}
             <directionalLight
                 ref={moonRef}
                 intensity={timeOfDay === "night" ? 1.3 : 0}
                 color={0xaaaaff}
-            castShadow={timeOfDay === "night"}
-            shadow-mapSize-width={SHADOW_RESOLUTION}
-            shadow-mapSize-height={SHADOW_RESOLUTION}
-            shadow-radius={SHADOW_RADIUS}
-            shadow-bias={SHADOW_BIAS}
-            shadow-normalBias={SHADOW_NORMAL_BIAS}
-            shadow-camera-near={0.1}
-            shadow-camera-far={SHADOW_RANGE}
-            shadow-camera-left={-SHADOW_RANGE}
-            shadow-camera-right={SHADOW_RANGE}
-            shadow-camera-top={SHADOW_RANGE}
-            shadow-camera-bottom={-SHADOW_RANGE}
+                castShadow={timeOfDay === "night"}
+                shadow-mapSize-width={SHADOW_RESOLUTION}
+                shadow-mapSize-height={SHADOW_RESOLUTION}
+                shadow-radius={SHADOW_RADIUS}
+                shadow-bias={SHADOW_BIAS}
+                shadow-normalBias={SHADOW_NORMAL_BIAS}
+                shadow-camera-near={0.1}
+                shadow-camera-far={SHADOW_RANGE}
+                shadow-camera-left={-SHADOW_RANGE}
+                shadow-camera-right={SHADOW_RANGE}
+                shadow-camera-top={SHADOW_RANGE}
+                shadow-camera-bottom={-SHADOW_RANGE}
             />
         </>
     )
