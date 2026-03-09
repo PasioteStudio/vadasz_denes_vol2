@@ -65,20 +65,18 @@ export function getNextStep(
 }
 /**
  * Be leszünk-e ragadva?
- * @param {Position} column ahol tartózkodunk mző
- * @param {Position} next_column a következő mező
+ * @param {VectorField} next_column a következő mező
  * @param {Action[]} my_path az eddig megtett útt
  * 
  * @returns {boolean} `boolean`
  */
 export function isStuck(
-  column: Position,
-  next_column: Position,
+  next_column: VectorField,
   my_path: Action[],
 ): boolean {
   return my_path.slice(-2).filter(tile => 
       (tile.position.x == next_column.x && tile.position.y == next_column.y) || 
-      (column.x == tile.position.x && tile.position.y == column.y)
+      (next_column.x + next_column.endPoint.relative_x == tile.position.x && tile.position.y == next_column.y + next_column.endPoint.relative_y)
   ).length > 0
 }
 

@@ -37,9 +37,11 @@ export function generateMap(): Tile[][] {
 }
 
 /**
+ * @async
  * Creates a map from a file using an URL
  * @param {string} URL the path to the file
- * @returns {Promise<Tile[][]>} map (Promise<Tile[][]>)
+ * @param {boolean} isText
+ * @returns {Promise<Tile[][]>} map `Promise<Tile[][]>`
  */
 export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
   let lines: string[] = [];
