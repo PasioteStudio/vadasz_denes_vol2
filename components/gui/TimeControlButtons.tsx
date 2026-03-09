@@ -14,7 +14,7 @@ export default function TimeControlButtons() {
     } else {
       // Paused + single-step: set speed AND adjust tick
       cycle.player.setSpeed(amount);
-      cycle.direction.current = amount > 0 ? 1 : -1
+      cycle.setDirection(amount > 0 ? 1 : -1)
       cycle.setTick(cycle.currentTick + amount);
     }
   };
