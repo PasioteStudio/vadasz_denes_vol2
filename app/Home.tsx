@@ -93,17 +93,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => {
     if (deltas.length > 1) return
     flavoredMap.current = generateFlavoredMap(map);
-    setDeltas(prev=>{
-      if(prev.length == 0){
-        return [{
-            energy: 0,
-            inventoryChanges: [],
-            logsAdded: [],
-            moves: [{ from: {x:0,y:0}, to: {x:0,y:0}, mode: "wait" }]
-        }]
-      }
-      return prev
-    })
     const start = new Date()
     const worker = new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' })
     worker.postMessage({
