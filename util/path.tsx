@@ -1,4 +1,4 @@
-import { astar } from "@/util/astar"
+import { astar } from "@/lib/astar"
 import { Position } from "@/types/RoverContextTypes";
 import { VectorField, WeightPoint } from "../lib/constants"
 import { findNearestOre } from "./ore";

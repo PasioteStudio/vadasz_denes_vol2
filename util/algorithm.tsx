@@ -1,10 +1,10 @@
 import { isOre, vectorValues, Tile, WeightPoint } from "@/lib/constants";
-import { Graph, astar } from "@/util/astar"
+import { Graph, astar } from "@/lib/astar"
 import { getNextStep, isDay, isStuck, isThereAWay, stuck } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
 import { calculateTile, tileToString } from "./tile";
 import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
-import { solve } from "./salesman"
+import { solve } from "../lib/salesman"
 import { findNearestOre } from "./ore";
 import { deepCopy } from "./path";
 
