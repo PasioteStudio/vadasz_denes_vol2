@@ -181,9 +181,6 @@ export const Renderer = () => {
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
         {/* <ParticleManager /> */}
-
-
-        <RareTile></RareTile>
       </Canvas>
 
       {isInventoryOpen && (
