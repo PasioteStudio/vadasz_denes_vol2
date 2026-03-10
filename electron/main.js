@@ -27,6 +27,7 @@ function createWindowWithPort(port) {
       nodeIntegration: false, // Disable node integration for security
       contextIsolation: true, // Enable context isolation
       backgroundThrottling: false, // Prevent background throttling
+      preload: path.join(__dirname, 'preload.js'), // Preload script
       sandbox: true // Enable sandbox for security
     },
     autoHideMenuBar: true, // Hide menu bar
