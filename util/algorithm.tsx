@@ -92,7 +92,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         const tile: Position = ordered_path[ordered_path.length - 1].position
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move", position: tile } })
+        go_home = astarpath.map(tile => { return { action: "move", position: {x:tile.y,y:tile.x} } })
         
         
     }
