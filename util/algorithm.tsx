@@ -63,11 +63,11 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
             final_path.length < 1 ? start : final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1], 
             endNode, iterations - final_path.length,power,withWeight)
         my_path = [...final_path, ...my_path]
-
+        
         //nézzük meg, hogy a kiszámolt út ugyanannyi ércet gyűjtött-e be, mint az előző számolásnál
         const current_ores = my_path.filter(i => i.action == "mine")
         const prev_ores = weight_based_path.filter(i => i.action == "mine")
-
+        
         //nézzük meg, hogy ugyanannyi-e a két réc halmaz, és hogy ugyanaz-e, ha igen, akkor ne számoljunk tovább
         if(weight_based_path.length > 0)weight_based_path[0].action = "move2"
         if (current_ores.length == prev_ores.length && final_path.length > 0 && final_path[0].action != "move2"){
@@ -76,14 +76,13 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         
         weight_based_path = my_path
         
-        
         //salesman probléma megoldásának próbálkozása
         const { ordered_path } = salesmanSolver(current_ores.map(i => i.positions[0]),obstacleGraph, start,time_complexity)
         //Ha jobb a kiszámolt út, akkor állítsuk be
         if(ordered_path.length < my_path.length){
             final_path = ordered_path
-        //ha rosszabb, de még mindig több ércet vettünk fel, mint legutóbb,
-        // akkor ne szakadjon meg a két érc halmaz megnézésekor
+            //ha rosszabb, de még mindig több ércet vettünk fel, mint legutóbb,
+            // akkor ne szakadjon meg a két érc halmaz megnézésekor
         }else if(final_path.length > 0 && final_path[0].action == "move2"){
             final_path = deepCopy(final_path)
             final_path[0].action ="move"
@@ -93,9 +92,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move", positions: [{x:tile.y,y:tile.x}] } })
-        
-        
+        go_home = astarpath.map(tile => { return { action: "move", positions: [{x:tile.y,y:tile.x}] } })        
     }
     //ha az algoritmus lefutott több, mint egyszer, és az utolsó nem volt megfelelő, akkor cseréljük ki
     if (temp_final_path.length != 0 && final_path.length + go_home.length > iterations) {
@@ -209,27 +206,25 @@ function estimatePath(
         let next_tile = calculateTile(update_able_map, current_tile.x + current_tile.endPoint.relative_x, current_tile.y + current_tile.endPoint.relative_y)
 
         if (we_are_stuck || isStuck(next_tile,withWeight ? my_path : [{action:"move",positions:[next_tile]}])) {
-            const { next_tile_to_go } = stuck(current_tile, update_able_map,obstacleGraph)
-            current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
-
-            my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] })
-            const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
-            const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
-            if (tile_id !== null) {
-                we_are_stuck = false
-                update_able_map[tile_id].weight = 0
-                my_path.push({ action: "mine", positions: [{ x: current_tile.x, y: current_tile.y }] })
-            }else{
+            let tile_id = null
+            let once = true
+            while(tile_id === null){
                 const { next_tile_to_go } = stuck(current_tile, update_able_map,obstacleGraph)
                 current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
-                my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] })
-                const tile_id2_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
-                const tile_id2 = update_able_map[tile_id2_temp].weight != 0 ? tile_id2_temp : null
+                
+                once ? my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] }) :  my_path[my_path.length - 1].positions.push({ x: current_tile.x, y: current_tile.y })
+                once = false
+
+                const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
+                tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
+                
                 if (tile_id !== null) {
                     we_are_stuck = false
                     update_able_map[tile_id].weight = 0
                     my_path.push({ action: "mine", positions: [{ x: current_tile.x, y: current_tile.y }] })
                 }
+                //TODO Léphet-e még eggyet energia szerint?
+                break;
             }
 
             const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
