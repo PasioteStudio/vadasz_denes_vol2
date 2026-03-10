@@ -22,11 +22,9 @@ export default function BatteryDisplayer() {
             onMouseMove={handleMouseMove}
             onMouseOut={() => setPosition({ x: -100, y: -100 })}
         >
-            {/* Battery icon */}
-            <img src="/battery.png" className="h-full mr-2" />
 
             {/* Battery segments */}
-            <div className="flex grow h-4 justify-start rounded bg-[#0b1a0f] overflow-hidden gap-1">
+            <div className="flex grow h-7 justify-start rounded bg-[#0b1a0f] overflow-hidden gap-1">
                 {Array.from({ length: segments }).map((_, i) => {
                     if (i < fullSegments) {
                         // Fully filled segments
@@ -47,6 +45,7 @@ export default function BatteryDisplayer() {
                     }
                 })}
             </div>
+            <div className="w-3 h-5 bg-[#1e1e2f]/90 absolute left-full rounded-r-sm border border-[#ff4500] border-l-transparent"></div>
 
             {/* Tooltip on hover */}
             <div
