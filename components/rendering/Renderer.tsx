@@ -11,11 +11,12 @@ import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
 
+
 import { ParticleManager } from './Particles/ParticleManager';
 import { RareTile } from '@/Prefabs/RareTile';
 import { PathDisplayer } from './PathDisplayer';
 
-
+import { MainParticle } from './Particles/MainParticles';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -184,10 +185,8 @@ export const Renderer = () => {
         {rover && <MarsRover onSelect={showInventory} />}
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
-        {/* <ParticleManager /> */}
+        <MainParticle camPosition={camPos}/>
 
-
-        <RareTile></RareTile>
       </Canvas>
 
       {isInventoryOpen && (
