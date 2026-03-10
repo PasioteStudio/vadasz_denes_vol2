@@ -50,8 +50,10 @@ export function getNextStep(
   // Az út el van torlaszolva, használjuk az A* algoritmust egy alternatív út kereséséhez
   const startNode = obstacleGraph.grid[fromY][fromX];
   const endNode = obstacleGraph.grid[toY][toX];
+  const weight = endNode.weight
   endNode.weight = 1
   const path = astar.search(obstacleGraph, startNode, endNode);
+  endNode.weight = weight
 
   if (path && path.length > 0) {
     const nextNode = path[0];

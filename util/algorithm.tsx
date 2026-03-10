@@ -20,7 +20,7 @@ export interface Action {
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.FAST): { path: Position[], deltas: Delta[] } {
+export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.FAST,withWeight:boolean = false): { path: Position[], deltas: Delta[] } {
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };
@@ -60,7 +60,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         //súllyal vezérelt út
         let { my_path } = estimatePath(obstacleGraph, update_able_map, 
             final_path.length < 1 ? start : final_path[final_path.length - 1].position, 
-            endNode, iterations - final_path.length)
+            endNode, iterations - final_path.length,withWeight)
         my_path = [...final_path, ...my_path]
 
         //nézzük meg, hogy a kiszámolt út ugyanannyi ércet gyűjtött-e be, mint az előző számolásnál
@@ -77,7 +77,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         
         
         //salesman probléma megoldásának próbálkozása
-        const { ordered_path } = salesmanSolver(current_ores.map(i => i.position),obstacleGraph, start)
+        const { ordered_path } = salesmanSolver(current_ores.map(i => i.position),obstacleGraph, start,time_complexity)
         //Ha jobb a kiszámolt út, akkor állítsuk be
         if(ordered_path.length < my_path.length){
             final_path = ordered_path
@@ -157,11 +157,12 @@ function salesmanSolver(
     mine_positions: Position[],
     obstacleGraph:any,
     start: Position,
-    seconds?:number
+    seconds?:number,
+    time_complexity?:TimeComplexity
 ): { ordered_path: Action[] } {
     // Adaptive coefficient: scales SA work to problem size badly with the use of AI (thx) instead of running
     // a fixed 184 million iterations regardless of how many ores there are.
-    const solution = solve(mine_positions, 1, undefined, undefined, true,seconds);
+    const solution = solve(mine_positions, 1, undefined, undefined, true,seconds,time_complexity);
     const ordered_points = solution.map((i: number) => mine_positions[i]);
     const ordered_path: Action[] = []
     let current = start
@@ -227,7 +228,7 @@ function estimatePath(
         }
         
 
-        if (obstacleGraph.grid[next_tile.y][next_tile.x].weight === 0) {
+        if (obstacleGraph.grid[next_tile.y][next_tile.x].weight == 0) {
             const step = getNextStep(current_tile.x, current_tile.y, next_tile.x + next_tile.endPoint.relative_x, next_tile.y + next_tile.endPoint.relative_y,obstacleGraph)
             next_tile = calculateTile(update_able_map, current_tile.x + step.dx, current_tile.y + step.dy)
         }

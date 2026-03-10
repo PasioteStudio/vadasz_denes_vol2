@@ -11,6 +11,7 @@
     "package": "electron-builder -w --x64"
   },
   "dependencies": {
+    "electron-updater": "^6.8.3",
     "express": "^5.2.1"
   },
   "devDependencies": {
@@ -21,15 +22,16 @@
   "build": {
     "appId": "vadasz.denes.szigmakik",
     "productName": "Vadász Dénes",
-    "compression":"maximum",
-    "electronLanguages":"hu",
+    "compression": "maximum",
+    "electronLanguages": "hu",
     "copyright": "Copyright © 2026 SzigMakik",
     "icon": "./favicon.ico",
     "publish": {
       "provider": "github",
-      "owner": "SzigMakik",
-      "releaseType":"prerelease",
-      "repo": "vadasz_denes_vol2"
+      "owner": "PasioteStudio",
+      "releaseType": "prerelease",
+      "repo": "vadasz_denes_vol2",
+      "publishAutoUpdate": true
     },
     "asar": true
   }
