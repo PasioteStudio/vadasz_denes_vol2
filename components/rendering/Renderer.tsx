@@ -172,8 +172,9 @@ export const Renderer = () => {
           fov={fov}
         />
 
-        <ambientLight intensity={timeOfDay == 'day' ? 1 : 0.5} color={0xff6666} />
+        <ambientLight intensity={timeOfDay == 'day' ? 0.6 : 0.3} color={0xff6666} />
         <DayNightDirectionalLights />
+        <directionalLight position={[0,1,1]} intensity={timeOfDay == "day" ? 0.2 : 0.1} color={0xffffff} />
 
         <MapRenderer map={map!} camPos={camPos} rover={rover!} camH={CAM_HEIGHT} />
 
