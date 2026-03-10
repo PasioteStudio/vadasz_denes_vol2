@@ -185,7 +185,7 @@ export const Renderer = () => {
         {rover && <MarsRover onSelect={showInventory} />}
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
-        <MainParticle camPosition={camPos}/>
+        {/* <MainParticle camPosition={camPos}/> */}
 
       </Canvas>
 
