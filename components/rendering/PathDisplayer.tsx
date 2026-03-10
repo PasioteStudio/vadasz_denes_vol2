@@ -2,7 +2,7 @@ import { Line } from "@react-three/drei";
 import { useMemo } from "react";
 import { Position } from "@/types/RoverContextTypes";
 import { TILE_GAP } from "./TileRenderer";
-import { useTimeline } from "@/lib/contexts";
+import { useCycle, useTimeline } from "@/lib/contexts";
 
 export const PathDisplayer = () => {
   const { path, rover } = useTimeline();
@@ -39,6 +39,11 @@ export const PathDisplayer = () => {
       // Check **after** pushing: switch happens at rover
       if (currentPoint.x === currentPos.x && currentPoint.y === currentPos.y) {
         caughtRover = true;
+        nocaught.push([
+          currentPoint.x * TILE_GAP,
+          height,
+          currentPoint.y * TILE_GAP,
+        ])
       }
     }
 
@@ -52,18 +57,18 @@ export const PathDisplayer = () => {
       {completedpoints.length > 1 && (
         <Line
           points={completedpoints}
-          color="blue"
-          lineWidth={5}
-          opacity={0.5}
+          color="orange"
+          lineWidth={3}
+          opacity={0.8}
           transparent
         />
       )}
       {rest.length > 1 && (
         <Line
           points={rest}
-          color="white"
-          lineWidth={5}
-          opacity={0.2}
+          color="blue"
+          lineWidth={3}
+          opacity={0.5}
           transparent
         />
       )}
