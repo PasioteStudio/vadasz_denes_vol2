@@ -16,11 +16,11 @@ export enum TimeComplexity {
 
 export interface Action {
     action:"move"|"mine"|"move2",
-    position:Position
+    positions:Position[]
 }
 
 const max_stack = 5
-export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.FAST,withWeight:boolean = false): { path: Position[], deltas: Delta[] } {
+export function makePath(iterations: number, map: Tile[][], time_complexity: TimeComplexity = TimeComplexity.FAST,withWeight:boolean = false): { path: Position[][], deltas: Delta[] } {
     const deltas: Delta[] = [];
 
     let start: Position = { x: 0, y: 0 };
@@ -51,16 +51,17 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     let temp_go_home: Action[] = [];
     let weight_based_path: Action[] = []
     let current_stack = 0
+    let power = 100
 
-    while (final_path.length + (final_path.length < 1 ? 0 : Math.ceil(findNearestOre(final_path[final_path.length - 1].position.x, final_path[final_path.length - 1].position.y, update_able_map).distance)) + go_home.length < iterations && current_stack < max_stack) {
+    while (final_path.length + (final_path.length < 1 ? 0 : Math.ceil(findNearestOre(final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1].x, final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1].y, update_able_map).distance)) + go_home.length < iterations && current_stack < max_stack) {
         current_stack++
         temp_final_path = final_path
         temp_go_home = go_home
 
         //súllyal vezérelt út
         let { my_path } = estimatePath(obstacleGraph, update_able_map, 
-            final_path.length < 1 ? start : final_path[final_path.length - 1].position, 
-            endNode, iterations - final_path.length,withWeight)
+            final_path.length < 1 ? start : final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1], 
+            endNode, iterations - final_path.length,power,withWeight)
         my_path = [...final_path, ...my_path]
 
         //nézzük meg, hogy a kiszámolt út ugyanannyi ércet gyűjtött-e be, mint az előző számolásnál
@@ -77,7 +78,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         
         
         //salesman probléma megoldásának próbálkozása
-        const { ordered_path } = salesmanSolver(current_ores.map(i => i.position),obstacleGraph, start,time_complexity)
+        const { ordered_path } = salesmanSolver(current_ores.map(i => i.positions[0]),obstacleGraph, start,time_complexity)
         //Ha jobb a kiszámolt út, akkor állítsuk be
         if(ordered_path.length < my_path.length){
             final_path = ordered_path
@@ -89,10 +90,10 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         }else{
             final_path = my_path
         }
-        const tile: Position = ordered_path[ordered_path.length - 1].position
+        const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move", position: {x:tile.y,y:tile.x} } })
+        go_home = astarpath.map(tile => { return { action: "move", positions: [{x:tile.y,y:tile.x}] } })
         
         
     }
@@ -107,7 +108,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
 
     //állítsuk be a megtett utat
     for (let i = 0; i < final_path.length; i++) {
-        const { x, y } = final_path[i].position;
+        const [{ x, y }] = final_path[i].positions;
         deltas.push({
             energy: -1 + (isDay(i) ? 10 : 0),
             inventoryChanges: (final_path[i].action == "mine" ? [{
@@ -115,14 +116,13 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
                 mode: "add",
                 ore: map[y][x],
             } as InventoryChange] : []),
-            logsAdded: [{ message: final_path[i].action == "mine" ? `+1 ${tileToString(map[y][x])}` :
-                `Mozgás ide: ${final_path[i].position.x}, ${final_path[i].position.y}` }],
-            moves: [{
-                from: i == 0 ? start : final_path[i - 1].position,
-                to: final_path[i].position,
+            logsAdded: final_path[i].action == "mine" ? [{ message: `+1 ${tileToString(map[y][x])}` }] : final_path[i].positions.map(pos=>{return {message:`Mozgás ide: ${pos.x}, ${pos.y}`}}),
+            moves: final_path[i].positions.map((pos,id)=>{return {
+                from: id == 0 && i == 0 ? start : (id == 0 ? final_path[i - 1].positions[final_path[i - 1].positions.length - 1] : final_path[i].positions[id-1]),
+                to: pos,
                 mode: final_path[i].action == "move2" ? "move" : final_path[i].action as ("move" | "mine"),
                 ore: (final_path[i].action == "mine" ? map[y][x] : undefined)
-            }],
+            }})
         })
     }
 
@@ -134,14 +134,14 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
             inventoryChanges: [],
             logsAdded: [{ message: "Várakozás..." }],
             moves: [{
-                from: final_path[i - 1].position,
-                to: final_path[i - 1].position,
+                from: final_path[i - 1].positions[final_path[i - 1].positions.length - 1],
+                to: final_path[i - 1].positions[final_path[i - 1].positions.length - 1],
                 mode: "wait",
             }],
         })
     }
 
-    return { path: final_path.map(i => i.position), deltas }
+    return { path: final_path.map(i => i.positions), deltas }
 }
 
 /**
@@ -171,10 +171,10 @@ function salesmanSolver(
         const target = ordered_points[i]
         const steps = getNextStep(current.x, current.y, target.x, target.y,obstacleGraph,true)
         for (let i =0;i<steps.entire_path!.length;i++) {
-            ordered_path.push({ action: "move", position: steps.entire_path![i] })
+            ordered_path.push({ action: "move", positions: [steps.entire_path![i]] })
         }
         current = steps.entire_path![steps.entire_path!.length - 1]
-        ordered_path.push({ action: "mine", position: current })
+        ordered_path.push({ action: "mine", positions: [current] })
     }
     return { ordered_path }
 }
@@ -188,6 +188,7 @@ function salesmanSolver(
  * @param {Position} start az a pont, ahonnan kezdjük az utat
  * @param {any} endNode az a pont, ahová vissza kell érjünk
  * @param {number} iterations a maximálisan eltölthető idő
+ * @param {number} power 
  * @param {boolean} withWeight súllyal becsüljön, vagy a legközelebbi érchez menjen
  * @returns {Action[]} `my_path` a kiszámolt út
  */
@@ -197,6 +198,7 @@ function estimatePath(
     start: Position,
     endNode: any, //biztos, hogy nem akadály
     iterations: number,
+    power:number,
     withWeight: boolean = false
 ): { my_path: Action[] } {
     const my_path: Action[] = []
@@ -206,17 +208,28 @@ function estimatePath(
     while (isThereAWay(current_tile) && my_path.length < iterations) {
         let next_tile = calculateTile(update_able_map, current_tile.x + current_tile.endPoint.relative_x, current_tile.y + current_tile.endPoint.relative_y)
 
-        if (we_are_stuck || isStuck(next_tile,withWeight ? my_path : [{action:"move",position:next_tile}])) {
+        if (we_are_stuck || isStuck(next_tile,withWeight ? my_path : [{action:"move",positions:[next_tile]}])) {
             const { next_tile_to_go } = stuck(current_tile, update_able_map,obstacleGraph)
             current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
 
-            my_path.push({ action: "move", position: { x: current_tile.x, y: current_tile.y } })
+            my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] })
             const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
             const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
             if (tile_id !== null) {
                 we_are_stuck = false
                 update_able_map[tile_id].weight = 0
-                my_path.push({ action: "mine", position: { x: current_tile.x, y: current_tile.y } })
+                my_path.push({ action: "mine", positions: [{ x: current_tile.x, y: current_tile.y }] })
+            }else{
+                const { next_tile_to_go } = stuck(current_tile, update_able_map,obstacleGraph)
+                current_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
+                my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] })
+                const tile_id2_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
+                const tile_id2 = update_able_map[tile_id2_temp].weight != 0 ? tile_id2_temp : null
+                if (tile_id !== null) {
+                    we_are_stuck = false
+                    update_able_map[tile_id].weight = 0
+                    my_path.push({ action: "mine", positions: [{ x: current_tile.x, y: current_tile.y }] })
+                }
             }
 
             const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
@@ -234,13 +247,13 @@ function estimatePath(
         }
 
         current_tile = next_tile
-        my_path.push({ action: "move", position: { x: current_tile.x, y: current_tile.y } })
+        my_path.push({ action: "move", positions: [{ x: current_tile.x, y: current_tile.y }] })
 
         const tile_id_temp = update_able_map.findIndex(tile => tile.y == current_tile.y && tile.x == current_tile.x)
         const tile_id = update_able_map[tile_id_temp].weight != 0 ? tile_id_temp : null
         if (tile_id !== null) {
             update_able_map[tile_id].weight = 0
-            my_path.push({ action: "mine", position: { x: current_tile.x, y: current_tile.y } })
+            my_path.push({ action: "mine", positions: [{ x: current_tile.x, y: current_tile.y }] })
         }
 
         const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];

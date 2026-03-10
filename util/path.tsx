@@ -77,8 +77,8 @@ export function isStuck(
   my_path: Action[],
 ): boolean {
   return my_path.slice(-2).filter(tile => 
-      (tile.position.x == next_tile.x && tile.position.y == next_tile.y) || 
-      (next_tile.x + next_tile.endPoint.relative_x == tile.position.x && tile.position.y == next_tile.y + next_tile.endPoint.relative_y)
+      (tile.positions[tile.positions.length - 1].x == next_tile.x && tile.positions[tile.positions.length - 1].y == next_tile.y) || 
+      (next_tile.x + next_tile.endPoint.relative_x == tile.positions[tile.positions.length - 1].x && tile.positions[tile.positions.length - 1].y == next_tile.y + next_tile.endPoint.relative_y)
   ).length > 0
 }
 
