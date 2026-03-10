@@ -37,6 +37,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     position: startingPoint,
     startingPosition: startingPoint,
   });
+  const [path, setPath] = useState<Position[]>([]);
 
   const setTickTo = useCallback((t: number) => {
     try {
@@ -109,6 +110,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         const end = new Date()
         console.log("time: ", end.getTime() - start.getTime())
         const path = event.data.result;
+        setPath(path.path);
         console.log("deltas: ", path.deltas)
         console.log("path:", path.path)
         setDeltas(path.deltas);
@@ -142,6 +144,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         rover: rover ?? DefaultRoverContextObject,
         startingPoint: startingPoint,
         flavoredMap: flavoredMap.current,
+        path: path
       }}>
         <Renderer />
         <GUI />

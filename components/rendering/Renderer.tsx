@@ -13,6 +13,7 @@ import MapRenderer from './MapRenderer';
 
 import { ParticleManager } from './Particles/ParticleManager';
 import { RareTile } from '@/Prefabs/RareTile';
+import { PathDisplayer } from './PathDisplayer';
 
 
 
@@ -177,6 +178,8 @@ export const Renderer = () => {
         <directionalLight position={[0,1,1]} intensity={timeOfDay == "day" ? 0.2 : 0.1} color={0xffffff} />
 
         <MapRenderer map={map!} camPos={camPos} rover={rover!} camH={CAM_HEIGHT} />
+
+        <PathDisplayer/>
 
         {rover && <MarsRover onSelect={showInventory} />}
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
