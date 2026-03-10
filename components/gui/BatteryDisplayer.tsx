@@ -28,20 +28,20 @@ export default function BatteryDisplayer() {
                 {Array.from({ length: segments }).map((_, i) => {
                     if (i < fullSegments) {
                         // Fully filled segments
-                        return <div key={i} className="flex-1 h-full rounded-sm bg-[#0f9d58]"></div>;
+                        return <div key={i} className="flex-1 h-full rounded-[1px] bg-[#0f9d58]"></div>;
                     } else if (i === fullSegments && partialSegmentFraction > 0) {
                         // Partial segment: inner div controls width
                         return (
-                            <div key={i} className="flex-1 h-full rounded-sm bg-[#143222] relative overflow-hidden">
+                            <div key={i} className="flex-1 h-full rounded-[1px] bg-[#143222] relative overflow-hidden">
                                 <div
-                                    className="h-full bg-[#0f9d58] rounded-sm"
+                                    className="h-full bg-[#0f9d58] rounded-[1px]"
                                     style={{ width: `${partialSegmentFraction * 100}%` }}
                                 ></div>
                             </div>
                         );
                     } else {
                         // Empty segments
-                        return <div key={i} className="flex-1 h-full rounded-sm bg-[#143222]"></div>;
+                        return <div key={i} className="flex-1 h-full rounded-[1px] bg-[#143222]"></div>;
                     }
                 })}
             </div>
