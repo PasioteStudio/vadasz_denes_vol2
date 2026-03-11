@@ -1,15 +1,10 @@
-import { Tile } from "@/lib/constants"
+import { Tile, TILE_GAP } from "@/lib/constants"
 import { BarrierTile } from "@/Prefabs/BarrierTile";
 import { NormalTile } from "@/Prefabs/NormalTile";
-import { NormalTile1 } from "@/Prefabs/NormalTile1";
-import { NormalTile2 } from "@/Prefabs/NormalTile2";
-import { NormalTile3 } from "@/Prefabs/NormalTile3";
 import { GoldTile } from "@/Prefabs/GoldTile";
 import { WaterTile } from "@/Prefabs/WaterTile";
 import { RareTile } from "@/Prefabs/RareTile";
 import { BaseTile } from "@/Prefabs/BaseTile";
-
-export const TILE_GAP = 2.1;
 
 interface TileRendererProps {
   tile: Tile
@@ -38,3 +33,5 @@ export const TileRenderer = ({ tile, x, y }: TileRendererProps) => {
     
   }
 }
+
+export { TILE_GAP };

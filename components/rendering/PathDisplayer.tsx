@@ -1,54 +1,47 @@
 import { Line } from "@react-three/drei";
-import { useMemo } from "react";
-import { Position } from "@/types/RoverContextTypes";
+import { useMemo, useRef } from "react";
 import { TILE_GAP } from "./TileRenderer";
-import { useCycle, useTimeline } from "@/lib/contexts";
+import { useTimeline } from "@/lib/contexts";
 
 export const PathDisplayer = () => {
   const { path, rover } = useTimeline();
+  
+  // Track the current flat index of the rover along the path
+  const roverIndexRef = useRef(0);
 
   const { completedpoints, rest } = useMemo(() => {
     if (!Array.isArray(path)) return { completedpoints: [], rest: [] };
 
-    const completed: [number, number, number][] = [];
-    const nocaught: [number, number, number][] = [];
-    const currentPos = rover.position;
+    const flatPath: [number, number, number][] = [];
     const height = 0.3;
 
-    let caughtRover = false;
+    // Flatten the path
+    path.forEach(segment => {
+      segment.forEach(p => {
+        flatPath.push([p.x * TILE_GAP, height, p.y * TILE_GAP]);
+      });
+    });
 
-    for (let i = 0; i < path.length; i++) {
-      const currentPoint = path[i];
-
-      if (caughtRover) {
-        // after rover → not yet completed
-        nocaught.push([
-          currentPoint.x * TILE_GAP,
-          height,
-          currentPoint.y * TILE_GAP,
-        ]);
-      } else {
-        // before rover → completed
-        completed.push([
-          currentPoint.x * TILE_GAP,
-          height,
-          currentPoint.y * TILE_GAP,
-        ]);
-      }
-
-      // Check **after** pushing: switch happens at rover
-      if (currentPoint.x === currentPos.x && currentPoint.y === currentPos.y) {
-        caughtRover = true;
-        nocaught.push([
-          currentPoint.x * TILE_GAP,
-          height,
-          currentPoint.y * TILE_GAP,
-        ])
+    // Find the next index where the rover is
+    let nextIndex = roverIndexRef.current;
+    for (let i = roverIndexRef.current; i < flatPath.length; i++) {
+      const pt = flatPath[i];
+      if (pt[0] === rover.position.x * TILE_GAP && pt[2] === rover.position.y * TILE_GAP) {
+        nextIndex = i;
+        break;
       }
     }
 
-    return { completedpoints: completed, rest: nocaught };
-  }, [rover, path]);
+    // Only advance by one index per render
+    if (nextIndex > roverIndexRef.current) {
+      roverIndexRef.current += 1;
+    }
+
+    const completedpoints = flatPath.slice(0, roverIndexRef.current + 1);
+    const rest = flatPath.slice(roverIndexRef.current); // include current rover point
+
+    return { completedpoints, rest };
+  }, [path, rover]);
 
   if (!path || path.length < 2) return null;
 

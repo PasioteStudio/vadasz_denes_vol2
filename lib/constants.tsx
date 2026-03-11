@@ -13,6 +13,8 @@ export interface WeightPoint {
   weight: number;
 }
 
+export const TILE_GAP = 2.1;
+
 export interface VectorField {
   x: number;
   y: number;

@@ -37,7 +37,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     position: startingPoint,
     startingPosition: startingPoint,
   });
-  const [path, setPath] = useState<Position[]>([]);
+  const [path, setPath] = useState<Position[][]>([]);
 
   const setTickTo = useCallback((t: number) => {
     try {

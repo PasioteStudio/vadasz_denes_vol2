@@ -7,7 +7,7 @@ export type MapTimelineContextT = {
     rover: RoverT,
     startingPoint: Position,
     flavoredMap: [boolean, Tile, Tile|null][][],
-    path: Position[]
+    path: Position[][]
 }
 
 export type Delta = {
