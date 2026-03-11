@@ -41,12 +41,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const rotationY = useRef(0)
 
   const elapsed = useRef(0)
-
   const subtickMoves = useRef<
     {
-      needsRotate: boolean
-      needsMove: boolean
-      needsMine: boolean
+      type: "rotate" | "move" | "mine"
       startPos: THREE.Vector3
       targetPos: THREE.Vector3
       startRot: number
@@ -66,6 +63,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const shortestAngleDelta = (from: number, to: number) =>
     normalizeAngle(to - from)
 
+  // Build subtick moves sequentially
   useEffect(() => {
     if (!timeline.deltas.length) return
 
@@ -99,22 +97,43 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
           : lastRot
 
-      subtickMoves.current.push({
-        needsRotate: lastRot !== targetRot,
-        needsMove: lastPos.distanceTo(targetPos) > 0,
-        needsMine: move.mode === "mine",
-        startPos: lastPos.clone(),
-        targetPos,
-        startRot: lastRot,
-        targetRot,
-        duration:
-          (lastRot !== targetRot ? ROTATE_TIME : 0) +
-          (lastPos.distanceTo(targetPos) > 0 ? MOVE_TIME : 0) +
-          (move.mode === "mine" ? MINE_TIME : 0),
-      })
+      // Add rotate subtick if needed
+      if (lastRot !== targetRot) {
+        subtickMoves.current.push({
+          type: "rotate",
+          startPos: lastPos.clone(),
+          targetPos: lastPos.clone(), // position doesn't change during rotation
+          startRot: lastRot,
+          targetRot,
+          duration: ROTATE_TIME,
+        })
+        lastRot = targetRot
+      }
 
-      lastPos.copy(targetPos)
-      lastRot = targetRot
+      // Add move subtick if needed
+      if (lastPos.distanceTo(targetPos) > 0) {
+        subtickMoves.current.push({
+          type: "move",
+          startPos: lastPos.clone(),
+          targetPos,
+          startRot: lastRot,
+          targetRot: lastRot,
+          duration: MOVE_TIME,
+        })
+        lastPos.copy(targetPos)
+      }
+
+      // Add mine subtick if needed
+      if (move.mode === "mine") {
+        subtickMoves.current.push({
+          type: "mine",
+          startPos: lastPos.clone(),
+          targetPos: lastPos.clone(),
+          startRot: lastRot,
+          targetRot: lastRot,
+          duration: MINE_TIME,
+        })
+      }
     }
 
     elapsed.current = 0
@@ -127,32 +146,32 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       rotationY.current = first.startRot
     }
 
-    tickDuration.current = 600 / Math.abs(cycle.player.speed)
+    // Total tick duration is sum of subtick durations
+    tickDuration.current =
+      subtickMoves.current.reduce((sum, s) => sum + s.duration, 0) /
+      Math.abs(cycle.player.speed)
   }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
   useFrame((_, delta) => {
     if (!subtickMoves.current.length) return
 
     elapsed.current += delta * 1000
-
     cycle.t.current = Math.min(elapsed.current / tickDuration.current, 1)
 
     let time = elapsed.current
 
     for (const step of subtickMoves.current) {
-      const dur = step.duration
+      if (time <= step.duration) {
+        const progress = step.duration === 0 ? 1 : time / step.duration
 
-      if (time <= dur) {
-        const progress = dur === 0 ? 1 : time / dur
-
-        if (step.needsRotate) {
+        if (step.type === "rotate") {
           const deltaRot = shortestAngleDelta(step.startRot, step.targetRot)
           const newRot = step.startRot + deltaRot * progress
           group.current.rotation.y = newRot
           rotationY.current = newRot
         }
 
-        if (step.needsMove) {
+        if (step.type === "move") {
           group.current.position.lerpVectors(
             step.startPos,
             step.targetPos,
@@ -161,19 +180,24 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           position.current.copy(group.current.position)
         }
 
+        if (step.type === "mine") {
+          // TODO: mining effects
+        }
+
         break
       } else {
-        if (step.needsRotate) {
+        // Snap to end of subtick
+        if (step.type === "rotate") {
           group.current.rotation.y = step.targetRot
           rotationY.current = step.targetRot
         }
 
-        if (step.needsMove) {
+        if (step.type === "move") {
           group.current.position.copy(step.targetPos)
           position.current.copy(step.targetPos)
         }
 
-        time -= dur
+        time -= step.duration
       }
     }
 
