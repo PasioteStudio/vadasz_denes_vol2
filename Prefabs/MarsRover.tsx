@@ -39,8 +39,8 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   const position = useRef(new THREE.Vector3())
   const rotationY = useRef(0)
-
   const elapsed = useRef(0)
+
   const subtickMoves = useRef<
     {
       type: "rotate" | "move" | "mine"
@@ -52,8 +52,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     }[]
   >([])
 
-  const tickDuration = useRef(600 / Math.abs(cycle.player.speed))
-
+  const tickDuration = useRef(0)
   const { nodes, materials } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
@@ -63,7 +62,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const shortestAngleDelta = (from: number, to: number) =>
     normalizeAngle(to - from)
 
-  // Build subtick moves sequentially
   useEffect(() => {
     if (!timeline.deltas.length) return
 
@@ -71,6 +69,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     if (!currentDelta || !currentDelta.moves.length) return
 
     let moves = [...currentDelta.moves]
+    const speedFactor = Math.abs(cycle.player.speed)
 
     if (cycle.direction === -1) {
       moves = moves.map(m => ({ from: m.to, to: m.from, mode: m.mode })).reverse()
@@ -89,7 +88,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         move.to.y * TILE_GAP
       )
 
-      // rotation direction vector
+      // rotation vector
       const dir = new THREE.Vector3().subVectors(actualTarget, actualStart)
       const rotatedDir = cycle.direction === -1 ? dir.clone().negate() : dir
       const targetRot =
@@ -97,7 +96,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
           : lastRot
 
-      // rotate subtick if needed
+      // rotate subtick
       if (lastRot !== targetRot) {
         subtickMoves.current.push({
           type: "rotate",
@@ -105,12 +104,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           targetPos: actualStart.clone(),
           startRot: lastRot,
           targetRot,
-          duration: ROTATE_TIME,
+          duration: ROTATE_TIME / speedFactor,
         })
         lastRot = targetRot
       }
 
-      // move subtick if needed
+      // move subtick
       if (!actualStart.equals(actualTarget)) {
         subtickMoves.current.push({
           type: "move",
@@ -118,12 +117,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           targetPos: actualTarget.clone(),
           startRot: lastRot,
           targetRot: lastRot,
-          duration: MOVE_TIME,
+          duration: MOVE_TIME / speedFactor,
         })
         lastPos.copy(actualTarget)
       }
 
-      // mine subtick if needed
+      // mine subtick
       if (move.mode === "mine") {
         subtickMoves.current.push({
           type: "mine",
@@ -131,7 +130,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           targetPos: lastPos.clone(),
           startRot: lastRot,
           targetRot: lastRot,
-          duration: MINE_TIME,
+          duration: MINE_TIME / speedFactor,
         })
       }
     }
@@ -146,9 +145,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       rotationY.current = first.startRot
     }
 
-    tickDuration.current =
-      subtickMoves.current.reduce((sum, s) => sum + s.duration, 0) /
-      Math.abs(cycle.player.speed)
+    tickDuration.current = subtickMoves.current.reduce((sum, s) => sum + s.duration, 0)
   }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
   useFrame((_, delta) => {
@@ -171,11 +168,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         }
 
         if (step.type === "move") {
-          group.current.position.lerpVectors(
-            step.startPos,
-            step.targetPos,
-            progress
-          )
+          group.current.position.lerpVectors(step.startPos, step.targetPos, progress)
           position.current.copy(group.current.position)
         }
 
@@ -199,10 +192,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       }
     }
 
-    if (
-      elapsed.current >= tickDuration.current &&
-      cycle.player.playing === "playing"
-    ) {
+    if (elapsed.current >= tickDuration.current && cycle.player.playing === "playing") {
       cycle.setTick(cycle.currentTick + cycle.direction)
     }
   })
