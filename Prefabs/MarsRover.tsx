@@ -27,11 +27,10 @@ type MarsRoverProps = ThreeElements["group"] & {
   onSelect?: () => void
 }
 
-// Constants
 const ROTATE_TIME = 200
 const MOVE_TIME = 200
 const MINE_TIME = 200
-const MODEL_ROTATION_OFFSET = - Math.PI / 2
+const MODEL_ROTATION_OFFSET = -Math.PI
 
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
@@ -42,6 +41,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const rotationY = useRef(0)
 
   const elapsed = useRef(0)
+
   const subtickMoves = useRef<
     {
       needsRotate: boolean
@@ -60,11 +60,12 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const { nodes, materials } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
-  // Utilities
-  const normalizeAngle = (angle: number) => Math.atan2(Math.sin(angle), Math.cos(angle))
-  const shortestAngleDelta = (from: number, to: number) => normalizeAngle(to - from)
+  const normalizeAngle = (angle: number) =>
+    Math.atan2(Math.sin(angle), Math.cos(angle))
 
-  // Build subtick moves on tick change
+  const shortestAngleDelta = (from: number, to: number) =>
+    normalizeAngle(to - from)
+
   useEffect(() => {
     if (!timeline.deltas.length) return
 
@@ -73,7 +74,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     let moves = [...currentDelta.moves]
 
-    // Reverse moves if going backward
     if (cycle.direction === -1) {
       moves = moves.map(m => ({ from: m.to, to: m.from, mode: m.mode })).reverse()
     }
@@ -84,84 +84,103 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     let lastRot = rotationY.current
 
     for (const move of moves) {
-      const targetPos = new THREE.Vector3(move.to.x * TILE_GAP, 0.8, move.to.y * TILE_GAP)
+      const targetPos = new THREE.Vector3(
+        move.to.x * TILE_GAP,
+        0.8,
+        move.to.y * TILE_GAP
+      )
+
       const dir = new THREE.Vector3().subVectors(targetPos, lastPos)
-      const targetRot = dir.length() > 0
-        ? Math.atan2(dir.x, dir.z) + MODEL_ROTATION_OFFSET
-        : lastRot
+      const rotatedDir =
+        cycle.direction === -1 ? dir.clone().negate() : dir
+
+      const targetRot =
+        rotatedDir.length() > 0
+          ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
+          : lastRot
 
       subtickMoves.current.push({
         needsRotate: lastRot !== targetRot,
         needsMove: lastPos.distanceTo(targetPos) > 0,
         needsMine: move.mode === "mine",
         startPos: lastPos.clone(),
-        targetPos, // keep targetPos as is — reversed moves already handled by reversing array
+        targetPos,
         startRot: lastRot,
         targetRot,
         duration:
-          (ROTATE_TIME * (lastRot !== targetRot ? 1 : 0)) +
-          (MOVE_TIME * (lastPos.distanceTo(targetPos) > 0 ? 1 : 0)) +
-          (MINE_TIME * (move.mode === "mine" ? 1 : 0)),
+          (lastRot !== targetRot ? ROTATE_TIME : 0) +
+          (lastPos.distanceTo(targetPos) > 0 ? MOVE_TIME : 0) +
+          (move.mode === "mine" ? MINE_TIME : 0),
       })
 
       lastPos.copy(targetPos)
       lastRot = targetRot
     }
 
-    // Reset elapsed for new tick
     elapsed.current = 0
 
-    // Snap to last move of this tick
     if (subtickMoves.current.length > 0) {
-      const last = subtickMoves.current[subtickMoves.current.length - 1]
-      group.current.position.copy(last.targetPos)
-      group.current.rotation.y = last.targetRot
-      position.current.copy(last.targetPos)
-      rotationY.current = last.targetRot
+      const first = subtickMoves.current[0]
+      group.current.position.copy(first.startPos)
+      group.current.rotation.y = first.startRot
+      position.current.copy(first.startPos)
+      rotationY.current = first.startRot
     }
 
     tickDuration.current = 600 / Math.abs(cycle.player.speed)
   }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
-  // Animate rover per subtick
-  useFrame((_, deltaSec) => {
+  useFrame((_, delta) => {
     if (!subtickMoves.current.length) return
 
-    elapsed.current += deltaSec * 1000
+    elapsed.current += delta * 1000
+
     cycle.t.current = Math.min(elapsed.current / tickDuration.current, 1)
 
     let time = elapsed.current
 
-    for (const subtick of subtickMoves.current) {
-      const stepDur = subtick.duration
-      if (time <= stepDur) {
-        if (subtick.needsRotate) {
-          const deltaRot = shortestAngleDelta(subtick.startRot, subtick.targetRot)
-          group.current.rotation.y = subtick.startRot + deltaRot * (time / stepDur)
-          rotationY.current = group.current.rotation.y
+    for (const step of subtickMoves.current) {
+      const dur = step.duration
+
+      if (time <= dur) {
+        const progress = dur === 0 ? 1 : time / dur
+
+        if (step.needsRotate) {
+          const deltaRot = shortestAngleDelta(step.startRot, step.targetRot)
+          const newRot = step.startRot + deltaRot * progress
+          group.current.rotation.y = newRot
+          rotationY.current = newRot
         }
-        if (subtick.needsMove) {
-          group.current.position.lerpVectors(subtick.startPos, subtick.targetPos, time / stepDur)
+
+        if (step.needsMove) {
+          group.current.position.lerpVectors(
+            step.startPos,
+            step.targetPos,
+            progress
+          )
           position.current.copy(group.current.position)
         }
-        if (subtick.needsMine) {
-          // TODO: mining animation/effects
-        }
+
         break
       } else {
-        if (subtick.needsRotate) {
-          group.current.rotation.y = subtick.targetRot
-          rotationY.current = subtick.targetRot
+        if (step.needsRotate) {
+          group.current.rotation.y = step.targetRot
+          rotationY.current = step.targetRot
         }
-        if (subtick.needsMove) {
-          group.current.position.copy(subtick.targetPos)
-          position.current.copy(subtick.targetPos)
+
+        if (step.needsMove) {
+          group.current.position.copy(step.targetPos)
+          position.current.copy(step.targetPos)
         }
-        time -= stepDur
+
+        time -= dur
       }
     }
 
-    if (elapsed.current >= tickDuration.current && cycle.player.playing === "playing") {
+    if (
+      elapsed.current >= tickDuration.current &&
+      cycle.player.playing === "playing"
+    ) {
       cycle.setTick(cycle.currentTick + cycle.direction)
     }
   })
