@@ -144,7 +144,8 @@ export const Renderer = () => {
     
       if (dx === 0 && dy === 0) return prev;
 
-      return { x: clampNum((prev.x + dx), 0, 50 * GAP), y: clampNum((prev.y + dy), 92, 210) };
+      return { x: clampNum((prev.x + dx), 0, 50 * GAP), y: clampNum((prev.y + dy), 92, 220) };
+
     });
 
       animFrameId = requestAnimationFrame(loop);
