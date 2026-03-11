@@ -31,6 +31,7 @@ type MarsRoverProps = ThreeElements["group"] & {
 const ROTATE_TIME = 200
 const MOVE_TIME = 200
 const MINE_TIME = 200
+const MODEL_ROTATION_OFFSET = - Math.PI / 2
 
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
@@ -42,7 +43,16 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
   const elapsed = useRef(0)
   const subtickMoves = useRef<
-    { needsRotate: boolean; needsMove: boolean; needsMine: boolean; startPos: THREE.Vector3; targetPos: THREE.Vector3; startRot: number; targetRot: number; duration: number }[]
+    {
+      needsRotate: boolean
+      needsMove: boolean
+      needsMine: boolean
+      startPos: THREE.Vector3
+      targetPos: THREE.Vector3
+      startRot: number
+      targetRot: number
+      duration: number
+    }[]
   >([])
 
   const tickDuration = useRef(600 / Math.abs(cycle.player.speed))
@@ -50,11 +60,11 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const { nodes, materials } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
-  // Utility to normalize angles
+  // Utilities
   const normalizeAngle = (angle: number) => Math.atan2(Math.sin(angle), Math.cos(angle))
   const shortestAngleDelta = (from: number, to: number) => normalizeAngle(to - from)
 
-  // Build subtick moves whenever the tick changes
+  // Build subtick moves on tick change
   useEffect(() => {
     if (!timeline.deltas.length) return
 
@@ -63,11 +73,9 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     let moves = [...currentDelta.moves]
 
-    // Reverse moves if going backwards
+    // Reverse moves if going backward
     if (cycle.direction === -1) {
-      moves = moves
-        .map(m => ({ from: m.to, to: m.from, mode: m.mode }))
-        .reverse()
+      moves = moves.map(m => ({ from: m.to, to: m.from, mode: m.mode })).reverse()
     }
 
     subtickMoves.current = []
@@ -77,15 +85,17 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     for (const move of moves) {
       const targetPos = new THREE.Vector3(move.to.x * TILE_GAP, 0.8, move.to.y * TILE_GAP)
-      let dir = new THREE.Vector3().subVectors(targetPos, lastPos)
-      const targetRot = dir.length() > 0 ? Math.atan2(dir.x, dir.z) : lastRot
+      const dir = new THREE.Vector3().subVectors(targetPos, lastPos)
+      const targetRot = dir.length() > 0
+        ? Math.atan2(dir.x, dir.z) + MODEL_ROTATION_OFFSET
+        : lastRot
 
       subtickMoves.current.push({
         needsRotate: lastRot !== targetRot,
         needsMove: lastPos.distanceTo(targetPos) > 0,
         needsMine: move.mode === "mine",
         startPos: lastPos.clone(),
-        targetPos,
+        targetPos, // keep targetPos as is — reversed moves already handled by reversing array
         startRot: lastRot,
         targetRot,
         duration:
@@ -94,15 +104,14 @@ export function MarsRover({ ...props }: MarsRoverProps) {
           (MINE_TIME * (move.mode === "mine" ? 1 : 0)),
       })
 
-      // Prepare for next move
       lastPos.copy(targetPos)
       lastRot = targetRot
     }
 
-    // Reset elapsed time at tick start
+    // Reset elapsed for new tick
     elapsed.current = 0
 
-    // Snap rover to the last move's position/rotation in this tick
+    // Snap to last move of this tick
     if (subtickMoves.current.length > 0) {
       const last = subtickMoves.current[subtickMoves.current.length - 1]
       group.current.position.copy(last.targetPos)
@@ -119,36 +128,27 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     if (!subtickMoves.current.length) return
 
     elapsed.current += deltaSec * 1000
-
-    // Global cycle.t between 0 and 1
     cycle.t.current = Math.min(elapsed.current / tickDuration.current, 1)
 
     let time = elapsed.current
 
     for (const subtick of subtickMoves.current) {
       const stepDur = subtick.duration
-
       if (time <= stepDur) {
-        // Interpolate subtick
         if (subtick.needsRotate) {
           const deltaRot = shortestAngleDelta(subtick.startRot, subtick.targetRot)
           group.current.rotation.y = subtick.startRot + deltaRot * (time / stepDur)
           rotationY.current = group.current.rotation.y
         }
-
         if (subtick.needsMove) {
           group.current.position.lerpVectors(subtick.startPos, subtick.targetPos, time / stepDur)
           position.current.copy(group.current.position)
         }
-
-        // Mining logic placeholder (could trigger animation/effects)
         if (subtick.needsMine) {
-          // TODO: implement mining animation/effects
+          // TODO: mining animation/effects
         }
-
         break
       } else {
-        // Snap to target if elapsed exceeds this subtick
         if (subtick.needsRotate) {
           group.current.rotation.y = subtick.targetRot
           rotationY.current = subtick.targetRot
@@ -161,7 +161,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       }
     }
 
-    // Move to next tick if elapsed exceeds total duration
     if (elapsed.current >= tickDuration.current && cycle.player.playing === "playing") {
       cycle.setTick(cycle.currentTick + cycle.direction)
     }
@@ -181,26 +180,26 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       <group name="Scene">
         <group name="Armature">
           <group name="Cube002">
-  {([
-    ["Cube001", "Material.004"],
-    ["Cube001_1", "Material.009"],
-    ["Cube001_2", "Material.010"],
-    ["Cube001_3", "Material.011"],
-    ["Cube001_4", "Material.012"],
-    ["Cube001_5", "Material.013"],
-    ["Cube001_6", "Material.014"],
-  ] as const).map(([meshName, matName], i) => {
-    const mesh = nodes[meshName] as THREE.SkinnedMesh
-    return (
-      <skinnedMesh
-        key={i}
-        geometry={mesh.geometry}
-        material={materials[matName]}
-        skeleton={mesh.skeleton}
-      />
-    )
-  })}
-</group>
+            {([
+              ["Cube001", "Material.004"],
+              ["Cube001_1", "Material.009"],
+              ["Cube001_2", "Material.010"],
+              ["Cube001_3", "Material.011"],
+              ["Cube001_4", "Material.012"],
+              ["Cube001_5", "Material.013"],
+              ["Cube001_6", "Material.014"],
+            ] as const).map(([meshName, matName], i) => {
+              const mesh = nodes[meshName] as THREE.SkinnedMesh
+              return (
+                <skinnedMesh
+                  key={i}
+                  geometry={mesh.geometry}
+                  material={materials[matName]}
+                  skeleton={mesh.skeleton}
+                />
+              )
+            })}
+          </group>
           <primitive object={nodes.Bone} />
         </group>
       </group>
