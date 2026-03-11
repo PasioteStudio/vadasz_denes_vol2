@@ -181,20 +181,26 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       <group name="Scene">
         <group name="Armature">
           <group name="Cube002">
-            {Object.entries(nodes)
-              .filter(([key, node]) => key.startsWith("Cube001") && "skeleton" in node)
-              .map(([key, node], i) => {
-                const mesh = node as THREE.SkinnedMesh
-                return (
-                  <skinnedMesh
-                    key={i}
-                    geometry={mesh.geometry}
-                    material={materials[`Material.00${i + 4}`]}
-                    skeleton={mesh.skeleton}
-                  />
-                )
-              })}
-          </group>
+  {([
+    ["Cube001", "Material.004"],
+    ["Cube001_1", "Material.009"],
+    ["Cube001_2", "Material.010"],
+    ["Cube001_3", "Material.011"],
+    ["Cube001_4", "Material.012"],
+    ["Cube001_5", "Material.013"],
+    ["Cube001_6", "Material.014"],
+  ] as const).map(([meshName, matName], i) => {
+    const mesh = nodes[meshName] as THREE.SkinnedMesh
+    return (
+      <skinnedMesh
+        key={i}
+        geometry={mesh.geometry}
+        material={materials[matName]}
+        skeleton={mesh.skeleton}
+      />
+    )
+  })}
+</group>
           <primitive object={nodes.Bone} />
         </group>
       </group>
