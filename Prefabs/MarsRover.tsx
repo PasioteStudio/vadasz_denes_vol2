@@ -1,16 +1,13 @@
 "use client"
 
 import * as THREE from "three"
-import React, { useRef, useEffect } from "react"
-import { useGLTF, useAnimations } from "@react-three/drei"
+import { useRef, useEffect } from "react"
+import { useGLTF } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/lib/constants"
 import { useCycle, useTimeline } from "@/lib/contexts"
-import { isOre } from "@/lib/constants"
-import { processMapChanges } from "@/util/deltas"
-import { lerp } from "three/src/math/MathUtils.js"
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -30,190 +27,145 @@ type MarsRoverProps = ThreeElements["group"] & {
   onSelect?: () => void
 }
 
+// Constants
+const ROTATE_TIME = 200
+const MOVE_TIME = 200
+const MINE_TIME = 200
+
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
   const cycle = useCycle()
   const timeline = useTimeline()
 
-  const gap = TILE_GAP
-  const actionDurations = new Map<"mine" | "move" | "rotate", number>([
-    ["mine", 300],
-    ["move", 300],
-    ["rotate", 300],
-  ])
-  const totalDuration = useRef(0);
+  const position = useRef(new THREE.Vector3())
+  const rotationY = useRef(0)
 
-  const position = useRef({
-    start: new THREE.Vector3(),
-    target: new THREE.Vector3()
-  })
+  const elapsed = useRef(0)
+  const subtickMoves = useRef<
+    { needsRotate: boolean; needsMove: boolean; needsMine: boolean; startPos: THREE.Vector3; targetPos: THREE.Vector3; startRot: number; targetRot: number; duration: number }[]
+  >([])
 
-  const rotation = useRef({
-    start: 0,
-    target: 0,
-  })
+  const tickDuration = useRef(600 / Math.abs(cycle.player.speed))
 
-  const tickPlan = useRef<{ step: number, plan: { mode: "move" | "rotate" | "mine", duration: number }[] }>({
-    step: 0,
-    plan: []
-  });
-  
-
-  const elapsed = useRef(0);
-
-  // Persisted position/rotation state (world values, updated each tick)
-
-  const { nodes, materials, animations } =
+  const { nodes, materials } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
 
-  function normalizeAngle(angle: number) {
-    return Math.atan2(Math.sin(angle), Math.cos(angle))
-  }
+  // Utility to normalize angles
+  const normalizeAngle = (angle: number) => Math.atan2(Math.sin(angle), Math.cos(angle))
+  const shortestAngleDelta = (from: number, to: number) => normalizeAngle(to - from)
 
-  function shortestAngleDelta(from: number, to: number) {
-    let delta = normalizeAngle(to - from)
-    return delta
-  }
-
+  // Build subtick moves whenever the tick changes
   useEffect(() => {
-    if (!timeline.deltas.length) return;
+    if (!timeline.deltas.length) return
 
-    const start = timeline.deltas[0].moves[0].to;
+    const currentDelta = timeline.deltas[cycle.currentTick]
+    if (!currentDelta || !currentDelta.moves.length) return
 
-    const startVec = new THREE.Vector3(
-      start.x * gap,
-      0.8,
-      start.y * gap
-    );
+    let moves = [...currentDelta.moves]
 
-    position.current.start.copy(startVec);
-    position.current.target.copy(startVec);
-
-    group.current.position.copy(startVec);
-  }, [timeline.deltas]);
-
-  //TODO this will have to be improved when the multi movement ticks come into play
-  useEffect(() => { // tick change -> set new plan
-    if(timeline.deltas.length == 0) return;
-    const delta = timeline.deltas[cycle.currentTick]
-    const moves = delta.moves;
-    const d = cycle.direction == 1 ? moves[moves.length - 1] : moves[0];
-    const targetPos = new THREE.Vector3(d.to.x * gap, 0.8, d.to.y * gap);
-
-    let hasToRotate = false, hasToMove = false, hasToMine = false;
-
-    // POSITION
-    position.current.start = position.current.target;
-    position.current.target = targetPos;
-
-
-    // ROTATION
-    rotation.current.start = rotation.current.target;
-
-    if (position.current.start.distanceTo(position.current.target) != 0) {
-      hasToMove = true;
-      const dir = new THREE.Vector3()
-        .subVectors(position.current.target, position.current.start)
-        .normalize()
-
-      rotation.current.target = Math.atan2(dir.x, dir.z) - Math.PI / 2 * cycle.direction
-      hasToRotate = rotation.current.start != rotation.current.target;
+    // Reverse moves if going backwards
+    if (cycle.direction === -1) {
+      moves = moves
+        .map(m => ({ from: m.to, to: m.from, mode: m.mode }))
+        .reverse()
     }
 
-    hasToMine = delta.moves.find(m => m.mode == "mine") !== undefined || false; // TODO ezt újra kell dolgozni, ha több move van egy tickben.
+    subtickMoves.current = []
 
-    cycle.t.current = 0;
-    elapsed.current = 0;
-    totalDuration.current = 0;
-    tickPlan.current.step = 0;
-    tickPlan.current.plan = [];
-    if (hasToRotate) {
-      tickPlan.current.plan.push({
-        mode: "rotate",
-        duration: actionDurations.get("rotate")! / Math.abs(cycle.player.speed)
-      });
+    let lastPos = position.current.clone()
+    let lastRot = rotationY.current
+
+    for (const move of moves) {
+      const targetPos = new THREE.Vector3(move.to.x * TILE_GAP, 0.8, move.to.y * TILE_GAP)
+      let dir = new THREE.Vector3().subVectors(targetPos, lastPos)
+      const targetRot = dir.length() > 0 ? Math.atan2(dir.x, dir.z) : lastRot
+
+      subtickMoves.current.push({
+        needsRotate: lastRot !== targetRot,
+        needsMove: lastPos.distanceTo(targetPos) > 0,
+        needsMine: move.mode === "mine",
+        startPos: lastPos.clone(),
+        targetPos,
+        startRot: lastRot,
+        targetRot,
+        duration:
+          (ROTATE_TIME * (lastRot !== targetRot ? 1 : 0)) +
+          (MOVE_TIME * (lastPos.distanceTo(targetPos) > 0 ? 1 : 0)) +
+          (MINE_TIME * (move.mode === "mine" ? 1 : 0)),
+      })
+
+      // Prepare for next move
+      lastPos.copy(targetPos)
+      lastRot = targetRot
     }
-    if (hasToMove) {
-      tickPlan.current.plan.push({
-        mode: "move",
-        duration: actionDurations.get("move")! / Math.abs(cycle.player.speed)
-      });
+
+    // Reset elapsed time at tick start
+    elapsed.current = 0
+
+    // Snap rover to the last move's position/rotation in this tick
+    if (subtickMoves.current.length > 0) {
+      const last = subtickMoves.current[subtickMoves.current.length - 1]
+      group.current.position.copy(last.targetPos)
+      group.current.rotation.y = last.targetRot
+      position.current.copy(last.targetPos)
+      rotationY.current = last.targetRot
     }
-    if (hasToMine) {
-      tickPlan.current.plan.push({
-        mode: "mine",
-        duration: actionDurations.get("mine")! / Math.abs(cycle.player.speed)
-      });
-    }
 
-    tickPlan.current.plan.forEach(p => totalDuration.current += actionDurations.get(p.mode)!)
-  }, [cycle.currentTick, timeline.deltas, cycle.direction])
+    tickDuration.current = 600 / Math.abs(cycle.player.speed)
+  }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
-  useFrame((_, delta) => {
-    elapsed.current += delta * 1000;
+  // Animate rover per subtick
+  useFrame((_, deltaSec) => {
+    if (!subtickMoves.current.length) return
 
-    cycle.t.current = Math.min(elapsed.current / totalDuration.current, 1)
-    const plan = tickPlan.current.plan;
-    if (plan.length == 0) {
-      if(cycle.player.playing == "playing"){ // ne tiltsuk le a playert az első lépésről
-        cycle.setTick(cycle.currentTick + cycle.direction)
+    elapsed.current += deltaSec * 1000
+
+    // Global cycle.t between 0 and 1
+    cycle.t.current = Math.min(elapsed.current / tickDuration.current, 1)
+
+    let time = elapsed.current
+
+    for (const subtick of subtickMoves.current) {
+      const stepDur = subtick.duration
+
+      if (time <= stepDur) {
+        // Interpolate subtick
+        if (subtick.needsRotate) {
+          const deltaRot = shortestAngleDelta(subtick.startRot, subtick.targetRot)
+          group.current.rotation.y = subtick.startRot + deltaRot * (time / stepDur)
+          rotationY.current = group.current.rotation.y
+        }
+
+        if (subtick.needsMove) {
+          group.current.position.lerpVectors(subtick.startPos, subtick.targetPos, time / stepDur)
+          position.current.copy(group.current.position)
+        }
+
+        // Mining logic placeholder (could trigger animation/effects)
+        if (subtick.needsMine) {
+          // TODO: implement mining animation/effects
+        }
+
+        break
+      } else {
+        // Snap to target if elapsed exceeds this subtick
+        if (subtick.needsRotate) {
+          group.current.rotation.y = subtick.targetRot
+          rotationY.current = subtick.targetRot
+        }
+        if (subtick.needsMove) {
+          group.current.position.copy(subtick.targetPos)
+          position.current.copy(subtick.targetPos)
+        }
+        time -= stepDur
       }
-      return;
-    }
-    // POSITION
-    const stepIndex = tickPlan.current.step;
-    const step = plan[stepIndex];
-
-    // total duration of previous steps
-    const prevDuration = plan
-      .slice(0, stepIndex)
-      .reduce((sum, s) => sum + s.duration, 0);
-
-    // normalized progress of the current step
-    const progress = Math.min(
-      1,
-      Math.max(0, (elapsed.current - prevDuration) / step.duration)
-    );
-
-    // MOVE
-    if (step.mode === "move") {
-      const newPos = new THREE.Vector3(
-        lerp(position.current.start.x, position.current.target.x, progress),
-        1,
-        lerp(position.current.start.z, position.current.target.z, progress)
-      );
-
-      group.current.position.set(newPos.x, 0.8, newPos.z);
     }
 
-    // ROTATE
-    if (step.mode === "rotate") {
-      const rotDiff = shortestAngleDelta(
-        rotation.current.start,
-        rotation.current.target
-      );
-
-      const newRotY = rotation.current.start + rotDiff * progress;
-      group.current.rotation.y = newRotY;
+    // Move to next tick if elapsed exceeds total duration
+    if (elapsed.current >= tickDuration.current && cycle.player.playing === "playing") {
+      cycle.setTick(cycle.currentTick + cycle.direction)
     }
-
-    if (step.mode === "mine") {
-      // TODO mine
-    }
-
-    // advance step
-    if (elapsed.current >= prevDuration + step.duration) {
-      const before = tickPlan.current.step;
-      tickPlan.current.step = Math.max(0, Math.min(stepIndex + 1, plan.length - 1));
-
-      if(before == tickPlan.current.step && cycle.player.playing == "playing"){
-        cycle.setTick(cycle.currentTick + cycle.direction)
-      }
-
-    }
-
   })
-
 
   return (
     <group
@@ -229,41 +181,19 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       <group name="Scene">
         <group name="Armature">
           <group name="Cube002">
-            <skinnedMesh
-              geometry={nodes.Cube001.geometry}
-              material={materials["Material.004"]}
-              skeleton={nodes.Cube001.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_1.geometry}
-              material={materials["Material.009"]}
-              skeleton={nodes.Cube001_1.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_2.geometry}
-              material={materials["Material.010"]}
-              skeleton={nodes.Cube001_2.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_3.geometry}
-              material={materials["Material.011"]}
-              skeleton={nodes.Cube001_3.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_4.geometry}
-              material={materials["Material.012"]}
-              skeleton={nodes.Cube001_4.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_5.geometry}
-              material={materials["Material.013"]}
-              skeleton={nodes.Cube001_5.skeleton}
-            />
-            <skinnedMesh
-              geometry={nodes.Cube001_6.geometry}
-              material={materials["Material.014"]}
-              skeleton={nodes.Cube001_6.skeleton}
-            />
+            {Object.entries(nodes)
+              .filter(([key, node]) => key.startsWith("Cube001") && "skeleton" in node)
+              .map(([key, node], i) => {
+                const mesh = node as THREE.SkinnedMesh
+                return (
+                  <skinnedMesh
+                    key={i}
+                    geometry={mesh.geometry}
+                    material={materials[`Material.00${i + 4}`]}
+                    skeleton={mesh.skeleton}
+                  />
+                )
+              })}
           </group>
           <primitive object={nodes.Bone} />
         </group>
