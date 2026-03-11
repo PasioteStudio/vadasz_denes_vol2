@@ -17,6 +17,8 @@ import { RareTile } from '@/Prefabs/RareTile';
 import { PathDisplayer } from './PathDisplayer';
 
 import { MainParticle } from './Particles/MainParticles';
+import { clamp } from 'three/src/math/MathUtils.js';
+import { clampNum } from '@/util/math';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -122,18 +124,28 @@ export const Renderer = () => {
       const deltaTime = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
-      setDirection((prev) => {
-        let dx = 0;
-        let dy = 0;
-        let actualSpeed = speed;
-        if (keys.current.shift) actualSpeed *= 2;
-        if (keys.current.w) dy -= actualSpeed * deltaTime;
-        if (keys.current.s) dy += actualSpeed * deltaTime;
+    setDirection((prev) => {
+      let dx = 0;
+      let dy = 0;
+      let actualSpeed = speed;
+
+      if (keys.current.shift) actualSpeed *= 2;
+
+
         if (keys.current.a) dx -= actualSpeed * deltaTime;
+      
+
         if (keys.current.d) dx += actualSpeed * deltaTime;
-        if (dx === 0 && dy === 0) return prev;
-        return { x: prev.x + dx, y: prev.y + dy };
-      });
+      
+      
+      if (keys.current.w) dy -= actualSpeed * deltaTime;
+
+      if (keys.current.s) dy += actualSpeed * deltaTime;
+    
+      if (dx === 0 && dy === 0) return prev;
+      console.log(prev.y + dy);
+      return { x: clampNum((prev.x + dx), 0, 50 * GAP), y: clampNum((prev.y + dy), 92, 210) };
+    });
 
       animFrameId = requestAnimationFrame(loop);
     };
@@ -185,7 +197,7 @@ export const Renderer = () => {
         {rover && <MarsRover onSelect={showInventory} />}
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
-        {/* <MainParticle camPosition={camPos}/> */}
+         {/* <MainParticle camPosition={camPos}/> */}
 
       </Canvas>
 
