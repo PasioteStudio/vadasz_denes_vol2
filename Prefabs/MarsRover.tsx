@@ -82,27 +82,27 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     let lastRot = rotationY.current
 
     for (const move of moves) {
-      const targetPos = new THREE.Vector3(
+      const actualStart = lastPos.clone()
+      const actualTarget = new THREE.Vector3(
         move.to.x * TILE_GAP,
         0.8,
         move.to.y * TILE_GAP
       )
 
-      const dir = new THREE.Vector3().subVectors(targetPos, lastPos)
-      const rotatedDir =
-        cycle.direction === -1 ? dir.clone().negate() : dir
-
+      // rotation direction vector
+      const dir = new THREE.Vector3().subVectors(actualTarget, actualStart)
+      const rotatedDir = cycle.direction === -1 ? dir.clone().negate() : dir
       const targetRot =
         rotatedDir.length() > 0
           ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
           : lastRot
 
-      // Add rotate subtick if needed
+      // rotate subtick if needed
       if (lastRot !== targetRot) {
         subtickMoves.current.push({
           type: "rotate",
-          startPos: lastPos.clone(),
-          targetPos: lastPos.clone(), // position doesn't change during rotation
+          startPos: actualStart.clone(),
+          targetPos: actualStart.clone(),
           startRot: lastRot,
           targetRot,
           duration: ROTATE_TIME,
@@ -110,20 +110,20 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         lastRot = targetRot
       }
 
-      // Add move subtick if needed
-      if (lastPos.distanceTo(targetPos) > 0) {
+      // move subtick if needed
+      if (!actualStart.equals(actualTarget)) {
         subtickMoves.current.push({
           type: "move",
-          startPos: lastPos.clone(),
-          targetPos,
+          startPos: actualStart.clone(),
+          targetPos: actualTarget.clone(),
           startRot: lastRot,
           targetRot: lastRot,
           duration: MOVE_TIME,
         })
-        lastPos.copy(targetPos)
+        lastPos.copy(actualTarget)
       }
 
-      // Add mine subtick if needed
+      // mine subtick if needed
       if (move.mode === "mine") {
         subtickMoves.current.push({
           type: "mine",
@@ -146,7 +146,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       rotationY.current = first.startRot
     }
 
-    // Total tick duration is sum of subtick durations
     tickDuration.current =
       subtickMoves.current.reduce((sum, s) => sum + s.duration, 0) /
       Math.abs(cycle.player.speed)
@@ -186,7 +185,6 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
         break
       } else {
-        // Snap to end of subtick
         if (step.type === "rotate") {
           group.current.rotation.y = step.targetRot
           rotationY.current = step.targetRot
