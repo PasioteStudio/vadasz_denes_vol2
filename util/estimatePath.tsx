@@ -78,7 +78,6 @@ export function estimatePath(
                     update_able_map[tile_id].weight = 0
                     path.push({ action: "mine",positions: [{ x: current_tile.x, y: current_tile.y }] })
                     power -= 2
-                    break;
                 }
                 //Léphet-e még eggyet energia szerint?
                 next_tile_to_go = stuck(current_tile, update_able_map,obstacleGraph).next_tile_to_go
@@ -91,7 +90,7 @@ export function estimatePath(
                 const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
                 const astarpath = astar.search(obstacleGraph, startNode, endNode);
 
-                if((path.length + astarpath.length) >= iterations - 1){
+                if(path.length + astarpath.length >= iterations - 1){
                     go_back = true
                     break;
                 }
@@ -124,7 +123,6 @@ export function estimatePath(
             if (tile_id !== null) {
                 update_able_map[tile_id].weight = 0
                 path.push({ action: "mine",positions: [{ x: current_tile.x, y: current_tile.y }] })
-                break;
             }
              //Léphet-e még eggyet energia szerint?
             next_tile = calculateTile(update_able_map, current_tile.x + current_tile.endPoint.relative_x, current_tile.y + current_tile.endPoint.relative_y)
@@ -136,6 +134,7 @@ export function estimatePath(
             const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
             const astarpath = astar.search(obstacleGraph, startNode, endNode);
 
+            console.log("p",path.length,"a",astarpath.length)
             if((path.length + astarpath.length) >= iterations - 1){
                 go_back = true
                 break;
@@ -147,6 +146,7 @@ export function estimatePath(
         power += isDay(path.length) ? (tile_id === null ? 10 : 20) : 0
         if(power > 100)power = 100
     }
+    console.log("p2",path.length)
 
     return { path }
 }

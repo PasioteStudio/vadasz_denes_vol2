@@ -64,7 +64,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
             final_path.length < 1 ? start : final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1], 
             endNode, iterations - final_path.length,power,withWeight)
         path = [...final_path, ...path]
-        
+
         //nézzük meg, hogy a kiszámolt út ugyanannyi ércet gyűjtött-e be, mint az előző számolásnál
         const current_ores = path.filter(i => i.action == "mine")
         const prev_ores = weight_based_path.filter(i => i.action == "mine")
@@ -93,7 +93,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move",power, positions: [{x:tile.y,y:tile.x}] } })        
+        go_home = astarpath.map(tile => { return { action: "move", positions: [{x:tile.y,y:tile.x}] } })
     }
     //ha az algoritmus lefutott több, mint egyszer, és az utolsó nem volt megfelelő, akkor cseréljük ki
     if (temp_final_path.length != 0 && final_path.length + go_home.length > iterations) {
