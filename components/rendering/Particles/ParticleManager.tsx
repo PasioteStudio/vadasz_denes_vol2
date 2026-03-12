@@ -8,7 +8,7 @@ export function ParticleManager() {
   const dustRef = useRef<Dust | null>(null)
 
   useEffect(() => {
-    dustRef.current = new Dust(scene, 700, 50, [-10, 10, -30], -20)
+    dustRef.current = new Dust(scene, 70, 50, [-10, 10, -30], -20)
 
     return () => {
       if (dustRef.current) {
