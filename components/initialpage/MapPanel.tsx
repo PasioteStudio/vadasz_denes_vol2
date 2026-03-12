@@ -64,7 +64,7 @@ export default function MapPanel(
             <div className="flex items-center justify-start w-max gap-4">
                 <button
                     onClick={setUpload}
-                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-black/30 duration-120
+                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-xl shadow-black/70  duration-120
                     ${current.option === "upload" && "border-buttonicon"}`}
                 >
                     <img src="/ui/filemap.png" className="w-[7vw] aspect-square" />
@@ -75,7 +75,7 @@ export default function MapPanel(
             <div className="flex items-center justify-start w-max gap-4">
                 <button
                     onClick={selectDefault}
-                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-black/30 duration-120
+                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-xl shadow-black/70  duration-120
                     ${current.option === "default" && "border-buttonicon"}`}
                 >
                     <img src="/ui/map.png" className="w-[4vw] aspect-square" />
@@ -85,7 +85,7 @@ export default function MapPanel(
             <div className="flex items-center justify-start w-max gap-4">
                 <button
                     onClick={selectRandom}
-                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-black/30 duration-120
+                    className={`bg-buttonbg rounded-md border-2 border-buttonbg p-[1vw] w-max cursor-pointer hover:shadow-md shadow-xl shadow-black/70  duration-120
                     ${current.option === "random" && "border-buttonicon"}`}
                 >
                     <img src="/ui/mapgen.png" className="w-[4vw] aspect-square relative left-[0.3vw]" />
