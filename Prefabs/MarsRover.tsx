@@ -90,7 +90,12 @@ useEffect(() => {
   let tickStartPos: THREE.Vector3
 
   if (cycle.direction === -1) {
-    const firstMove = currentDelta.moves[0]
+    let firstMove = currentDelta.moves[0]
+    if(currentDelta.moves.length > 1){
+      firstMove = currentDelta.moves[1]
+    }else if(timeline.deltas[cycle.currentTick+1].moves.length > 0){
+      firstMove = timeline.deltas[cycle.currentTick+1].moves[0]
+    }
     tickStartPos = new THREE.Vector3(
       firstMove.to.x * TILE_GAP,
       0.8,
