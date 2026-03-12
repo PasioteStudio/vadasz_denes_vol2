@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
     const [visible, setVisible] = useState(isLoading); // track visibility
     const [fade, setFade] = useState(false); // for fade-in/out
-    const MIN_DISPLAY_TIME = 0;
+    const MIN_DISPLAY_TIME = 3000;
     const [startTime, setStartTime] = useState<number | null>(null);
 
     // Handle mount: start fade-in and record start time
