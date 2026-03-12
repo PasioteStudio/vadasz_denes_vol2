@@ -1,6 +1,6 @@
 import { astar } from "@/lib/astar"
 import { Position } from "@/types/RoverContextTypes";
-import { VectorField, WeightPoint } from "../lib/constants"
+import { energy_moving, VectorField, WeightPoint } from "../lib/constants"
 import { findNearestOre } from "./ore";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { Action } from "./algorithm";
@@ -131,4 +131,17 @@ export function deepCopy<T>(array: T[]): T[] {
 
 export function isDay(tick: number): boolean {
   return tick % 48 <= DefaultCycleContextObject.day
+}
+/**
+ * @description Megnézi, hogy nagyobb-e a jelenlegi energia, mint a következőleg megtenni kívánt út
+ * 
+ * @param {number} power jelenlegi energia
+ * @param {number} time jelenlegi idő (út hossza)
+ * @param {number} current a jelenlegi félórában megtett út mennyisége
+ * @param {number | null} next_tile_id a következő mező érc értéke (ha van)
+ * 
+ * @returns {boolean} van-e
+ */
+export function isThereEnoughPower(power:number,time:number,current:number,next_tile_id:number | null):boolean{
+    return power >= energy_moving(current) - (isDay(time) ? 10 : 0) + (next_tile_id !== null ? 2 : 0)
 }

@@ -50,34 +50,16 @@ export function isOre(tile:Tile){
     return [Tile.Green, Tile.Blue, Tile.Yellow].includes(tile)
 }
 
-export class Rover {
-    speed:SPEED
-    to_extract_ore = 1 /*Egy ásvány kibányászása fél óráig tart. Eközben az adott blokkon áll a rover.*/
-    daylight_powering = 10  /* Nappal az akkumulátor +10 egységet töltődik fél óra alatt. Éjszaka az akkumulátor nem töltődik. */
-    power = {  //A rovernek van 100 egységnyi akkumulátor kapacitása.
-        max:100,
-        min:0,
-        current:100
-    }
-    constructor(speed?:SPEED) {
-        this.speed = speed ? speed : SPEED.MEDIUM
-    }
-    energy_moving = ()=>{
-        /*
-        Mozgáskor a fogyasztás a sebesség négyzetével arányos:
-        Efelhasznált= k · v2
-        ahol:
-        v = a rover sebessége (blokk/fél óra)
-        k = 2, állandó
-        */
+export function energy_moving(speed:SPEED){
+    /*
+    Mozgáskor a fogyasztás a sebesség négyzetével arányos:
+    Efelhasznált= k · v2
+    ahol:
+    v = a rover sebessége (blokk/fél óra)
+    k = 2, állandó
+    */
 
-        //valami ilyesmi? nem
-        return useMemo(()=>{
-            const k = 2
-            return k * Math.pow(this.speed,2)
-        }, [this.speed])
-    }
-    
-
-
+    //valami ilyesmi? nem
+    const k = 2
+    return k * Math.pow(speed,2)
 }
