@@ -72,12 +72,22 @@ useEffect(() => {
   )
 
   const currentDelta = timeline.deltas[tickIndex]
-  if (!currentDelta || !currentDelta.moves.length) return
+  if (!currentDelta) return
 
-  let moves = [...currentDelta.moves]
+  // --- SELECT DELTA BASED ON DIRECTION ---
+  let workingDelta = currentDelta
+
+  if (cycle.direction === -1) {
+    const nextIndex = Math.min(cycle.currentTick + 1, timeline.deltas.length - 1)
+    workingDelta = timeline.deltas[nextIndex]
+  }
+
+  if (!workingDelta || !workingDelta.moves.length) return
+
+  let moves = [...workingDelta.moves]
   const speedFactor = Math.abs(cycle.player.speed)
 
-  // Reverse moves if going backward
+  // Reverse moves when playing backwards
   if (cycle.direction === -1) {
     moves = moves
       .map((m) => ({ from: m.to, to: m.from, mode: m.mode }))
@@ -87,28 +97,13 @@ useEffect(() => {
   subtickMoves.current = []
 
   // --- SNAP TO TICK START POSITION ONLY ---
-  let tickStartPos: THREE.Vector3
+  const firstMove = moves[0]
 
-  if (cycle.direction === -1) {
-    let firstMove = currentDelta.moves[0]
-    if(currentDelta.moves.length > 1){
-      firstMove = currentDelta.moves[1]
-    }else if(timeline.deltas[cycle.currentTick+1].moves.length > 0){
-      firstMove = timeline.deltas[cycle.currentTick+1].moves[0]
-    }
-    tickStartPos = new THREE.Vector3(
-      firstMove.to.x * TILE_GAP,
-      0.8,
-      firstMove.to.y * TILE_GAP
-    )
-  } else {
-    const firstMove = currentDelta.moves[0]
-    tickStartPos = new THREE.Vector3(
-      firstMove.from.x * TILE_GAP,
-      0.8,
-      firstMove.from.y * TILE_GAP
-    )
-  }
+  const tickStartPos = new THREE.Vector3(
+    firstMove.from.x * TILE_GAP,
+    0.8,
+    firstMove.from.y * TILE_GAP
+  )
 
   // Snap position only
   group.current.position.copy(tickStartPos)
@@ -120,13 +115,15 @@ useEffect(() => {
 
   for (const move of moves) {
     const actualTarget = new THREE.Vector3(
-      (cycle.direction == 1 ? move.to.x : move.from.x) * TILE_GAP,
+      move.to.x * TILE_GAP,
       0.8,
-      (cycle.direction == 1 ? move.to.y : move.from.y) * TILE_GAP
+      move.to.y * TILE_GAP
     )
 
     const moveDir = new THREE.Vector3().subVectors(actualTarget, prevPos)
-    const rotatedDir = cycle.direction === -1 ? moveDir.clone().negate() : moveDir
+    const rotatedDir =
+      cycle.direction === -1 ? moveDir.clone().negate() : moveDir
+
     const targetRot =
       rotatedDir.length() > 0
         ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
