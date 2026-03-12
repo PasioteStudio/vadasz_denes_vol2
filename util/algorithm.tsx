@@ -17,7 +17,6 @@ export enum TimeComplexity {
 
 export interface Action {
     action:"move"|"mine"|"move2"|"wait",
-    power:number,
     positions:Position[]
 }
 
@@ -107,10 +106,11 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
 
     //állítsuk be a megtett utat
     for (let i = 0; i < final_path.length; i++) {
-        console.log(final_path[i].positions.length)
         const { x, y } = final_path[i].positions[final_path[i].positions.length - 1];
         deltas.push({
-            energy: final_path[i].power,
+            energy: -(final_path[i].action == "mine" ? 
+                2 : (final_path[i].action == "wait" ? 
+                    1 : energy_moving(final_path[i].positions.length))) + (isDay(i) ? 10 : 0),
             inventoryChanges: (final_path[i].action == "mine" ? [{
                 amount: 1,
                 mode: "add",
@@ -130,7 +130,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     for (let i = final_path.length; i < iterations; i++) {
         final_path.push(final_path[i - 1])
         deltas.push({
-            energy: final_path[i].power,
+            energy: -1 + (isDay(i) ? 10 : 0),
             inventoryChanges: [],
             logsAdded: [{ message: "Várakozás..." }],
             moves: [{
@@ -174,7 +174,7 @@ function salesmanSolver(
             //menjen a rover az út végéig
             while(j < steps.entire_path!.length ){
                 if(!isThereEnoughPower(power,ordered_path.length,1,null)){
-                    ordered_path.push({power, action: "wait", positions: [current] })
+                    ordered_path.push({ action: "wait", positions: [current] })
                     if(power>0)power-=1
                     power+=(isDay(ordered_path.length) ? 10 : 0)
                     if(power > 100)power = 100
@@ -185,7 +185,7 @@ function salesmanSolver(
                     positions.push(steps.entire_path![j])
                     j++
                 }
-                ordered_path.push({power, action: "move", positions: positions })
+                ordered_path.push({action: "move", positions: positions })
                 power -= energy_moving(ordered_path[ordered_path.length - 1].positions.length)
                 power += isDay(ordered_path.length) ? 10 : 0
                 if(power > 100)power = 100
@@ -193,12 +193,12 @@ function salesmanSolver(
         }
         current = steps.entire_path![steps.entire_path!.length - 1]
         while(power < 2){
-            ordered_path.push({power, action: "wait", positions: [current] })
+            ordered_path.push({action: "wait", positions: [current] })
             if(power>0)power-=1
             power+=(isDay(ordered_path.length) ? 10 : 0)
             if(power > 100)power = 100
         }
-        ordered_path.push({power, action: "mine", positions: [current] })
+        ordered_path.push({action: "mine", positions: [current] })
         power -= 2
         power += isDay(ordered_path.length) ? 10 : 0
         if(power > 100)power = 100

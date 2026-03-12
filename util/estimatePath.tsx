@@ -35,7 +35,7 @@ export function estimatePath(
     while (isThereAWay(current_tile) && path.length < iterations) {
         if(go_back) break;
         if(!isThereEnoughPower(power,path.length,1,null)){
-            path.push({ power,action: "wait", positions: [{ x: current_tile.x, y: current_tile.y }] })
+            path.push({ action: "wait", positions: [{ x: current_tile.x, y: current_tile.y }] })
             if(power > 0)power -= 1
             power += (isDay(path.length) ? 10 : 0)
             if(power > 100)power = 100
@@ -52,7 +52,7 @@ export function estimatePath(
         let once = true
         let tile_id = null
         let next_tile_id = null
-        if (rover_stuck || isStuck(next_tile,withWeight ? path : [{power,action:"move",positions:[next_tile]}])) {
+        if (rover_stuck || isStuck(next_tile,withWeight ? path : [{action:"move",positions:[next_tile]}])) {
             let next_tile:VectorField | null = null
             let next_tile_to_go:Position | null = null
             while(tile_id === null){
@@ -63,7 +63,7 @@ export function estimatePath(
                     current_tile = next_tile
                 }
 
-                once ? path.push({ action: "move",power, positions: [{ x: current_tile.x, y: current_tile.y }] }) :  path[path.length - 1].positions.push({ x: current_tile.x, y: current_tile.y })
+                once ? path.push({ action: "move",positions: [{ x: current_tile.x, y: current_tile.y }] }) :  path[path.length - 1].positions.push({ x: current_tile.x, y: current_tile.y })
                 once = false
 
                 if(next_tile_id === null){
@@ -76,11 +76,11 @@ export function estimatePath(
                 if (tile_id !== null) {
                     rover_stuck = false
                     update_able_map[tile_id].weight = 0
-                    path.push({ action: "mine",power, positions: [{ x: current_tile.x, y: current_tile.y }] })
+                    path.push({ action: "mine",positions: [{ x: current_tile.x, y: current_tile.y }] })
                     power -= 2
                     break;
                 }
-                //TODO Léphet-e még eggyet energia szerint?
+                //Léphet-e még eggyet energia szerint?
                 next_tile_to_go = stuck(current_tile, update_able_map,obstacleGraph).next_tile_to_go
                 next_tile = calculateTile(update_able_map, next_tile_to_go.x, next_tile_to_go.y)
 
@@ -111,7 +111,7 @@ export function estimatePath(
             
             current_tile = next_tile
             
-            once ? path.push({ action: "move",power, positions: [{ x: current_tile.x, y: current_tile.y }] }) :  path[path.length - 1].positions.push({ x: current_tile.x, y: current_tile.y })
+            once ? path.push({ action: "move",positions: [{ x: current_tile.x, y: current_tile.y }] }) :  path[path.length - 1].positions.push({ x: current_tile.x, y: current_tile.y })
             once = false
             
             if(next_tile_id === null){
@@ -123,10 +123,10 @@ export function estimatePath(
             
             if (tile_id !== null) {
                 update_able_map[tile_id].weight = 0
-                path.push({ action: "mine",power, positions: [{ x: current_tile.x, y: current_tile.y }] })
+                path.push({ action: "mine",positions: [{ x: current_tile.x, y: current_tile.y }] })
                 break;
             }
-             //TODO Léphet-e még eggyet energia szerint?
+             //Léphet-e még eggyet energia szerint?
             next_tile = calculateTile(update_able_map, current_tile.x + current_tile.endPoint.relative_x, current_tile.y + current_tile.endPoint.relative_y)
 
             const tile_id2_temp = update_able_map.findIndex(tile => tile.y == next_tile!.y && tile.x == next_tile!.x)
