@@ -89,13 +89,13 @@ export function estimatePath(
                 //vissza kell-e mennünk?
                 const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
                 const astarpath = astar.search(obstacleGraph, startNode, endNode);
-                const modified_astar = modified_astarpath(power,path.length,astarpath).modified_path
+                const modified_astar = modified_astarpath(power,path.length,astarpath,current_tile).modified_path
 
                 if(path.length + modified_astar.length >= iterations - 1){
                     go_back = true
                     break;
                 }
-                else if(isThereEnoughPower(power,path.length,path[path.length - 1].positions.length,next_tile_id) && path[path.length - 1].positions.length < 3) continue
+                else if(isThereEnoughPower(power,path.length,path[path.length - 1].positions.length + 1,next_tile_id) && path[path.length - 1].positions.length < 3) continue
                 else break;
             }
             power -= energy_moving(path[path.length - (tile_id === null ? 1 : 2)].positions.length)
@@ -134,13 +134,13 @@ export function estimatePath(
             //vissza kell-e mennünk?
             const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
             const astarpath = astar.search(obstacleGraph, startNode, endNode);
-            const modified_astar = modified_astarpath(power,path.length,astarpath).modified_path
+            const modified_astar = modified_astarpath(power,path.length,astarpath,current_tile).modified_path
 
             if((path.length + modified_astar.length) >= iterations - 1){
                 go_back = true
                 break;
             }
-            else if(isThereEnoughPower(power,path.length,path[path.length - 1].positions.length,next_tile_id) && path[path.length - 1].positions.length < 3) continue
+            else if(isThereEnoughPower(power,path.length,path[path.length - 1].positions.length + 1,next_tile_id) && path[path.length - 1].positions.length < 3) continue
             else break;
         }
         power -= energy_moving(path[path.length - (tile_id === null ? 1 : 2)].positions.length)

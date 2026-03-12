@@ -1,6 +1,6 @@
 import { isOre, vectorValues, Tile, WeightPoint, energy_moving } from "@/lib/constants";
 import { Graph, astar } from "@/lib/astar"
-import { getNextStep, isDay, isThereEnoughPower, modified_astarpath } from "@/util/path"
+import { getNextStep, isDay, modified_astarpath } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
 import { tileToString } from "./tile";
 import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
@@ -93,7 +93,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = modified_astarpath(power,ordered_path.length,astarpath).modified_path
+        go_home = modified_astarpath(power,ordered_path.length,astarpath,tile).modified_path
     }
     //ha az algoritmus lefutott több, mint egyszer, és az utolsó nem volt megfelelő, akkor cseréljük ki
     if (temp_final_path.length != 0 && final_path.length + go_home.length > iterations) {
@@ -108,7 +108,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     for (let i = 0; i < final_path.length; i++) {
         const { x, y } = final_path[i].positions[final_path[i].positions.length - 1];
         deltas.push({
-            energy: -(final_path[i].action == "mine" ? 
+            energy: -(final_path[i].action == "mine" ?
                 2 : (final_path[i].action == "wait" ? 
                     1 : energy_moving(final_path[i].positions.length))) + (isDay(i) ? 10 : 0),
             inventoryChanges: (final_path[i].action == "mine" ? [{
@@ -170,7 +170,7 @@ function salesmanSolver(
     for (let i = 0; i < ordered_points.length; i++) {
         const target = ordered_points[i]
         const steps = getNextStep(current.x, current.y, target.x, target.y,obstacleGraph,true)
-        const astar_path = modified_astarpath(power,ordered_path.length,steps.entire_path!)
+        const astar_path = modified_astarpath(power,ordered_path.length,steps.entire_path!,current)
         power = astar_path.power
         astar_path.modified_path.forEach(i=>{
             ordered_path.push(i)

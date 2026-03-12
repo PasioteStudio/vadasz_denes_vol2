@@ -92,7 +92,7 @@ export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], rove
 }
 
 export const getEnergyForTick = (tick: number, deltas: Delta[]): number => {
-    const energyDeltas = deltas.slice(0,tick).map(d => d.energy);
+    const energyDeltas = deltas.slice(0,tick+2).map(d => d.energy);
     let energy = 100;
 
     for(let i = 0; i < energyDeltas.length; i++) {

@@ -146,17 +146,17 @@ export function isThereEnoughPower(power:number,time:number,current:number,next_
     return power >= energy_moving(current) - (isDay(time) ? 10 : 0) + (next_tile_id !== null ? 2 : 0)
 }
 
-export function modified_astarpath(power:number,time:number,path:Position[]){
+export function modified_astarpath(power:number,time:number,path:Position[],current_pos:Position){
     let current_power = power
     const modified_path:Action[] = []
     //menjen a rover az út végéig
     let j = 0
     while(j < path.length ){
         if(!isThereEnoughPower(current_power,time + modified_path.length,1,null)){
-            let prev = modified_path[modified_path.length - 1].positions
+            let prev = modified_path.length == 0 ? [current_pos] : modified_path[modified_path.length - 1].positions
             modified_path.push({action:"wait",positions:[prev[prev.length - 1]]})
             if(current_power>0)current_power-=1
-            current_power+=(isDay(modified_path.length) ? 10 : 0)
+            current_power+=(isDay(time + modified_path.length) ? 10 : 0)
             if(current_power > 100)current_power = 100
             continue
         }
@@ -167,7 +167,8 @@ export function modified_astarpath(power:number,time:number,path:Position[]){
         }
         modified_path.push({action:"move",positions:positions})
         current_power -= energy_moving(positions.length)
-        current_power += isDay(modified_path.length) ? 10 : 0
+        if(current_power < 0)current_power = 0
+        current_power += isDay(time + modified_path.length) ? 10 : 0
         if(current_power > 100)current_power = 100
     }
     return {power:current_power, modified_path}
