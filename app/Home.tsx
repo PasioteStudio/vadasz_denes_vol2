@@ -42,6 +42,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const setTickTo = useCallback((t: number) => {
     try {
       const actualTick = Math.max(0, Math.min(deltas.length - 1, t));
+      console.log(actualTick)
       if (actualTick == cycle.currentTick) return;
       if (!(deltas[actualTick] ?? undefined)) throw Error;
       setCycle(prev => {
@@ -61,11 +62,20 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   }, [deltas, map, cycle.currentTick]);
 
   const recalculateSnapshots = useCallback((fromTick: number, toTick: number) => {
-    const cTick = cycle.currentTick;
+    console.log("from: ", fromTick, "to: ", toTick)
+    const cTick = fromTick;
+    console.log("--------------------")
+    console.log(`from: ${fromTick}, to: ${toTick}`)
+    const direction = toTick < fromTick ? -1 : 1
     const deltasToExecute =
-      cycleDirection === -1
-        ? deltas.filter((d, i) => i <= fromTick + (d.moves.find(m => m.mode == "mine") ? 1 : 0) && i > toTick)
+      toTick < fromTick
+        ? deltas.filter((d, i) => {
+          console.log(i, fromTick, i <= fromTick, toTick, i > toTick)
+          return i <= fromTick && i > toTick;
+        })
         : deltas.filter((_, i) => i > fromTick && i <= toTick)
+
+    console.log(deltasToExecute)
 
     let position: Position = { ...rover!.position }
     let inventory: Item[] = [...rover!.inventory]
@@ -77,10 +87,10 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
 
     deltasToExecute.forEach(d => {
       energy = getEnergyForTick(cTick, deltas);
-      position = processPositionChanges(position, d.moves, cycleDirection)
-      inventory = processInventoryChanges(inventory, d.inventoryChanges, cycleDirection)
-      logs = processLogChanges(logs, d.logsAdded, cycleDirection)
-      newMap = processMapChanges(newMap, d.moves, cycleDirection)
+      position = processPositionChanges(position, d.moves, direction)
+      inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
+      logs = processLogChanges(logs, d.logsAdded, direction)
+      newMap = processMapChanges(newMap, d.moves, direction)
     })
 
     setRover(p => {
