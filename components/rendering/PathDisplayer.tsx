@@ -1,47 +1,54 @@
 import { Line } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { TILE_GAP } from "./TileRenderer";
 import { useTimeline } from "@/lib/contexts";
 
 export const PathDisplayer = () => {
   const { path, rover } = useTimeline();
-  
-  // Track the current flat index of the rover along the path
-  const roverIndexRef = useRef(0);
 
-  const { completedpoints, rest } = useMemo(() => {
-    if (!Array.isArray(path)) return { completedpoints: [], rest: [] };
+  const [roverIndex, setRoverIndex] = useState(0);
 
-    const flatPath: [number, number, number][] = [];
+  const flatPath = useMemo(() => {
+    if (!Array.isArray(path)) return [];
     const height = 0.3;
 
-    // Flatten the path
-    path.forEach(segment => {
-      segment.forEach(p => {
-        flatPath.push([p.x * TILE_GAP, height, p.y * TILE_GAP]);
-      });
-    });
+    return path.flatMap(segment =>
+      segment.map(
+        p => [p.x * TILE_GAP, height, p.y * TILE_GAP] as [number, number, number]
+      )
+    );
+  }, [path]);
 
-    // Find the next index where the rover is
-    let nextIndex = roverIndexRef.current;
-    for (let i = roverIndexRef.current; i < flatPath.length; i++) {
-      const pt = flatPath[i];
-      if (pt[0] === rover.position.x * TILE_GAP && pt[2] === rover.position.y * TILE_GAP) {
-        nextIndex = i;
-        break;
+  useEffect(() => {
+    if (!flatPath.length) return;
+
+    const roverX = rover.position.x * TILE_GAP;
+    const roverZ = rover.position.y * TILE_GAP;
+
+    const dist = (p: [number, number, number]) =>
+      (p[0] - roverX) ** 2 + (p[2] - roverZ) ** 2;
+
+    setRoverIndex(prev => {
+      let best = prev;
+      let bestDist = dist(flatPath[prev]);
+
+      const start = Math.max(0, prev - 2);
+      const end = Math.min(flatPath.length - 1, prev + 2);
+
+      for (let i = start; i <= end; i++) {
+        const d = dist(flatPath[i]);
+        if (d < bestDist) {
+          bestDist = d;
+          best = i;
+        }
       }
-    }
 
-    // Only advance by one index per render
-    if (nextIndex > roverIndexRef.current) {
-      roverIndexRef.current += 1;
-    }
+      return best;
+    });
+  }, [rover.position, flatPath]);
 
-    const completedpoints = flatPath.slice(0, roverIndexRef.current + 1);
-    const rest = flatPath.slice(roverIndexRef.current); // include current rover point
-
-    return { completedpoints, rest };
-  }, [path, rover]);
+  const completedpoints = flatPath.slice(0, roverIndex + 1);
+  const rest = flatPath.slice(roverIndex);
 
   if (!path || path.length < 2) return null;
 
@@ -56,6 +63,7 @@ export const PathDisplayer = () => {
           transparent
         />
       )}
+
       {rest.length > 1 && (
         <Line
           points={rest}
