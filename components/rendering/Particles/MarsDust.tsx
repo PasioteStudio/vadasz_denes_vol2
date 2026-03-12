@@ -12,7 +12,7 @@ export class Dust {
   radius: number
   size: number
 
-  constructor(scene: THREE.Scene, dustcount: number = 2000, radius = 30, offset: [number, number, number], lowerBound: number = -20, size: number = 0.1) {
+  constructor(scene: THREE.Scene, dustcount: number = 2000, radius = 30, offset: [number, number, number], lowerBound: number = 0, size: number = 0.1) {
     //random pozíció és sebesség
     this.dustCount = dustcount
     const positions = new Float32Array(this.dustCount * 3)
@@ -88,20 +88,19 @@ export function MarsDust({ camPosition }: IMainParticle) {
       dustsRef.current = []
       const cam = camPositionRef.current
       const dust = new Dust(
-        scene, 15, 50,
+        scene, 15 , 50,
         [cam[0] - 10, 10, cam[2] - 100],
-        -20, 2
+        0, 2
       )
       dustRef.current = dust
-      dustsRef.current.push(dust)
-    
+      
 
     return () => {
       if (dustRef.current) {
         scene.remove(dustRef.current.points)
       }
     }
-  }, [scene]) //csak a scene
+  },[scene]) //csak a scene
 
   useFrame((_, delta) => {
     if (!dustRef.current) return
