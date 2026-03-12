@@ -11,6 +11,7 @@ interface IMainParticle{
 
 export function MainParticle({ camPosition }: IMainParticle) {
   const { scene } = useThree()
+  const DUSTCOUNT = 150
   const dustRef = useRef<Dust | null>(null)
   //legutóbbi reset pozíció
   const lastResetPos = useRef<[number, number, number]>([0,0,0])
@@ -18,7 +19,7 @@ export function MainParticle({ camPosition }: IMainParticle) {
   useEffect(() => {
     //csinálunk egy initial dustot
     const dust = new Dust(
-      scene, 150, 50,
+      scene, DUSTCOUNT, 50,
       [camPosition[0] - 10, 10, camPosition[2] - 100],
       0, 2
     )
