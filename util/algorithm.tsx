@@ -1,6 +1,6 @@
 import { isOre, vectorValues, Tile, WeightPoint, energy_moving } from "@/lib/constants";
 import { Graph, astar } from "@/lib/astar"
-import { getNextStep, isDay, isThereEnoughPower } from "@/util/path"
+import { getNextStep, isDay, isThereEnoughPower, modified_astarpath } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
 import { tileToString } from "./tile";
 import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
@@ -93,7 +93,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = astarpath.map(tile => { return { action: "move", positions: [{x:tile.y,y:tile.x}] } })
+        go_home = modified_astarpath(power,ordered_path.length,astarpath).modified_path
     }
     //ha az algoritmus lefutott több, mint egyszer, és az utolsó nem volt megfelelő, akkor cseréljük ki
     if (temp_final_path.length != 0 && final_path.length + go_home.length > iterations) {
@@ -170,27 +170,11 @@ function salesmanSolver(
     for (let i = 0; i < ordered_points.length; i++) {
         const target = ordered_points[i]
         const steps = getNextStep(current.x, current.y, target.x, target.y,obstacleGraph,true)
-        for (let j =0;j<steps.entire_path!.length;j) {
-            //menjen a rover az út végéig
-            while(j < steps.entire_path!.length ){
-                if(!isThereEnoughPower(power,ordered_path.length,1,null)){
-                    ordered_path.push({ action: "wait", positions: [current] })
-                    if(power>0)power-=1
-                    power+=(isDay(ordered_path.length) ? 10 : 0)
-                    if(power > 100)power = 100
-                    continue
-                }
-                const positions = []
-                while(positions.length < 3 && j<steps.entire_path!.length && isThereEnoughPower(power,ordered_path.length,positions.length,null)){
-                    positions.push(steps.entire_path![j])
-                    j++
-                }
-                ordered_path.push({action: "move", positions: positions })
-                power -= energy_moving(ordered_path[ordered_path.length - 1].positions.length)
-                power += isDay(ordered_path.length) ? 10 : 0
-                if(power > 100)power = 100
-            }
-        }
+        const astar_path = modified_astarpath(power,ordered_path.length,steps.entire_path!)
+        power = astar_path.power
+        astar_path.modified_path.forEach(i=>{
+            ordered_path.push(i)
+        })
         current = steps.entire_path![steps.entire_path!.length - 1]
         while(power < 2){
             ordered_path.push({action: "wait", positions: [current] })

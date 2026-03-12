@@ -1,5 +1,5 @@
 import { energy_moving, VectorField, WeightPoint } from "@/lib/constants";
-import { getNextStep, isDay, isStuck, isThereAWay, stuck,isThereEnoughPower } from "./path";
+import { getNextStep, isDay, isStuck, isThereAWay, stuck,isThereEnoughPower, modified_astarpath } from "./path";
 import { Action } from "./algorithm";
 import { calculateTile } from "./tile";
 import { astar } from "@/lib/astar"
@@ -89,8 +89,9 @@ export function estimatePath(
                 //vissza kell-e mennünk?
                 const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
                 const astarpath = astar.search(obstacleGraph, startNode, endNode);
+                const modified_astar = modified_astarpath(power,path.length,astarpath).modified_path
 
-                if(path.length + astarpath.length >= iterations - 1){
+                if(path.length + modified_astar.length >= iterations - 1){
                     go_back = true
                     break;
                 }
@@ -133,9 +134,9 @@ export function estimatePath(
             //vissza kell-e mennünk?
             const startNode = obstacleGraph.grid[current_tile.y][current_tile.x];
             const astarpath = astar.search(obstacleGraph, startNode, endNode);
+            const modified_astar = modified_astarpath(power,path.length,astarpath).modified_path
 
-            console.log("p",path.length,"a",astarpath.length)
-            if((path.length + astarpath.length) >= iterations - 1){
+            if((path.length + modified_astar.length) >= iterations - 1){
                 go_back = true
                 break;
             }

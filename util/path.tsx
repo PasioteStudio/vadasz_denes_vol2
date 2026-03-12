@@ -145,3 +145,30 @@ export function isDay(tick: number): boolean {
 export function isThereEnoughPower(power:number,time:number,current:number,next_tile_id:number | null):boolean{
     return power >= energy_moving(current) - (isDay(time) ? 10 : 0) + (next_tile_id !== null ? 2 : 0)
 }
+
+export function modified_astarpath(power:number,time:number,path:Position[]){
+    let current_power = power
+    const modified_path:Action[] = []
+    //menjen a rover az út végéig
+    let j = 0
+    while(j < path.length ){
+        if(!isThereEnoughPower(current_power,time + modified_path.length,1,null)){
+            let prev = modified_path[modified_path.length - 1].positions
+            modified_path.push({action:"wait",positions:[prev[prev.length - 1]]})
+            if(current_power>0)current_power-=1
+            current_power+=(isDay(modified_path.length) ? 10 : 0)
+            if(current_power > 100)current_power = 100
+            continue
+        }
+        const positions:Position[] = []
+        while(positions.length < 3 && j<path.length && isThereEnoughPower(current_power,time +modified_path.length,positions.length + 1,null)){
+            positions.push({x:path[j].y,y:path[j].x})
+            j++
+        }
+        modified_path.push({action:"move",positions:positions})
+        current_power -= energy_moving(positions.length)
+        current_power += isDay(modified_path.length) ? 10 : 0
+        if(current_power > 100)current_power = 100
+    }
+    return {power:current_power, modified_path}
+}
