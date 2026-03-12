@@ -11,6 +11,7 @@ import { getEnergyForTick, processInventoryChanges, processLogChanges, processMa
 import { generateFlavoredMap, getStartingPoint } from "@/util/map";
 import { clamp } from "three/src/math/MathUtils.js";
 import { deepCopy } from "@/util/path";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "direction" | "setDirection">>({
@@ -30,6 +31,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const [map, setMap] = useState<Tile[][]>(initialMap);
   const flavoredMap = useRef<[boolean, Tile, Tile | null][][]>([])
   const [deltas, setDeltas] = useState<Delta[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [rover, setRover] = useState<RoverT>({
     energy: 100,
     inventory: [],
@@ -117,6 +119,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         // console.log("deltas: ", path.deltas)
         console.log("path:", path.path)
         setDeltas(path.deltas);
+        setIsLoading(false)
       }
       worker.terminate();
     };
@@ -151,6 +154,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       }}>
         <Renderer />
         <GUI />
+        <LoadingScreen isLoading={isLoading} />
       </MapTimeLineContext.Provider>
     </CycleContext.Provider>
   );
