@@ -120,9 +120,9 @@ useEffect(() => {
 
   for (const move of moves) {
     const actualTarget = new THREE.Vector3(
-      move.to.x * TILE_GAP,
+      (cycle.direction == 1 ? move.to.x : move.from.x) * TILE_GAP,
       0.8,
-      move.to.y * TILE_GAP
+      (cycle.direction == 1 ? move.to.y : move.from.y) * TILE_GAP
     )
 
     const moveDir = new THREE.Vector3().subVectors(actualTarget, prevPos)
