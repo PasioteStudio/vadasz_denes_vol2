@@ -30,7 +30,7 @@ type MarsRoverProps = ThreeElements["group"] & {
 const ROTATE_TIME = 200
 const MOVE_TIME = 200
 const MINE_TIME = 200
-const MODEL_ROTATION_OFFSET = -Math.PI/2
+const MODEL_ROTATION_OFFSET = -Math.PI / 2
 
 export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
@@ -65,71 +65,76 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   useEffect(() => {
     if (!timeline.deltas.length) return
 
-    const currentDelta = timeline.deltas[cycle.currentTick]
+    // clamp currentTick safely
+    const tickIndex = Math.min(
+      Math.max(cycle.currentTick, 0),
+      timeline.deltas.length - 1
+    )
+
+    const currentDelta = timeline.deltas[tickIndex]
     if (!currentDelta || !currentDelta.moves.length) return
 
     let moves = [...currentDelta.moves]
     const speedFactor = Math.abs(cycle.player.speed)
 
     if (cycle.direction === -1) {
-      moves = moves.map(m => ({ from: m.to, to: m.from, mode: m.mode })).reverse()
+      moves = moves
+        .map((m) => ({ from: m.to, to: m.from, mode: m.mode }))
+        .reverse()
     }
 
     subtickMoves.current = []
 
-    let lastPos = position.current.clone()
-    let lastRot = rotationY.current
+    // Start from current rover position/rotation to avoid freezing
+    let prevPos = group.current.position.clone()
+    let prevRot = group.current.rotation.y
 
     for (const move of moves) {
-      const actualStart = lastPos.clone()
       const actualTarget = new THREE.Vector3(
         move.to.x * TILE_GAP,
         0.8,
         move.to.y * TILE_GAP
       )
 
-      // rotation vector
-      const dir = new THREE.Vector3().subVectors(actualTarget, actualStart)
+      const dir = new THREE.Vector3().subVectors(actualTarget, prevPos)
       const rotatedDir = cycle.direction === -1 ? dir.clone().negate() : dir
       const targetRot =
         rotatedDir.length() > 0
           ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
-          : lastRot
+          : prevRot
 
-      // rotate subtick
-      if (lastRot !== targetRot) {
-        subtickMoves.current.push({
-          type: "rotate",
-          startPos: actualStart.clone(),
-          targetPos: actualStart.clone(),
-          startRot: lastRot,
-          targetRot,
-          duration: ROTATE_TIME / speedFactor,
-        })
-        lastRot = targetRot
-      }
+      // Rotate subtick
+      const rotZero = prevRot === targetRot
+      subtickMoves.current.push({
+        type: "rotate",
+        startPos: prevPos.clone(),
+        targetPos: prevPos.clone(),
+        startRot: prevRot,
+        targetRot,
+        duration: rotZero ? 0 : ROTATE_TIME / speedFactor,
+      })
+      prevRot = targetRot
 
-      // move subtick
-      if (!actualStart.equals(actualTarget)) {
-        subtickMoves.current.push({
-          type: "move",
-          startPos: actualStart.clone(),
-          targetPos: actualTarget.clone(),
-          startRot: lastRot,
-          targetRot: lastRot,
-          duration: MOVE_TIME / speedFactor,
-        })
-        lastPos.copy(actualTarget)
-      }
+      // Move subtick
+      const moveZero = prevPos.equals(actualTarget)
+      subtickMoves.current.push({
+        type: "move",
+        startPos: prevPos.clone(),
+        targetPos: actualTarget.clone(),
+        startRot: prevRot,
+        targetRot: prevRot,
+        duration: moveZero ? 0 : MOVE_TIME / speedFactor,
+      })
+      prevPos.copy(actualTarget)
 
-      // mine subtick
+      // Mine subtick
       if (move.mode === "mine") {
         subtickMoves.current.push({
           type: "mine",
-          startPos: lastPos.clone(),
-          targetPos: lastPos.clone(),
-          startRot: lastRot,
-          targetRot: lastRot,
+          startPos: prevPos.clone(),
+          targetPos: prevPos.clone(),
+          startRot: prevRot,
+          targetRot: prevRot,
           duration: MINE_TIME / speedFactor,
         })
       }
@@ -137,6 +142,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
     elapsed.current = 0
 
+    // Initialize rover at first subtick start
     if (subtickMoves.current.length > 0) {
       const first = subtickMoves.current[0]
       group.current.position.copy(first.startPos)
@@ -145,7 +151,10 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       rotationY.current = first.startRot
     }
 
-    tickDuration.current = subtickMoves.current.reduce((sum, s) => sum + s.duration, 0)
+    tickDuration.current = subtickMoves.current.reduce(
+      (sum, s) => sum + s.duration,
+      0
+    )
   }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
   useFrame((_, delta) => {
@@ -157,8 +166,16 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     let time = elapsed.current
 
     for (const step of subtickMoves.current) {
-      if (time <= step.duration) {
-        const progress = step.duration === 0 ? 1 : time / step.duration
+      // Skip zero-length steps immediately
+      const stepDuration =
+        step.type === "move" && step.startPos.equals(step.targetPos)
+          ? 0
+          : step.type === "rotate" && step.startRot === step.targetRot
+          ? 0
+          : step.duration
+
+      if (time <= stepDuration) {
+        const progress = stepDuration === 0 ? 1 : Math.min(time / stepDuration, 1)
 
         if (step.type === "rotate") {
           const deltaRot = shortestAngleDelta(step.startRot, step.targetRot)
@@ -178,22 +195,29 @@ export function MarsRover({ ...props }: MarsRoverProps) {
 
         break
       } else {
+        // snap to step target
         if (step.type === "rotate") {
           group.current.rotation.y = step.targetRot
           rotationY.current = step.targetRot
         }
-
-        if (step.type === "move") {
+        if (step.type === "move" || step.type === "mine") {
           group.current.position.copy(step.targetPos)
           position.current.copy(step.targetPos)
         }
 
-        time -= step.duration
+        time -= stepDuration
       }
     }
 
+    // Handle tick boundaries safely
     if (elapsed.current >= tickDuration.current && cycle.player.playing === "playing") {
-      cycle.setTick(cycle.currentTick + cycle.direction)
+      const nextTick = cycle.currentTick + cycle.direction
+      if (nextTick >= 0 && nextTick < timeline.deltas.length) {
+        cycle.setTick(nextTick)
+      } else {
+        // clamp elapsed so rover stays at last position
+        elapsed.current = tickDuration.current
+      }
     }
   })
 
