@@ -143,7 +143,7 @@ export const Renderer = () => {
       if (keys.current.s) dy += actualSpeed * deltaTime;
     
       if (dx === 0 && dy === 0) return prev;
-      console.log(prev.y + dy);
+
       return { x: clampNum((prev.x + dx), 0, 50 * GAP), y: clampNum((prev.y + dy), 92, 210) };
     });
 

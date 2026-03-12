@@ -96,7 +96,6 @@ export function StaticRover(props: ThreeElements['group']) {
 
   useEffect(() => {
     if (!actions) return
-    console.log('Available animations:', Object.keys(actions))
     const idle = actions['idle']
     idle?.reset().fadeIn(0.3).play()
     return () => {

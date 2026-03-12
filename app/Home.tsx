@@ -42,7 +42,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   const setTickTo = useCallback((t: number) => {
     try {
       const actualTick = Math.max(0, Math.min(deltas.length - 1, t));
-      console.log(actualTick)
       if (actualTick == cycle.currentTick) return;
       if (!(deltas[actualTick] ?? undefined)) throw Error;
       setCycle(prev => {
@@ -62,20 +61,14 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   }, [deltas, map, cycle.currentTick]);
 
   const recalculateSnapshots = useCallback((fromTick: number, toTick: number) => {
-    console.log("from: ", fromTick, "to: ", toTick)
     const cTick = fromTick;
-    console.log("--------------------")
-    console.log(`from: ${fromTick}, to: ${toTick}`)
     const direction = toTick < fromTick ? -1 : 1
     const deltasToExecute =
       toTick < fromTick
         ? deltas.filter((d, i) => {
-          console.log(i, fromTick, i <= fromTick, toTick, i > toTick)
           return i <= fromTick && i > toTick;
         })
         : deltas.filter((_, i) => i > fromTick && i <= toTick)
-
-    console.log(deltasToExecute)
 
     let position: Position = { ...rover!.position }
     let inventory: Item[] = [...rover!.inventory]
@@ -121,7 +114,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         console.log("time: ", end.getTime() - start.getTime())
         const path = event.data.result;
         setPath(path.path);
-        console.log("deltas: ", path.deltas)
+        // console.log("deltas: ", path.deltas)
         console.log("path:", path.path)
         setDeltas(path.deltas);
       }

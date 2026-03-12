@@ -38,7 +38,7 @@ export default function MapPanel(
         if (!file) return;
         const text = await file.text();
         const loadedMap: Tile[][] = await readMap(text, true);
-        console.log(loadedMap);
+
         if(!isValidMap(loadedMap)) {
             setError("Helytelen tartalmú fájl.");
             return;
