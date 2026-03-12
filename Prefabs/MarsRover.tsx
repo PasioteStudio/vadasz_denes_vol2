@@ -62,100 +62,117 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const shortestAngleDelta = (from: number, to: number) =>
     normalizeAngle(to - from)
 
-  useEffect(() => {
-    if (!timeline.deltas.length) return
+useEffect(() => {
+  if (!timeline.deltas.length) return
 
-    // clamp currentTick safely
-    const tickIndex = Math.min(
-      Math.max(cycle.currentTick, 0),
-      timeline.deltas.length - 1
+  // Clamp currentTick safely
+  const tickIndex = Math.min(
+    Math.max(cycle.currentTick, 0),
+    timeline.deltas.length - 1
+  )
+
+  const currentDelta = timeline.deltas[tickIndex]
+  if (!currentDelta || !currentDelta.moves.length) return
+
+  let moves = [...currentDelta.moves]
+  const speedFactor = Math.abs(cycle.player.speed)
+
+  // Reverse moves if going backward
+  if (cycle.direction === -1) {
+    moves = moves
+      .map((m) => ({ from: m.to, to: m.from, mode: m.mode }))
+      .reverse()
+  }
+
+  subtickMoves.current = []
+
+  // --- SNAP TO TICK START POSITION ONLY ---
+  let tickStartPos: THREE.Vector3
+
+  if (cycle.direction === -1) {
+    const firstMove = currentDelta.moves[0]
+    tickStartPos = new THREE.Vector3(
+      firstMove.to.x * TILE_GAP,
+      0.8,
+      firstMove.to.y * TILE_GAP
+    )
+  } else {
+    const firstMove = currentDelta.moves[0]
+    tickStartPos = new THREE.Vector3(
+      firstMove.from.x * TILE_GAP,
+      0.8,
+      firstMove.from.y * TILE_GAP
+    )
+  }
+
+  // Snap position only
+  group.current.position.copy(tickStartPos)
+  position.current.copy(tickStartPos)
+
+  // --- BUILD SUBTICKS FROM CURRENT ROTATION ---
+  let prevPos = tickStartPos.clone()
+  let prevRot = rotationY.current // use current rotation for smooth lerp
+
+  for (const move of moves) {
+    const actualTarget = new THREE.Vector3(
+      move.to.x * TILE_GAP,
+      0.8,
+      move.to.y * TILE_GAP
     )
 
-    const currentDelta = timeline.deltas[tickIndex]
-    if (!currentDelta || !currentDelta.moves.length) return
+    const moveDir = new THREE.Vector3().subVectors(actualTarget, prevPos)
+    const rotatedDir = cycle.direction === -1 ? moveDir.clone().negate() : moveDir
+    const targetRot =
+      rotatedDir.length() > 0
+        ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
+        : prevRot
 
-    let moves = [...currentDelta.moves]
-    const speedFactor = Math.abs(cycle.player.speed)
+    // Rotate subtick
+    const rotZero = prevRot === targetRot
+    subtickMoves.current.push({
+      type: "rotate",
+      startPos: prevPos.clone(),
+      targetPos: prevPos.clone(),
+      startRot: prevRot,
+      targetRot,
+      duration: rotZero ? 0 : ROTATE_TIME / speedFactor,
+    })
+    prevRot = targetRot
 
-    if (cycle.direction === -1) {
-      moves = moves
-        .map((m) => ({ from: m.to, to: m.from, mode: m.mode }))
-        .reverse()
-    }
+    // Move subtick
+    const moveZero = prevPos.equals(actualTarget)
+    subtickMoves.current.push({
+      type: "move",
+      startPos: prevPos.clone(),
+      targetPos: actualTarget.clone(),
+      startRot: prevRot,
+      targetRot: prevRot,
+      duration: moveZero ? 0 : MOVE_TIME / speedFactor,
+    })
+    prevPos.copy(actualTarget)
 
-    subtickMoves.current = []
-
-    // Start from current rover position/rotation to avoid freezing
-    let prevPos = group.current.position.clone()
-    let prevRot = group.current.rotation.y
-
-    for (const move of moves) {
-      const actualTarget = new THREE.Vector3(
-        move.to.x * TILE_GAP,
-        0.8,
-        move.to.y * TILE_GAP
-      )
-
-      const dir = new THREE.Vector3().subVectors(actualTarget, prevPos)
-      const rotatedDir = cycle.direction === -1 ? dir.clone().negate() : dir
-      const targetRot =
-        rotatedDir.length() > 0
-          ? Math.atan2(rotatedDir.x, rotatedDir.z) + MODEL_ROTATION_OFFSET
-          : prevRot
-
-      // Rotate subtick
-      const rotZero = prevRot === targetRot
+    // Mine subtick
+    if (move.mode === "mine") {
       subtickMoves.current.push({
-        type: "rotate",
+        type: "mine",
         startPos: prevPos.clone(),
         targetPos: prevPos.clone(),
         startRot: prevRot,
-        targetRot,
-        duration: rotZero ? 0 : ROTATE_TIME / speedFactor,
-      })
-      prevRot = targetRot
-
-      // Move subtick
-      const moveZero = prevPos.equals(actualTarget)
-      subtickMoves.current.push({
-        type: "move",
-        startPos: prevPos.clone(),
-        targetPos: actualTarget.clone(),
-        startRot: prevRot,
         targetRot: prevRot,
-        duration: moveZero ? 0 : MOVE_TIME / speedFactor,
+        duration: MINE_TIME / speedFactor,
       })
-      prevPos.copy(actualTarget)
-
-      // Mine subtick
-      if (move.mode === "mine") {
-        subtickMoves.current.push({
-          type: "mine",
-          startPos: prevPos.clone(),
-          targetPos: prevPos.clone(),
-          startRot: prevRot,
-          targetRot: prevRot,
-          duration: MINE_TIME / speedFactor,
-        })
-      }
     }
+  }
 
-    elapsed.current = 0
+  // Reset elapsed
+  elapsed.current = 0
 
-    // Initialize rover at first subtick start
-    if (subtickMoves.current.length > 0) {
-      const first = subtickMoves.current[0]
-      group.current.position.copy(first.startPos)
-      group.current.rotation.y = first.startRot
-      position.current.copy(first.startPos)
-      rotationY.current = first.startRot
-    }
-
-    tickDuration.current = subtickMoves.current.reduce(
-      (sum, s) => sum + s.duration,
-      0
-    )
-  }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
+  // Calculate total tick duration
+  tickDuration.current = subtickMoves.current.reduce(
+    (sum, s) => sum + s.duration,
+    0
+  )
+}, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
   useFrame((_, delta) => {
     if (!subtickMoves.current.length) return
