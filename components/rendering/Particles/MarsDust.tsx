@@ -45,7 +45,7 @@ export class Dust {
     scene.add(this.points)
   }
 
-// In your Dust class update method:
+
 update(delta: number) {
   const pos = this.geometry.attributes.position.array as Float32Array
   const d = delta * 100

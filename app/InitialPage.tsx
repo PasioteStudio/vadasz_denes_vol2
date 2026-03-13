@@ -59,7 +59,8 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
             <StaticRover rotation={[0.1, 3.4, -0.1]} position={[-3.3, -0.1, -20]} scale={0.8} />
 
             <Terrain receiveShadow />
-            <ParticleManager></ParticleManager>
+            {/* TODO: Gálati, majd ha a pálya megoldhatatlan, akkor ez legyen true */}
+            <ParticleManager blowUp={false} />
         </Canvas>
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden ">
             <div className="w-1/2 h-full flex flex-col items-center py-[10vh] font-bold relative">
