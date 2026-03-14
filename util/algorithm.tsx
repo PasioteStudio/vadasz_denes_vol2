@@ -1,8 +1,8 @@
 import { isOre, vectorValues, Tile, WeightPoint, energy_moving } from "@/lib/constants";
 import { Graph, astar } from "@/lib/astar"
-import { getNextStep, isDay, modified_astarpath } from "@/util/path"
+import { getHasTimeToReturn, getNextStep, isDay, modified_astarpath } from "@/util/path"
 import { Position } from "@/types/RoverContextTypes";
-import { tileToString } from "./tile";
+import { getLastPosition, tileToString } from "./tile";
 import { Delta, InventoryChange } from "@/types/MapTimelineContextTypes";
 import { solve } from "../lib/salesman"
 import { findNearestOre } from "./ore";
@@ -55,22 +55,12 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     let power = 100
 
     // LOCAL HELPERS
-    function getlast<T>(arr:T[]): T {
-        return arr[arr.length-1]
-    }
-    const getLastPosition = (arr: Action[]) => {
-        const last = getlast(arr)
-        return getlast(last.positions)
-    }
-    const getNearestOreDistance = () => {
-        return Math.ceil(findNearestOre(getLastPosition(final_path).x, getLastPosition(final_path).y, update_able_map).distance)
-    }
-    const getHasTimeToReturn = ()=> {
-        return final_path.length + (final_path.length < 1 ? 0 : getNearestOreDistance()) + go_home.length < iterations
-    }
+    
+    
+    
 
     // refactored while loop - pápus
-    for(let current_stack = 0; current_stack < max_stack && getHasTimeToReturn(); current_stack++){
+    for(let current_stack = 0; current_stack < max_stack && getHasTimeToReturn(final_path,go_home,iterations,update_able_map); current_stack++){
         console.log("iter")
         temp_final_path = final_path
         temp_go_home = go_home

@@ -2,6 +2,7 @@ import { Position } from "@/types/RoverContextTypes";
 import { Tile, VectorField } from "../lib/constants";
 import { octantToStep } from "./path";
 import { WeightPoint } from "../lib/constants";
+import { Action } from "./algorithm";
 
 /**
  * Átalakítja a `string` karakterláncot `enum` felsorolássá
@@ -99,4 +100,12 @@ export function calculateTile(weightPoints:WeightPoint[],x:number,y:number) : Ve
       relative_y: rel.dy,
     }
   };
+}
+
+export function getlast<T>(arr:T[]): T {
+  return arr[arr.length-1]
+}
+export const getLastPosition = (arr: Action[]) => {
+    const last = getlast(arr)
+    return getlast(last.positions)
 }

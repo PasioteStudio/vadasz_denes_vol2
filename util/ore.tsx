@@ -1,5 +1,7 @@
 import { Position } from "@/types/RoverContextTypes";
 import { WeightPoint } from "../lib/constants";
+import { getLastPosition } from "./tile";
+import { Action } from "./algorithm";
 
 /**
  * Megtalálja a legközelebbi ércet az adott pontból euklideszi távolságot használva
@@ -24,4 +26,8 @@ export function findNearestOre(
     }
   });
   return {...nearest,distance:(minDistance === Infinity ? 0 : minDistance)};
+}
+
+export const getNearestOreDistance = (final_path:Action[],update_able_map:WeightPoint[]) => {
+  return Math.ceil(findNearestOre(getLastPosition(final_path).x, getLastPosition(final_path).y, update_able_map).distance)
 }

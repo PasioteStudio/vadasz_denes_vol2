@@ -1,7 +1,7 @@
 import { astar } from "@/lib/astar"
 import { Position } from "@/types/RoverContextTypes";
 import { energy_moving, VectorField, WeightPoint } from "../lib/constants"
-import { findNearestOre } from "./ore";
+import { findNearestOre, getNearestOreDistance } from "./ore";
 import { DefaultCycleContextObject } from "@/lib/contexts";
 import { Action } from "./algorithm";
 
@@ -172,4 +172,9 @@ export function modified_astarpath(power:number,time:number,path:Position[],curr
         if(current_power > 100)current_power = 100
     }
     return {power:current_power, modified_path}
+}
+
+
+export const getHasTimeToReturn = (final_path:Action[],go_home:Action[],iterations:number,update_able_map:WeightPoint[])=> {
+  return final_path.length + (final_path.length < 1 ? 0 : getNearestOreDistance(final_path,update_able_map)) + go_home.length < iterations
 }
