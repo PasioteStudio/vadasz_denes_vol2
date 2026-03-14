@@ -13,6 +13,8 @@ export default function CurrentAction() {
     const currentAction = moves[moves.length - 1];
     const pos = rover.position;
 
+    const consumption = deltas[currentTick].energy;
+
     const actionMap: Record<string, string> = {
         move: "mozgás",
         mine: "bányászás",
@@ -22,7 +24,6 @@ export default function CurrentAction() {
     return (
         <div
             className={`
-        fixed top-1/4 right-2
         w-max p-2
         bg-[#1e1e2f]/90 border border-[#ff4500]
         rounded-lg shadow-lg
@@ -34,7 +35,7 @@ export default function CurrentAction() {
             <p className="text-sm w-max font-semibold my-0">Jelenleg:</p>
             <p className="text-sm w-max mb-3 my-0">{actionMap[currentAction.mode] ?? currentAction.mode}</p>
             <p className="text-xs w-max">Cél Pozíció: {pos.x}, {pos.y}</p>
-            <p className="text-xs w-max">fogyasztás: TODO</p>
+            <p className="text-xs w-max">Energia változás: {consumption > 0 ? "+"+consumption : consumption}</p>
         </div>
     );
 }
