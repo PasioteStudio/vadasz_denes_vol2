@@ -71,20 +71,21 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
 
     // refactored while loop - pápus
     for(let current_stack = 0; current_stack < max_stack && getHasTimeToReturn(); current_stack++){
+        console.log("iter")
         temp_final_path = final_path
         temp_go_home = go_home
 
         //súllyal vezérelt út
         let { path } = estimatePath(obstacleGraph, update_able_map, 
-            final_path.length < 1 ? start : getlast(final_path).positions[final_path[final_path.length - 1].positions.length - 1], 
-            endNode, iterations - final_path.length,power,withWeight)
+            final_path.length < 1 ? start : getLastPosition(final_path), 
+            endNode, iterations - final_path.length, power, withWeight)
         path = [...final_path, ...path]
 
         //nézzük meg, hogy a kiszámolt út ugyanannyi ércet gyűjtött-e be, mint az előző számolásnál
         const current_ores = path.filter(i => i.action == "mine")
         const prev_ores = weight_based_path.filter(i => i.action == "mine")
         
-        //nézzük meg, hogy ugyanannyi-e a két réc halmaz, és hogy ugyanaz-e, ha igen, akkor ne számoljunk tovább
+        //nézzük meg, hogy ugyanannyi-e a két érc halmaz, és hogy ugyanaz-e, ha igen, akkor ne számoljunk tovább
         if(weight_based_path.length > 0)weight_based_path[0].action = "move2"
         if (current_ores.length == prev_ores.length && final_path.length > 0 && final_path[0].action != "move2"){
             break
@@ -93,7 +94,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         weight_based_path = path
         
         //salesman probléma megoldásának próbálkozása
-        const { ordered_path } = salesmanSolver(current_ores.map(i => i.positions[0]),obstacleGraph, start,time_complexity)
+        const { ordered_path } = salesmanSolver(current_ores.map(i => i.positions[0]), obstacleGraph, start, time_complexity)
         //Ha jobb a kiszámolt út, akkor állítsuk be
         if(ordered_path.length < path.length){
             final_path = ordered_path
@@ -105,16 +106,17 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         }else{
             final_path = path
         }
-        const tile: Position = getlast(ordered_path).positions[getlast(ordered_path).positions.length - 1]
+        const tile: Position = getLastPosition(final_path);
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
-        go_home = modified_astarpath(power,ordered_path.length,astarpath,tile).modified_path
+        go_home = modified_astarpath(power, ordered_path.length, astarpath, tile).modified_path
     }
     //ha az algoritmus lefutott több, mint egyszer, és az utolsó nem volt megfelelő, akkor cseréljük ki
-    if (temp_final_path.length != 0 && final_path.length + go_home.length > iterations) {
+    const cantGoHome = final_path.length + go_home.length > iterations;
+    if (temp_final_path.length != 0 && cantGoHome) {
         final_path = temp_final_path
         go_home = temp_go_home
-    } else if (temp_final_path.length == 0 && final_path.length + go_home.length > iterations) {
+    } else if (temp_final_path.length == 0 && cantGoHome) {
         final_path = weight_based_path
     }
     final_path = [...final_path, ...go_home]
