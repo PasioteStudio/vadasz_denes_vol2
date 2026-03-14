@@ -123,22 +123,25 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
 
     //állítsuk be a megtett utat
     for (let i = 0; i < final_path.length; i++) {
-        const { x, y } = final_path[i].positions[final_path[i].positions.length - 1];
+        const current = final_path[i];
+        const { x, y } = current.positions[current.positions.length - 1];
         deltas.push({
-            energy: -(final_path[i].action == "mine" ?
-                2 : (final_path[i].action == "wait" ? 
-                    1 : energy_moving(final_path[i].positions.length))) + (isDay(i) ? 10 : 0),
-            inventoryChanges: (final_path[i].action == "mine" ? [{
+            energy: -(current.action == "mine" ?
+                2 : (current.action == "wait" ? 
+                    1 : energy_moving(current.positions.length))) + (isDay(i) ? 10 : 0),
+            inventoryChanges: (current.action == "mine" ? [{
                 amount: 1,
                 mode: "add",
                 ore: map[y][x],
             } as InventoryChange] : []),
-            logsAdded: final_path[i].action == "mine" ? [{ message: `+1 ${tileToString(map[y][x])}` }] : final_path[i].positions.map(pos=>{return {message:`Mozgás ide: ${pos.x}, ${pos.y}`}}),
-            moves: final_path[i].positions.map((pos,id)=>{return {
-                from: id == 0 && i == 0 ? start : (id == 0 ? final_path[i - 1].positions[final_path[i - 1].positions.length - 1] : final_path[i].positions[id-1]),
+            logsAdded: current.action == "mine" ? [
+                { message: `+1 ${tileToString(map[y][x])}` }
+            ] : current.positions.map( pos => { return { message: `Mozgás ide: ${pos.x}, ${pos.y}` } } ),
+            moves: current.positions.map((pos,id) => { return {
+                from: id == 0 && i == 0 ? start : (id == 0 ? final_path[i - 1].positions[final_path[i - 1].positions.length - 1] : current.positions[id-1]),
                 to: pos,
-                mode: final_path[i].action == "move2" ? "move" : final_path[i].action as ("move" | "mine"),
-                ore: (final_path[i].action == "mine" ? map[y][x] : undefined)
+                mode: current.action == "move2" ? "move" : current.action as ("move" | "mine"),
+                ore: (current.action == "mine" ? map[y][x] : undefined)
             }})
         })
     }
