@@ -60,10 +60,10 @@ export function getNextStep(
     return {
       dx: nextNode.y - fromX,
       dy: nextNode.x - fromY,
-      entire_path : entire ? path.map(i=>{return {x:i.y,y:i.x}}) : undefined
+      entire_path : entire ? path : undefined //WARNING: ez az út x és y koordinátája fel van cserélve!
     };
   }
-  return { dx: 0, dy: 0 }; // Nincs út oda
+  return { dx: 0, dy: 0, entire_path:entire ? [] : undefined}; // Nincs út oda
 }
 /**
  * Be leszünk-e ragadva?

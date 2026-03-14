@@ -51,17 +51,9 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     let temp_final_path: Action[] = [];
     let temp_go_home: Action[] = [];
     let weight_based_path: Action[] = []
-    let current_stack = 0
     let power = 100
 
-    // LOCAL HELPERS
-    
-    
-    
-
-    // refactored while loop - pápus
     for(let current_stack = 0; current_stack < max_stack && getHasTimeToReturn(final_path,go_home,iterations,update_able_map); current_stack++){
-        console.log("iter")
         temp_final_path = final_path
         temp_go_home = go_home
 
@@ -179,13 +171,13 @@ function salesmanSolver(
     
     for (let i = 0; i < ordered_points.length; i++) {
         const target = ordered_points[i]
-        const steps = getNextStep(current.x, current.y, target.x, target.y,obstacleGraph,true)
+        const steps = getNextStep(current.x, current.y, target.x, target.y,obstacleGraph,true);
         const astar_path = modified_astarpath(power,ordered_path.length,steps.entire_path!,current)
         power = astar_path.power
         astar_path.modified_path.forEach(i=>{
             ordered_path.push(i)
         })
-        current = steps.entire_path![steps.entire_path!.length - 1]
+        current = steps.entire_path!.length > 0 ? steps.entire_path![steps.entire_path!.length - 1] : current
         while(power < 2){
             ordered_path.push({action: "wait", positions: [current] })
             if(power>0)power-=1
