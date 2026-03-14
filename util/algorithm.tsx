@@ -54,14 +54,29 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
     let current_stack = 0
     let power = 100
 
-    while (final_path.length + (final_path.length < 1 ? 0 : Math.ceil(findNearestOre(final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1].x, final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1].y, update_able_map).distance)) + go_home.length < iterations && current_stack < max_stack) {
-        current_stack++
+    // LOCAL HELPERS
+    function getlast<T>(arr:T[]): T {
+        return arr[arr.length-1]
+    }
+    const getLastPosition = (arr: Action[]) => {
+        const last = getlast(arr)
+        return getlast(last.positions)
+    }
+    const getNearestOreDistance = () => {
+        return Math.ceil(findNearestOre(getLastPosition(final_path).x, getLastPosition(final_path).y, update_able_map).distance)
+    }
+    const getHasTimeToReturn = ()=> {
+        return final_path.length + (final_path.length < 1 ? 0 : getNearestOreDistance()) + go_home.length < iterations
+    }
+
+    // refactored while loop - pápus
+    for(let current_stack = 0; current_stack < max_stack && getHasTimeToReturn(); current_stack++){
         temp_final_path = final_path
         temp_go_home = go_home
 
         //súllyal vezérelt út
         let { path } = estimatePath(obstacleGraph, update_able_map, 
-            final_path.length < 1 ? start : final_path[final_path.length - 1].positions[final_path[final_path.length - 1].positions.length - 1], 
+            final_path.length < 1 ? start : getlast(final_path).positions[final_path[final_path.length - 1].positions.length - 1], 
             endNode, iterations - final_path.length,power,withWeight)
         path = [...final_path, ...path]
 
@@ -90,7 +105,7 @@ export function makePath(iterations: number, map: Tile[][], time_complexity: Tim
         }else{
             final_path = path
         }
-        const tile: Position = ordered_path[ordered_path.length - 1].positions[ordered_path[ordered_path.length - 1].positions.length - 1]
+        const tile: Position = getlast(ordered_path).positions[getlast(ordered_path).positions.length - 1]
         const startNode = obstacleGraph.grid[tile.y][tile.x];
         const astarpath = astar.search(obstacleGraph, startNode, endNode);
         go_home = modified_astarpath(power,ordered_path.length,astarpath,tile).modified_path
