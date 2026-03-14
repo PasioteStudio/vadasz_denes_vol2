@@ -76,7 +76,7 @@ export default function DayNightCycleDisplayer() {
 
     return (
         <div
-            className="fixed top-0 right-0 aspect-square h-2/12 flex items-center justify-center"
+            className="fixed top-0 right-0 aspect-square h-5/24 flex items-center justify-center"
             style={{
                 opacity: resting ? restingOpacity / 100 : 1
             }}
