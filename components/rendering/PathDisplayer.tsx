@@ -1,62 +1,58 @@
 import { Line } from "@react-three/drei";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { TILE_GAP } from "./TileRenderer";
 import { useTimeline } from "@/lib/contexts";
+import { useCycle } from "@/lib/contexts";
+import { Position } from "@/types/RoverContextTypes";
 
 export const PathDisplayer = () => {
-  const { path, rover } = useTimeline();
+  const { path } = useTimeline();
+  const { currentTick } = useCycle();
 
-  const [roverIndex, setRoverIndex] = useState(0);
+  const { completedPoints, remainingPoints } = useMemo(() => {
+  if (!Array.isArray(path) || path.length === 0) {
+    return { completedPoints: [], remainingPoints: [] };
+  }
 
-  const flatPath = useMemo(() => {
-    if (!Array.isArray(path)) return [];
-    const height = 0.3;
+  const height = 0.3;
 
-    return path.flatMap(segment =>
-      segment.map(
-        p => [p.x * TILE_GAP, height, p.y * TILE_GAP] as [number, number, number]
-      )
-    );
-  }, [path]);
+  const completed: Position[] = [];
+  const remaining: Position[] = [];
 
-  useEffect(() => {
-    if (!flatPath.length) return;
+  for (let i = 0; i < path.length; i++) {
+    const current = path[i];
 
-    const roverX = rover.position.x * TILE_GAP;
-    const roverZ = rover.position.y * TILE_GAP;
-
-    const dist = (p: [number, number, number]) =>
-      (p[0] - roverX) ** 2 + (p[2] - roverZ) ** 2;
-
-    setRoverIndex(prev => {
-      let best = prev;
-      let bestDist = dist(flatPath[prev]);
-
-      const start = Math.max(0, prev - 2);
-      const end = Math.min(flatPath.length - 1, prev + 2);
-
-      for (let i = start; i <= end; i++) {
-        const d = dist(flatPath[i]);
-        if (d < bestDist) {
-          bestDist = d;
-          best = i;
-        }
+    for (let j = 0; j < current.length; j++) {
+      if (i < currentTick) {
+        completed.push(current[j]);
+      } else {
+        remaining.push(current[j]);
       }
+    }
+  }
 
-      return best;
-    });
-  }, [rover.position, flatPath]);
+  // ensure lines connect
+  if (completed.length > 0 && remaining.length > 0) {
+    remaining.unshift(completed[completed.length - 1]);
+  }
 
-  const completedpoints = flatPath.slice(0, roverIndex + 1);
-  const rest = flatPath.slice(roverIndex);
+  return {
+    completedPoints: completed.map(
+      p => [p.x * TILE_GAP, height, p.y * TILE_GAP] as [number, number, number]
+    ),
+    remainingPoints: remaining.map(
+      p => [p.x * TILE_GAP, height, p.y * TILE_GAP] as [number, number, number]
+    )
+  };
+}, [path, currentTick]);
 
   if (!path || path.length < 2) return null;
 
   return (
     <>
-      {completedpoints.length > 1 && (
+      {completedPoints.length > 1 && (
         <Line
-          points={completedpoints}
+          points={completedPoints}
           color="orange"
           lineWidth={3}
           opacity={0.8}
@@ -64,9 +60,9 @@ export const PathDisplayer = () => {
         />
       )}
 
-      {rest.length > 1 && (
+      {remainingPoints.length > 1 && (
         <Line
-          points={rest}
+          points={remainingPoints}
           color="blue"
           lineWidth={3}
           opacity={0.5}
