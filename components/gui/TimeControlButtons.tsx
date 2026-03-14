@@ -40,7 +40,7 @@ export default function TimeControlButtons() {
 
   return (
     <div
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#1e1e2f]/80 border-2 border-[#ff4500] rounded-lg p-3 shadow-lg flex flex-col items-center justify-center"
+      className="fixed bottom-2 left-1/2 -translate-x-1/2 bg-[#1e1e2f]/80 border-2 border-[#ff4500] rounded-lg p-3 shadow-lg flex flex-col items-center justify-center"
       style={{
         opacity: resting ? restingOpacity / 100 : 1,
         backdropFilter: "blur(6px)",
