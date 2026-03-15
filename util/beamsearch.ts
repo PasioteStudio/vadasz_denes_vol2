@@ -57,7 +57,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
             const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
 
-            if (!canReach(returnHome.length, item.energy, step+1, moves-1)) {
+            if (!canReach(returnHome.length, item.energy, step+1, moves-2)) {
                 continue;
             }
 
@@ -85,7 +85,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                 const position = smoves[smoves.length - 1].to
                 const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
                 // if we returned to start (cycle complete)
-                if (canReach(returnHome.length, newItem.energy, step+1, moves-1)) {
+                if (canReach(returnHome.length, newItem.energy, step+1, moves-2)) {
                     completed.push(newItem);
                     candidates.push(newItem);
                 }
