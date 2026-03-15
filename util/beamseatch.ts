@@ -29,7 +29,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 70; // this will somehow have to be improved
+    const beamWidth = 2000; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = new Graph(map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1)), { diagonal: true });
@@ -83,8 +83,8 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
 
     // get the best beam path
-    const winner = completed.sort((a, b) => a.score - b.score)[0];
-    console.log(winner)
+    const winner = completed.sort((a, b) => b.score - a.score)[0];
+    console.log(winner.score, winner)
     const path = winner.sequence.map(ms => ms.map(m => m.to));
     const deltas = generateDeltas(winner.sequence, map);
 
@@ -116,8 +116,9 @@ const expand = (item: BeamItem, grid: never[][], map: Tile[][]): Expansion[] => 
         possibleActions.push(a);
     }
     if (possibleActions.length == 0) possibleActions.push(action.standby)
+        
 
-    console.log(possibleActions)
+    
 
     //for each possibility, create the expansion
     const expansions: Expansion[] = [];
@@ -147,17 +148,19 @@ const expand = (item: BeamItem, grid: never[][], map: Tile[][]): Expansion[] => 
                 const newPos: Position = { x: currentPos.x + directions[i][0], y: currentPos.y + directions[i][1] }
                 if (grid[newPos.y][newPos.x] == 0) continue; // barrier
                 if (newPos.x == lastMove.from.x && newPos.y == lastMove.from.y) continue;
-                expansions.push({
+                const record = {
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: isOre(map[newPos.y][newPos.x]) ? 1 : 0, // TODO switch to modified map!
+                    dscore: isOre(map[newPos.y][newPos.x]) ? 2 : 1, // TODO switch to modified map!
                     steps: [{ from: lastMove.to, to: newPos, mode: "move" }]
-                })
+                }
+                expansions.push(record as Expansion)
+                // console.log(record);
             }
+            continue;
         }
         //move2
         //move3
     }
-
     return expansions;
 }
 
