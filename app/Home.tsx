@@ -64,7 +64,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   }, [deltas, map, cycle.currentTick]);
 
   const recalculateSnapshots = useCallback((fromTick: number, toTick: number) => {
-    const cTick = fromTick;
     const direction = toTick < fromTick ? -1 : 1
     const deltasToExecute =
       toTick < fromTick
@@ -109,6 +108,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     const end = Date.now();
     setDeltas(solve.deltas);
     setPath(solve.path);
+    console.log("path:", solve.path)
+    console.log("deltas:", solve.deltas)
     console.log("time: " + (end - start))
     setIsLoading(false)
 

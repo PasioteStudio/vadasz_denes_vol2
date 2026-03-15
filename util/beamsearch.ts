@@ -434,7 +434,7 @@ export function planReturnPath(
         pos: Position
         energy: number
         tick: number
-        path: Move[]
+        path: Move[][]
     };
 
     const queue: Node[] = [{
@@ -453,7 +453,6 @@ export function planReturnPath(
     ];
 
     while (queue.length > 0) {
-
         const node = queue.shift()!;
         const key = `${node.pos.x},${node.pos.y},${node.energy},${node.tick}`;
 
@@ -462,55 +461,65 @@ export function planReturnPath(
 
         // reached base
         if (node.pos.x === endPos.x && node.pos.y === endPos.y) {
-            return node.path;
+            return node.path.flat();
         }
 
-        if (node.tick >= maxTick || node.energy <= 0) continue;
+        if (node.energy <= 0) continue;
 
-        const recharge = node.tick % 48 < 32 ? dayCharge : 0;
+        // try move1, move2, move3
+        for (const move of [1, 2, 3] as MoveDistance[]) {
 
-        // try move1 move2 move3
-        for (const move of [1,2,3] as MoveDistance[]) {
-
-            const moveCost = consumption[move as action];
-
-            if (node.energy < moveCost) continue;
-
-            for (const [dx,dy] of dirs) {
+            for (const [dx, dy] of dirs) {
 
                 let cx = node.pos.x;
                 let cy = node.pos.y;
                 let valid = true;
+                const intermediateMoves: Move[] = [];
 
                 // walk intermediate tiles
                 for (let step = 1; step <= move; step++) {
+                    const nx = cx + dx;
+                    const ny = cy + dy;
 
-                    cx += dx;
-                    cy += dy;
-
-                    if (cx < 0 || cy < 0 || cx >= grid[0].length || cy >= grid.length) {
+                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
                         valid = false;
                         break;
                     }
 
-                    const tile = grid[cy][cx] as GridNode;
-
+                    const tile = grid[ny][nx] as GridNode;
                     if (tile.isWall()) {
                         valid = false;
                         break;
                     }
+
+                    intermediateMoves.push({ from: { x: cx, y: cy }, to: { x: nx, y: ny }, mode: "move" });
+                    cx = nx;
+                    cy = ny;
                 }
 
-                if (!valid) continue;
+                if (!valid || intermediateMoves.length === 0) continue;
+
+                // energy cost based on tiles moved
+                let moveEnergy = 0;
+                if (intermediateMoves.length === 1) moveEnergy = consumption[action.move1];
+                else if (intermediateMoves.length === 2) moveEnergy = consumption[action.move2];
+                else moveEnergy = consumption[action.move3];
+
+                if (node.energy < moveEnergy) continue;
+
+                // recharge for this tick
+                const recharge = node.tick % 48 < 32 ? dayCharge : 0;
+                const nextEnergy = node.energy - moveEnergy + recharge;
+                const nextTick = node.tick + 1;
+
+                // allow reaching exactly maxTick
+                if (nextTick > maxTick) continue;
 
                 queue.push({
                     pos: { x: cx, y: cy },
-                    energy: node.energy - moveCost + recharge,
-                    tick: node.tick + 1,
-                    path: [
-                        ...node.path,
-                        { from: node.pos, to: { x: cx, y: cy }, mode: "move" }
-                    ]
+                    energy: Math.min(nextEnergy, 100),
+                    tick: nextTick,
+                    path: [...node.path, intermediateMoves] // one tick = one array
                 });
             }
         }
