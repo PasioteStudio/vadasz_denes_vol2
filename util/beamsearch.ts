@@ -57,7 +57,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
             const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
 
-            if (!canReach(returnHome.length, item.energy, step+1, moves)) {
+            if (!canReach(returnHome.length, item.energy, step + 1, moves)) {
                 continue;
             }
 
@@ -85,7 +85,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                 const position = smoves[smoves.length - 1].to
                 const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
                 // if we returned to start (cycle complete)
-                if (canReach(returnHome.length, newItem.energy, step+1, moves)) {
+                if (canReach(returnHome.length, newItem.energy, step + 1, moves)) {
                     completed.push(newItem);
                     candidates.push(newItem);
                 }
@@ -103,6 +103,15 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     console.log(winner.score, winner)
     const lastMove = getlast(getlast(winner.sequence)).to;
 
+    const rawPath = astar.search(
+        graph,
+        graph.grid[lastMove.y][lastMove.x],
+        graph.grid[start.y][start.x]
+    );
+    console.log("lastMove:", lastMove);
+    console.log("start:", start);
+    console.log("rawPath nodes:", rawPath.map(n => ({ x: n.x, y: n.y })));
+    
     // Plan the return path
     const returnMoves = planReturnPath(
         graph,
@@ -115,8 +124,8 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
     console.log("return", returnMoves)
     if (returnMoves) {
-        for (const move of returnMoves) {
-            winner.sequence.push([move]); // each move is its own tick
+        for (const tick of returnMoves) {
+            winner.sequence.push(tick); // tick is already Move[]
         }
     } else {
         console.warn("Could not return to start within energy/ticks");
@@ -420,110 +429,94 @@ interface GridNode {
 }
 
 export function planReturnPath(
-    graph: any,
-    startPos: Position,
-    endPos: Position,
-    startEnergy: number,
-    startTick: number,
+    graph: InstanceType<typeof Graph>,
+    currentPos: Position,
+    start: Position,
+    energy: number,
+    currentTick: number,
     maxTick: number
-): Move[] | null {
+): Move[][] {  // <-- return Move[][] not Move[], each inner array is one tick
+    const rawPath = astar.search(
+        graph,
+        graph.grid[currentPos.x][currentPos.y],
+        graph.grid[start.x][start.y]
+    );
 
-    const grid = graph.grid as GridNode[][];
-
-    type Node = {
-        pos: Position
-        energy: number
-        tick: number
-        path: Move[][]
-    };
-
-    const queue: Node[] = [{
-        pos: startPos,
-        energy: startEnergy,
-        tick: startTick,
-        path: []
-    }];
-
-    const visited = new Set<string>();
-
-    const dirs = [
-        [-1,-1],[0,-1],[1,-1],
-        [-1,0],        [1,0],
-        [-1,1],[0,1],[1,1]
-    ];
-
-    while (queue.length > 0) {
-        const node = queue.shift()!;
-        const key = `${node.pos.x},${node.pos.y},${node.energy},${node.tick}`;
-
-        if (visited.has(key)) continue;
-        visited.add(key);
-
-        // reached base
-        if (node.pos.x === endPos.x && node.pos.y === endPos.y) {
-            return node.path.flat();
-        }
-
-        if (node.energy <= 0) continue;
-
-        // try move1, move2, move3
-        for (const move of [1, 2, 3] as MoveDistance[]) {
-
-            for (const [dx, dy] of dirs) {
-
-                let cx = node.pos.x;
-                let cy = node.pos.y;
-                let valid = true;
-                const intermediateMoves: Move[] = [];
-
-                // walk intermediate tiles
-                for (let step = 1; step <= move; step++) {
-                    const nx = cx + dx;
-                    const ny = cy + dy;
-
-                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
-                        valid = false;
-                        break;
-                    }
-
-                    const tile = grid[ny][nx] as GridNode;
-                    if (tile.isWall()) {
-                        valid = false;
-                        break;
-                    }
-
-                    intermediateMoves.push({ from: { x: cx, y: cy }, to: { x: nx, y: ny }, mode: "move" });
-                    cx = nx;
-                    cy = ny;
-                }
-
-                if (!valid || intermediateMoves.length === 0) continue;
-
-                // energy cost based on tiles moved
-                let moveEnergy = 0;
-                if (intermediateMoves.length === 1) moveEnergy = consumption[action.move1];
-                else if (intermediateMoves.length === 2) moveEnergy = consumption[action.move2];
-                else moveEnergy = consumption[action.move3];
-
-                if (node.energy < moveEnergy) continue;
-
-                // recharge for this tick
-                const recharge = node.tick % 48 < 32 ? dayCharge : 0;
-                const nextEnergy = node.energy - moveEnergy + recharge;
-                const nextTick = node.tick + 1;
-
-                // allow reaching exactly maxTick
-                if (nextTick > maxTick) continue;
-
-                queue.push({
-                    pos: { x: cx, y: cy },
-                    energy: Math.min(nextEnergy, 100),
-                    tick: nextTick,
-                    path: [...node.path, intermediateMoves] // one tick = one array
-                });
-            }
-        }
+    if (rawPath.length === 0 && (currentPos.x !== start.x || currentPos.y !== start.y)) {
+        console.warn("No path found to start");
+        return [];
     }
 
-    return null;
+    const posSequence: Position[] = [currentPos, ...rawPath.map(n => ({ x: n.x, y: n.y }))];
+
+    const ticks: Move[][] = [];
+    let e = energy;
+    let tick = currentTick;
+    let posIndex = 0;
+
+    const canMultiStep = (steps: number): boolean => {
+        if (posIndex + steps >= posSequence.length) return false;
+        const dx = posSequence[posIndex + 1].x - posSequence[posIndex].x;
+        const dy = posSequence[posIndex + 1].y - posSequence[posIndex].y;
+        for (let i = 1; i < steps; i++) {
+            const ndx = posSequence[posIndex + i + 1].x - posSequence[posIndex + i].x;
+            const ndy = posSequence[posIndex + i + 1].y - posSequence[posIndex + i].y;
+            if (ndx !== dx || ndy !== dy) return false;
+        }
+        return true;
+    };
+
+    while (posIndex < posSequence.length - 1) {
+        const chargeAmount = tick % 48 < 32 ? dayCharge : 0;
+
+        if (canMultiStep(3) && e >= consumption[action.move3]) {
+            const stepMoves: Move[] = [];
+            for (let i = 0; i < 3; i++) {
+                stepMoves.push({
+                    from: posSequence[posIndex + i],
+                    to: posSequence[posIndex + i + 1],
+                    mode: "move",
+                });
+            }
+            ticks.push(stepMoves); // one tick, 3 moves
+            e = Math.min(e - consumption[action.move3] + chargeAmount, 100);
+            posIndex += 3;
+        } else if (canMultiStep(2) && e >= consumption[action.move2]) {
+            const stepMoves: Move[] = [];
+            for (let i = 0; i < 2; i++) {
+                stepMoves.push({
+                    from: posSequence[posIndex + i],
+                    to: posSequence[posIndex + i + 1],
+                    mode: "move",
+                });
+            }
+            ticks.push(stepMoves); // one tick, 2 moves
+            e = Math.min(e - consumption[action.move2] + chargeAmount, 100);
+            posIndex += 2;
+        } else if (e >= consumption[action.move1]) {
+            ticks.push([{
+                from: posSequence[posIndex],
+                to: posSequence[posIndex + 1],
+                mode: "move",
+            }]);
+            e = Math.min(e - consumption[action.move1] + chargeAmount, 100);
+            posIndex += 1;
+        } else {
+            // wait to recharge
+            ticks.push([{ from: posSequence[posIndex], to: posSequence[posIndex], mode: "wait" }]);
+            e = Math.min(e - consumption[action.standby] + chargeAmount, 100);
+        }
+
+        tick++;
+    }
+
+    // Pad remaining ticks with waits at start
+    while (tick < maxTick) {
+        const chargeAmount = tick % 48 < 32 ? dayCharge : 0;
+        ticks.push([{ from: start, to: start, mode: "wait" }]);
+        e = Math.min(e - consumption[action.standby] + chargeAmount, 100);
+        tick++;
+    }
+
+    return ticks;
 }
