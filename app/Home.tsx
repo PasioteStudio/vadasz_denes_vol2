@@ -82,7 +82,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let newMap = deepCopy(flavoredMap.current);
 
     deltasToExecute.forEach(d => {
-      energy = getEnergyForTick(cTick, deltas);
+      energy = getEnergyForTick(toTick+1, deltas);
       position = processPositionChanges(position, d.moves, direction)
       inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
       logs = processLogChanges(logs, d.logsAdded, direction)
