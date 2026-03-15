@@ -17,10 +17,10 @@ type Expansion = {
     steps: Move[],
     dscore: number,
     denergy: number,
-    changes: {where:Position, to: Tile}[],
+    changes: { where: Position, to: Tile }[],
 }
 
-enum action {standby, mine, move1, move2, move3};
+enum action { standby, mine, move1, move2, move3 };
 const consumption: Record<action, number> = {
     [action.standby]: 1,
     [action.mine]: 2,
@@ -31,15 +31,16 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 200; // this will somehow have to be improved
+    const beamWidth = 30; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
+    const graph = new Graph(moveableGrid, { diagonal: true });
     // start tile
     const start = getStartingPoint(map);
     // beam
     let beam: BeamItem[] = [
-        { score: 0, sequence: [[{ from: start, to: start, mode: "move"}]], energy: 100, map: [...map.map(row => [...row])] },
+        { score: 0, sequence: [[{ from: start, to: start, mode: "move" }]], energy: 100, map: [...map.map(row => [...row])] },
     ]
     // array for beams that have returned
     const completed: BeamItem[] = [];
@@ -51,6 +52,14 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         const candidates: BeamItem[] = [];
 
         for (const item of beam) {
+            const smoves = item.sequence[item.sequence.length - 1];
+            const position = smoves[smoves.length - 1].to
+
+            const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
+
+            if (!canReach(returnHome.length, item.energy, step, moves)) {
+                continue;
+            }
 
             const expansions = expand(item, moveableGrid);
 
@@ -65,22 +74,22 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                     newmap[change.where.y][change.where.x] = change.to;
                 });
 
-                // if we returned to start (cycle complete)
-                if (e.steps[e.steps.length - 1].to.x === start.x && e.steps[e.steps.length - 1].to.y === start.y && newSequence.length > 1) {
-                    completed.push({
-                        sequence: newSequence,
-                        score: newScore,
-                        energy: newEnergy,
-                        map: newmap,
-                    });
-                } else {
-                    candidates.push({
-                        sequence: newSequence,
-                        score: newScore,
-                        energy: newEnergy,
-                        map: newmap,
-                    });
+
+                const newItem = {
+                    sequence: newSequence,
+                    score: newScore,
+                    energy: newEnergy,
+                    map: newmap,
                 }
+                const smoves = newItem.sequence[newItem.sequence.length - 1];
+                const position = smoves[smoves.length - 1].to
+                const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
+                // if we returned to start (cycle complete)
+                if (canReach(returnHome.length, newItem.energy, step, moves)) {
+                    completed.push(newItem);
+                    candidates.push(newItem);
+                } 
+                
             }
         }
 
@@ -91,6 +100,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
     // get the best beam path
     const winner = completed.sort((a, b) => b.score - a.score)[0];
+    console.log(winner.score, winner)
     const path = winner.sequence.map(ms => ms.map(m => m.to));
     const deltas = generateDeltas(winner.sequence, map);
 
@@ -105,7 +115,7 @@ const directions = [
     [-1, 1], [0, 1], [1, 1],
 ]
 
-const expand = (item: BeamItem, grid: (0|1)[][]): Expansion[] => {
+const expand = (item: BeamItem, grid: (0 | 1)[][]): Expansion[] => {
     const currentTick = item.sequence.length - 1;
     const chargeAmount = currentTick % 48 >= 32 ? 0 : dayCharge;
     const actions = Object.values(action).filter(
@@ -122,9 +132,9 @@ const expand = (item: BeamItem, grid: (0|1)[][]): Expansion[] => {
         possibleActions.push(a);
     }
     if (possibleActions.length == 0) possibleActions.push(action.standby)
-        
 
-    
+
+
 
     //for each possibility, create the expansion
     const expansions: Expansion[] = [];
@@ -145,20 +155,23 @@ const expand = (item: BeamItem, grid: (0|1)[][]): Expansion[] => {
                 denergy: chargeAmount - consumption[possibility],
                 dscore: 500,
                 steps: [{ from: lastMove.to, to: lastMove.to, mode: "mine", ore: item.map[lastMove.to.y][lastMove.to.x] }],
-                changes: [{where: {...lastMove.to}, to: Tile.Empty}]
+                changes: [{ where: { ...lastMove.to }, to: Tile.Empty }]
             })
             continue;
         }
         //move1 TODO move2 and move3
         const currentPos: Position = lastMove.to;
         if (possibility == action.move1 || possibility == action.move2 || possibility == action.move3) {
+            const flat = item.sequence.flat();
+            const prev2 = flat[Math.max(0, flat.length - 2)]
             for (let i = 0; i < directions.length; i++) {
                 const newPos: Position = { x: currentPos.x + directions[i][0], y: currentPos.y + directions[i][1] }
                 if (grid[newPos.y][newPos.x] == 0) continue; // barrier
+                if (newPos.x == prev2.to.x && newPos.y == prev2.to.y) continue;
                 if (newPos.x == lastMove.from.x && newPos.y == lastMove.from.y) continue;
                 const record: Expansion = {
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: isOre(item.map[newPos.y][newPos.x]) ? 2 : 1, 
+                    dscore: calculateMoveScore(item.map, newPos),
                     steps: [{ from: lastMove.to, to: newPos, mode: "move" }],
                     changes: [],
                 }
@@ -229,33 +242,54 @@ const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
 }
 
 function canReach(
-  distance: number,
-  energy: number,
-  tick: number,
-  maxTick: number
+    distance: number,
+    energy: number,
+    tick: number,
+    maxTick: number
 ): boolean {
-  // Base cases
-  if (distance <= 0) return true;        // Reached the goal
-  if (tick >= maxTick || energy < 0) return false; // Out of time or energy
+    // Base cases
+    if (distance <= 0) return true;        // Reached the goal
+    if (tick >= maxTick || energy < 0) return false; // Out of time or energy
 
-  // Recharge calculation
-  const recharge = tick % 48 < 32 ? 10 : 0;
+    // Recharge calculation
+    const recharge = tick % 48 < 32 ? 10 : 0;
 
-  // Possible moves: [distance, energyCost]
-  const moves: [number, number][] = [
-    [1, 2],
-    [2, 8],
-    [3, 18],
-  ];
+    // Possible moves: [distance, energyCost]
+    const moves: [number, number][] = [
+        [1, 2],
+        [2, 8],
+        [3, 18],
+    ];
 
-  // Try each possible move
-  for (const [moveDist, moveCost] of moves) {
-    if (energy >= moveCost) {
-      if (canReach(distance - moveDist, energy - moveCost + recharge, tick + 1, maxTick)) {
-        return true;
-      }
+    // Try each possible move
+    for (const [moveDist, moveCost] of moves) {
+        if (energy >= moveCost) {
+            if (canReach(distance - moveDist, energy - moveCost + recharge, tick + 1, maxTick)) {
+                return true;
+            }
+        }
     }
-  }
 
-  return false;
+    return false;
 }
+
+const calculateMoveScore = (map: Tile[][], pos: Position): number => {
+    const ores: Position[] = [];
+    for (let row = 0; row < map.length; row++) {
+        for (let col = 0; col < map[row].length; col++) {
+            const tile = map[row][col];
+            if (!isOre(tile)) continue;
+            ores.push({ x: col, y: row });
+        }
+    }
+
+    let score = 0;
+    for (const ore of ores) {
+        const dx = Math.abs(pos.x - ore.x);
+        const dy = Math.abs(pos.y - ore.y);
+        const dist = Math.max(dx, dy); // Chebyshev distance
+        score += 1 / (dist + 1);      // +1 to avoid division by zero
+    }
+
+    return score;
+};
