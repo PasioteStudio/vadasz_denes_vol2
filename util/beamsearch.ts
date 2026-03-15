@@ -31,7 +31,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 20; // this will somehow have to be improved
+    const beamWidth = 50; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
