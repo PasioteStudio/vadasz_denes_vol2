@@ -408,7 +408,7 @@ const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position
         const base = 1 / (dist + 1);
         score += visitedSet.has(`${ore.x},${ore.y}`) ? base * 0.2 : base;
     }
-    return score;
+    return Math.min(score, 20);
 };
 
 interface GridNode {
