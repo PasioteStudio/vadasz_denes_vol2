@@ -31,10 +31,10 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 20; // this will somehow have to be improved
+    const beamWidth = 200; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
-    const moveableGrid = new Graph(map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1)), { diagonal: true });
+    const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
     // start tile
     const start = getStartingPoint(map);
     // beam
@@ -52,7 +52,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
         for (const item of beam) {
 
-            const expansions = expand(item, moveableGrid.grid);
+            const expansions = expand(item, moveableGrid);
 
             for (const e of expansions) {
 
@@ -105,7 +105,7 @@ const directions = [
     [-1, 1], [0, 1], [1, 1],
 ]
 
-const expand = (item: BeamItem, grid: never[][]): Expansion[] => {
+const expand = (item: BeamItem, grid: (0|1)[][]): Expansion[] => {
     const currentTick = item.sequence.length - 1;
     const chargeAmount = currentTick % 48 >= 32 ? 0 : dayCharge;
     const actions = Object.values(action).filter(
@@ -226,4 +226,36 @@ const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
         }
     }
     return logs;
+}
+
+function canReach(
+  distance: number,
+  energy: number,
+  tick: number,
+  maxTick: number
+): boolean {
+  // Base cases
+  if (distance <= 0) return true;        // Reached the goal
+  if (tick >= maxTick || energy < 0) return false; // Out of time or energy
+
+  // Recharge calculation
+  const recharge = tick % 48 < 32 ? 10 : 0;
+
+  // Possible moves: [distance, energyCost]
+  const moves: [number, number][] = [
+    [1, 2],
+    [2, 8],
+    [3, 18],
+  ];
+
+  // Try each possible move
+  for (const [moveDist, moveCost] of moves) {
+    if (energy >= moveCost) {
+      if (canReach(distance - moveDist, energy - moveCost + recharge, tick + 1, maxTick)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
