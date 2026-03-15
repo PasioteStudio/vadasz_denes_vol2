@@ -12,7 +12,7 @@ import { generateFlavoredMap, getStartingPoint } from "@/util/map";
 import { clamp } from "three/src/math/MathUtils.js";
 import { deepCopy } from "@/util/path";
 import LoadingScreen from "@/components/loading/LoadingScreen";
-import { beamsolve } from "@/util/beamseatch";
+import { beamsolve } from "@/util/beamsearch";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "direction" | "setDirection">>({

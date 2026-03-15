@@ -17,14 +17,14 @@ type Expansion = {
     dscore: number,
     denergy: number,
 }
-enum action { standby, mine, move1 };
-// enum action {standby, mine, move1, move2, move3};
+
+enum action {standby, mine, move1, move2, move3};
 const consumption: Record<action, number> = {
     [action.standby]: 1,
     [action.mine]: 2,
     [action.move1]: 2,
-    // "move2": 8,
-    // "move3": 18,
+    [action.move2]: 8,
+    [action.move3]: 18,
 }
 const dayCharge = +10;
 
@@ -185,8 +185,8 @@ const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
 }
 
 const getActionCost = (moves: Move[]): number => {
-    // if (moves.length == 3) return consumption[action.move3];
-    // if (moves.length == 2) return consumption[action.move2];
+    if (moves.length == 3) return consumption[action.move3];
+    if (moves.length == 2) return consumption[action.move2];
     if (moves[0].mode == "mine") return consumption[action.mine];
     if (moves[0].mode == "wait") return consumption[action.standby];
     return 0;
