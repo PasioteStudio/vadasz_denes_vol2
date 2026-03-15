@@ -36,6 +36,15 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
     const graph = new Graph(moveableGrid, { diagonal: true });
+
+    // Transposed grid for planReturnPath — library uses grid[x][y] in that context
+    const rows = moveableGrid.length;
+    const cols = moveableGrid[0].length;
+    const transposedGrid = Array.from({ length: cols }, (_, x) =>
+        Array.from({ length: rows }, (_, y) => moveableGrid[y][x])
+    );
+    const transposedGraph = new Graph(transposedGrid, { diagonal: true });
+
     // start tile
     const start = getStartingPoint(map);
     // beam
@@ -44,7 +53,6 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     ]
     // array for beams that have returned
     const completed: BeamItem[] = [];
-
 
     //solve
     for (let step = 0; step < moves; step++) {
@@ -74,7 +82,6 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                     newmap[change.where.y][change.where.x] = change.to;
                 });
 
-
                 const newItem = {
                     sequence: newSequence,
                     score: newScore,
@@ -97,24 +104,14 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         beam = candidates.slice(0, beamWidth);
     }
 
-
     // get the best beam path
     const winner = completed.sort((a, b) => b.score - a.score)[0];
     console.log(winner.score, winner)
     const lastMove = getlast(getlast(winner.sequence)).to;
 
-    const rawPath = astar.search(
-        graph,
-        graph.grid[lastMove.y][lastMove.x],
-        graph.grid[start.y][start.x]
-    );
-    console.log("lastMove:", lastMove);
-    console.log("start:", start);
-    console.log("rawPath nodes:", rawPath.map(n => ({ x: n.x, y: n.y })));
-
-    // Plan the return path
+    // Plan the return path using the transposed graph
     const returnMoves = planReturnPath(
-        graph,
+        transposedGraph,
         lastMove,
         start,
         winner.energy,
@@ -444,7 +441,9 @@ export function planReturnPath(
     energy: number,
     currentTick: number,
     maxTick: number
-): Move[][] {  // <-- return Move[][] not Move[], each inner array is one tick
+): Move[][] {
+    // graph is the transposedGraph — library uses grid[x][y]
+    // so we access grid[x][y] and swap node coords back to Position on read
     const rawPath = astar.search(
         graph,
         graph.grid[currentPos.x][currentPos.y],
@@ -456,7 +455,11 @@ export function planReturnPath(
         return [];
     }
 
-    const posSequence: Position[] = [currentPos, ...rawPath.map(n => ({ x: n.x, y: n.y }))];
+    // transposedGrid[x][y], so node.x = our x, node.y = our y — swap back
+    const posSequence: Position[] = [
+    currentPos,
+    ...rawPath.map(n => ({ x: n.x, y: n.y }))  // no swap
+];
 
     const ticks: Move[][] = [];
     let e = energy;
