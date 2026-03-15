@@ -31,7 +31,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 30; // this will somehow have to be improved
+    const beamWidth = 5; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
@@ -311,10 +311,14 @@ const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
 }
 
 const getActionCost = (moves: Move[]): number => {
-    if (moves.length == 3) return consumption[action.move3];
-    if (moves.length == 2) return consumption[action.move2];
-    if (moves[0].mode == "mine") return consumption[action.mine];
-    if (moves[0].mode == "wait") return consumption[action.standby];
+    if (moves.length === 1) {
+        if (moves[0].mode === "wait") return consumption[action.standby];
+        if (moves[0].mode === "mine") return consumption[action.mine];
+        if (moves[0].mode === "move") return consumption[action.move1];
+    }
+    if (moves.length === 2) return consumption[action.move2];
+    if (moves.length === 3) return consumption[action.move3];
+
     return 0;
 }
 
