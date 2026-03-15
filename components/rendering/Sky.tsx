@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 
-export function Sky() {
+
+type SkyType = {
+  isDay:boolean
+}
+
+export function Sky({isDay}: SkyType ) {
   const { scene } = useThree();
 
   React.useEffect(() => {
@@ -10,9 +15,9 @@ export function Sky() {
 
     loader.load("./textures/Sky.png", (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
+      texture.flipY = isDay
 
-
-      const skyGeo = new THREE.SphereGeometry(500, 32, 32);
+      const skyGeo = new THREE.SphereGeometry(200, 32, 32);
 
       const skyMat = new THREE.MeshBasicMaterial({
         map: texture,
@@ -28,4 +33,4 @@ export function Sky() {
   return null;
 }
 
-export default Sky
+export default Sky;

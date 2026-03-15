@@ -7,7 +7,7 @@ import { Canvas } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
-import { PerspectiveCamera } from 'three';
+import { PerspectiveCamera, Vector3 } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
 import Sky from './Sky';
@@ -202,7 +202,7 @@ export const Renderer = () => {
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
          <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
-        <Sky/>
+        <Sky isDay={timeOfDay == "day"}/>
       </Canvas>
 
       {isInventoryOpen && (
