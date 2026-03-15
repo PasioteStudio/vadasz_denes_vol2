@@ -2,6 +2,7 @@ import React from 'react'
 import { useFrame, useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
+import { off } from 'process'
 
 export type ParticleType = {
     offset: [number, number, number]
@@ -76,7 +77,7 @@ update(delta: number) {
     pos[i * 3 + 2] += (Math.random() - 0.1) * 0.5 * d * dirZ
     
 
-    if (pos[i * 3 + 1] > this.offset[1] + 2 || pos[i * 3 + 1] < this.lowerBound) {
+    if (pos[i * 3 + 1] > this.offset[1] + 1 || pos[i * 3 + 1] < this.lowerBound) {
       pos[i * 3] = this.offset[0] + (Math.random() - 0.5) * 2 
       pos[i * 3 + 1] = this.offset[1]
       pos[i * 3 + 2] = this.offset[2] + (Math.random() - 0.5) * 2
@@ -88,14 +89,34 @@ update(delta: number) {
 }
 }
 
-export function RoverDustParticle({ offset, rotation,stepType }: ParticleType) {
-    
-      const { scene } = useThree()
-      const dustRef = useRef<RoverDust | null>(null)
-      
-    useEffect(() => {
-    dustRef.current = new RoverDust(scene, 100, 50, [offset[0], 3, offset[2]], rotation, 0, 2)
+export function RoverDustParticle({ offset, rotation, stepType }: ParticleType) {
+  const { scene } = useThree()
+  const dustRef = useRef<RoverDust | null>(null)
 
+
+  const offsetRef = useRef(offset)
+  const rotationRef = useRef(rotation)
+
+
+  useEffect(() => {
+    offsetRef.current = offset
+    rotationRef.current = rotation
+  })
+
+
+useEffect(() => {
+    const initialOffset = offsetRef.current
+    const initialRotation = rotationRef.current
+    
+    dustRef.current = new RoverDust(
+      scene, 
+      100, 
+      50, 
+      [initialOffset[0], 3, initialOffset[2]], 
+      initialRotation, 
+      0, 
+      2
+    )
 
     return () => {
       if (dustRef.current) {
@@ -103,20 +124,31 @@ export function RoverDustParticle({ offset, rotation,stepType }: ParticleType) {
         dustRef.current.geometry.dispose();
         (dustRef.current.points.material as THREE.Material).dispose()
       }
-
     }
-  }, [ scene])
+  }, [])
 
-    useFrame((_, delta): void => {
+  useFrame((_, delta) => {
     if (dustRef.current) {
-        dustRef.current.offset = offset
-        dustRef.current.rotation = rotation
-        dustRef.current.update(delta)
+      const backOffsetDistance = 2
+      const currentOffset = offsetRef.current
+      const currentRotation = rotationRef.current
+
+      const forwardX = Math.sin(currentRotation + Math.PI / 2)
+      const forwardZ = Math.cos(currentRotation + Math.PI / 2)
+
+      const dustOffset: [number, number, number] = [
+        currentOffset[0] - forwardX * backOffsetDistance,
+        0.3,
+        currentOffset[2] - forwardZ * backOffsetDistance,
+      ]
+
+      dustRef.current.offset = dustOffset
+      dustRef.current.rotation = currentRotation
+      dustRef.current.update(delta)
     }
-    })
+  })
 
   return null
-
 }
 
 export default RoverDustParticle

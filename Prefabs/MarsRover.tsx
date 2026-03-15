@@ -274,7 +274,7 @@ useEffect(() => {
                     material={materials[matName]}
                     skeleton={mesh.skeleton}
                   />
-                  <RoverDustParticle offset={[position.current.x, 0, position.current.z]} rotation={rotationY.current} stepType={subtickMoves.current} />
+        
                 </React.Fragment>
               )
             })}
@@ -282,6 +282,16 @@ useEffect(() => {
           <primitive object={nodes.Bone} />
         </group>
       </group>
+        {/* Dust particle, egy példány a rover roothoz */}
+      <RoverDustParticle
+        offset={[
+          group.current?.getWorldPosition(new THREE.Vector3()).x ?? 0,
+          0.3,
+          group.current?.getWorldPosition(new THREE.Vector3()).z ?? 0,
+        ]}
+        rotation={rotationY.current}
+        stepType={subtickMoves.current}
+      />
     </group>
   )
 }
