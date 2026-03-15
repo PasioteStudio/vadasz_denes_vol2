@@ -1,5 +1,5 @@
 import { Position } from "@/types/RoverContextTypes";
-import { WeightPoint } from "../lib/constants";
+import { isOre, Tile, WeightPoint } from "../lib/constants";
 import { getLastPosition } from "./tile";
 import { Action } from "./algorithm";
 
@@ -30,4 +30,15 @@ export function findNearestOre(
 
 export const getNearestOreDistance = (final_path:Action[],update_able_map:WeightPoint[]) => {
   return Math.ceil(findNearestOre(getLastPosition(final_path).x, getLastPosition(final_path).y, update_able_map).distance)
+}
+
+export const mapToOrePositions = (map: Tile[][]): Position[] => {
+  const positions: Position[] = [];
+  for(let row = 0; row < map.length; row++){
+    for(let col = 0; col < map[row].length; col++){
+      if(!isOre(map[row][col])) continue;
+      positions.push({y: row, x: col});
+    }
+  }
+  return positions;
 }
