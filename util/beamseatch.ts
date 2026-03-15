@@ -21,8 +21,8 @@ const consumption: Record<string, number> = {
     "standby": 1,
     "mine": 2,
     "move1": 2,
-    "move2": 8,
-    "move3": 18,
+    // "move2": 8,
+    // "move3": 18,
 }
 const dayCharge = +10;
 
@@ -30,7 +30,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     const beamWidth = 30; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
-    const moveableGrid = new Graph(map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1)), {diagonal: true});
+    const moveableGrid = new Graph(map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1)), { diagonal: true });
     // start tile
     const start = getStartingPoint(map);
     // beam
@@ -56,10 +56,10 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                 const newScore = item.score + e.dscore;
                 const newEnergy = Math.max(0, Math.min(item.energy + e.denergy, 100));
 
-                if(newEnergy < 0) continue;
+                if (newEnergy < 0) continue;
 
                 // if we returned to start (cycle complete)
-                if (e.steps[e.steps.length-1].to === start && newSequence.length > 1) {
+                if (e.steps[e.steps.length - 1].to === start && newSequence.length > 1) {
                     completed.push({
                         sequence: newSequence,
                         score: newScore,
@@ -91,13 +91,13 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     }
 }
 const directions = [
-    [-1,-1], [0,-1], [1,-1],
-    [-1,0],           [1,0],
-    [-1,1],   [0,1],  [1,1],
+    [-1, -1], [0, -1], [1, -1],
+    [-1, 0],            [1, 0],
+    [-1, 1], [0, 1], [1, 1],
 ]
 
 const expand = (item: BeamItem, grid: never[][], map: Tile[][]): Expansion[] => {
-    const currentTick = item.sequence.length-1;
+    const currentTick = item.sequence.length - 1;
     const chargeAmount = currentTick % 48 >= 32 ? 0 : dayCharge;
     const actions = Object.keys(consumption) as action[];
     const possibleActions: action[] = [];
@@ -105,46 +105,55 @@ const expand = (item: BeamItem, grid: never[][], map: Tile[][]): Expansion[] => 
     const lastMove = getlast(lastSequence);
 
     //get the actions that the energy allows
-    for(const a in actions){
-        if(consumption[a] > item.energy) continue;
-        if(a == "mine" && !isOre(map[lastMove.to.y][lastMove.to.x])) continue;
+    for (const a in actions) {
+        if (consumption[a] > item.energy) continue;
+        if (a == "mine" && !isOre(map[lastMove.to.y][lastMove.to.x])) continue;
         possibleActions.push(a as action);
     }
-    if(possibleActions.length == 0) possibleActions.push("standby")
+    if (possibleActions.length == 0) possibleActions.push("standby")
 
     //for each possibility, create the expansion
     const expansions: Expansion[] = [];
-    for(const possibility in possibleActions){
+    for (const possibility in possibleActions) {
         //standby
-        if(possibility == "standby"){
+        if (possibility == "standby") {
             expansions.push({
                 denergy: chargeAmount - consumption[possibility],
                 dscore: 0,
-                steps: [{from: lastMove.to, to: lastMove.to, mode: "wait"}]
+                steps: [{ from: lastMove.to, to: lastMove.to, mode: "wait" }]
             })
             continue;
         }
         //mine
-        if(possibility == "mine"){
+        if (possibility == "mine") {
             expansions.push({
                 denergy: chargeAmount - consumption[possibility],
-                dscore: 0,
-                steps: [{from: lastMove.to, to: lastMove.to, mode: "mine", ore: map[lastMove.to.y][lastMove.to.x]}]
+                dscore: 10,
+                steps: [{ from: lastMove.to, to: lastMove.to, mode: "mine", ore: map[lastMove.to.y][lastMove.to.x] }] // TODO switch to modified map!
             })
             continue;
         }
         //move1
         const currentPos: Position = lastMove.to;
-        if(possibility == "move1"){
-            for(let i = 0; i < directions.length; i++){
-                
+        if (possibility == "move1") {
+            for (let i = 0; i < directions.length; i++) {
+                const newPos: Position = { x: currentPos.x + directions[i][0], y: currentPos.y + directions[i][1] }
+                if(grid[newPos.y][newPos.x] == 0) continue; // barrier
+                if(newPos.x == lastMove.from.x && newPos.y == lastMove.from.y) continue;
+                expansions.push({
+                    denergy: chargeAmount - consumption[possibility],
+                    dscore: isOre(map[newPos.y][newPos.x]) ? 1 : 0, // TODO switch to modified map!
+                    steps: [{ from: lastMove.to, to: newPos, mode: "move" }]
+                })
             }
         }
+        //move2
+        //move3
     }
-    
+
     return expansions;
 }
 
-const generateDeltas = (sequence: Move[][]):Delta[] => {
+const generateDeltas = (sequence: Move[][]): Delta[] => {
     return []
 }
