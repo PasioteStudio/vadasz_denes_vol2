@@ -14,10 +14,10 @@ export class Explosion {
 
   directions: Float32Array
   speed: number = 0.1
-  life: number = 2
+  life: number = 1
   scene: THREE.Scene
   material: THREE.PointsMaterial
-
+  
 
   constructor(scene: THREE.Scene, particleCount: number = 2000, radius = 30, offset: [number, number, number], lowerBound: number = 0, size: number = 0.1, speed: number = 0.1) {
     
@@ -34,7 +34,6 @@ export class Explosion {
     this.geometry = new THREE.BufferGeometry()
     this.speed = speed
     //particle élete
-    const life = 2
     //pareaméterek a színváltozáshoz
 
     for (let i = 0; i < this.particleCount; i++) {

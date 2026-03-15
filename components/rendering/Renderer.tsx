@@ -19,6 +19,7 @@ import { PathDisplayer } from './PathDisplayer';
 import { MainParticle } from './Particles/MainParticles';
 import { clamp } from 'three/src/math/MathUtils.js';
 import { clampNum } from '@/util/math';
+import { Explosion } from './Particles/Exploson';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -196,9 +197,11 @@ export const Renderer = () => {
         <PathDisplayer/>
 
         {rover && <MarsRover onSelect={showInventory} />}
+        
+
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
-         <MainParticle camPosition={[camPos[0], 0, camPos[2]]}/>
+         <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
 
       </Canvas>
 

@@ -8,6 +8,9 @@ import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/lib/constants"
 import { useCycle, useTimeline } from "@/lib/contexts"
+import { RoverDustParticle } from "@/components/rendering/Particles/RoverDustParticle"
+import React from "react"
+
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -265,12 +268,14 @@ useEffect(() => {
             ] as const).map(([meshName, matName], i) => {
               const mesh = nodes[meshName] as THREE.SkinnedMesh
               return (
-                <skinnedMesh
-                  key={i}
-                  geometry={mesh.geometry}
-                  material={materials[matName]}
-                  skeleton={mesh.skeleton}
-                />
+                <React.Fragment key={i}>
+                  <skinnedMesh
+                    geometry={mesh.geometry}
+                    material={materials[matName]}
+                    skeleton={mesh.skeleton}
+                  />
+                  <RoverDustParticle offset={[position.current.x, 0, position.current.z]} rotation={rotationY.current} stepType={subtickMoves.current} />
+                </React.Fragment>
               )
             })}
           </group>
