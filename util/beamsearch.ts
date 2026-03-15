@@ -31,7 +31,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 5; // this will somehow have to be improved
+    const beamWidth = 20; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
@@ -57,7 +57,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
             const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
 
-            if (!canReach(returnHome.length, item.energy, step+1, moves-2)) {
+            if (!canReach(returnHome.length, item.energy, step+1, moves)) {
                 continue;
             }
 
@@ -85,7 +85,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                 const position = smoves[smoves.length - 1].to
                 const returnHome = astar.search(graph, graph.grid[position.y][position.x], graph.grid[start.y][start.x]);
                 // if we returned to start (cycle complete)
-                if (canReach(returnHome.length, newItem.energy, step+1, moves-2)) {
+                if (canReach(returnHome.length, newItem.energy, step+1, moves)) {
                     completed.push(newItem);
                     candidates.push(newItem);
                 }
