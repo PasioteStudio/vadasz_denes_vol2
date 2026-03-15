@@ -191,7 +191,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
         if (possibility === action.mine) {
             expansions.push({
                 denergy: chargeAmount - consumption[possibility],
-                dscore: 500,
+                dscore: 1000,
                 steps: [{ from: lastPos, to: lastPos, mode: "mine", ore: item.map[lastPos.y][lastPos.x] }],
                 changes: [{ where: { ...lastPos }, to: Tile.Empty }]
             });
@@ -406,9 +406,9 @@ const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
         const base = 1 / (dist + 1);
-        score += visitedSet.has(`${ore.x},${ore.y}`) ? base * 0.2 : base;
+        score += visitedSet.has(`${ore.x},${ore.y}`) ? base * 0.1 : base;
     }
-    return Math.min(score, 20);
+    return score;
 };
 
 interface GridNode {
