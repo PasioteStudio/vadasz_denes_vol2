@@ -34,7 +34,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 30;
+    const beamWidth = 100;
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
     const graph = new Graph(moveableGrid, { diagonal: true });
 
@@ -213,7 +213,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, orePositions),
+                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, orePositions, item.sequence),
                     steps: [{ from: currentPos, to: { x: nx, y: ny }, mode: "move" }],
                     changes: [],
                 });
@@ -252,7 +252,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence),
                     steps,
                     changes: [],
                 });
@@ -291,7 +291,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence),
                     steps,
                     changes: [],
                 });
@@ -391,15 +391,22 @@ function canReach(
 }
 
 // orePositions passed in — no recomputation per call
-const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position[]): number => {
+const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position[], sequence: Move[][]): number => {
+    const visitedSet = new Set<string>();
+    for (const tick of sequence) {
+        for (const move of tick) {
+            visitedSet.add(`${move.to.x},${move.to.y}`);
+        }
+    }
+
     let score = 0;
     for (const ore of orePositions) {
-        // skip if already mined
         if (!isOre(map[ore.y][ore.x])) continue;
         const dx = Math.abs(pos.x - ore.x);
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
-        score += 1 / (dist + 1);
+        const base = 1 / (dist + 1);
+        score += visitedSet.has(`${ore.x},${ore.y}`) ? base * 0.2 : base;
     }
     return score;
 };
