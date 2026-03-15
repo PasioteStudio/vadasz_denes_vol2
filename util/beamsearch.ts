@@ -31,7 +31,7 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 30; // this will somehow have to be improved
+    const beamWidth = 10; // this will somehow have to be improved
     // get ores
     const ores: Position[] = mapToOrePositions(map);
     const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
@@ -135,6 +135,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         deltas: deltas
     }
 }
+
 const directions = [
     [-1, -1], [0, -1], [1, -1],
     [-1, 0],/*--------*/[1, 0],
@@ -216,78 +217,73 @@ const expand = (item: BeamItem, grid: (0 | 1)[][]): Expansion[] => {
 
         // MOVE2
         if (possibility === action.move2) {
-            for (const [dx, dy] of directions) {
+            for (const [dx1, dy1] of directions) {
+                const nx1 = currentPos.x + dx1;
+                const ny1 = currentPos.y + dy1;
 
-                let px = currentPos.x;
-                let py = currentPos.y;
-                const steps: Move[] = [];
+                if (ny1 < 0 || ny1 >= grid.length || nx1 < 0 || nx1 >= grid[0].length) continue;
+                if (grid[ny1][nx1] === 0) continue;
 
-                for (let step = 0; step < 2; step++) {
-                    const nx = px + dx;
-                    const ny = py + dy;
+                for (const [dx2, dy2] of directions) {
+                    const nx2 = nx1 + dx2;
+                    const ny2 = ny1 + dy2;
 
-                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
-                        steps.length = 0;
-                        break;
-                    }
-                    if (grid[ny][nx] === 0) {
-                        steps.length = 0;
-                        break;
-                    }
+                    if (ny2 < 0 || ny2 >= grid.length || nx2 < 0 || nx2 >= grid[0].length) continue;
+                    if (grid[ny2][nx2] === 0) continue;
+                    // don't end up where we started
+                    if (nx2 === currentPos.x && ny2 === currentPos.y) continue;
 
-                    steps.push({ from: { x: px, y: py }, to: { x: nx, y: ny }, mode: "move" });
-                    px = nx;
-                    py = ny;
+                    expansions.push({
+                        denergy: chargeAmount - consumption[possibility],
+                        dscore: calculateMoveScore(item.map, { x: nx2, y: ny2 }, item.sequence),
+                        steps: [
+                            { from: currentPos, to: { x: nx1, y: ny1 }, mode: "move" },
+                            { from: { x: nx1, y: ny1 }, to: { x: nx2, y: ny2 }, mode: "move" },
+                        ],
+                        changes: [],
+                    });
                 }
-
-                if (steps.length !== 2) continue;
-                if (px === currentPos.x && py === currentPos.y) continue;
-
-                expansions.push({
-                    denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, item.sequence),
-                    steps,
-                    changes: [],
-                });
             }
             continue;
         }
 
         // MOVE3
         if (possibility === action.move3) {
-            for (const [dx, dy] of directions) {
+            for (const [dx1, dy1] of directions) {
+                const nx1 = currentPos.x + dx1;
+                const ny1 = currentPos.y + dy1;
 
-                let px = currentPos.x;
-                let py = currentPos.y;
-                const steps: Move[] = [];
+                if (ny1 < 0 || ny1 >= grid.length || nx1 < 0 || nx1 >= grid[0].length) continue;
+                if (grid[ny1][nx1] === 0) continue;
 
-                for (let step = 0; step < 3; step++) {
-                    const nx = px + dx;
-                    const ny = py + dy;
+                for (const [dx2, dy2] of directions) {
+                    const nx2 = nx1 + dx2;
+                    const ny2 = ny1 + dy2;
 
-                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
-                        steps.length = 0;
-                        break;
+                    if (ny2 < 0 || ny2 >= grid.length || nx2 < 0 || nx2 >= grid[0].length) continue;
+                    if (grid[ny2][nx2] === 0) continue;
+
+                    for (const [dx3, dy3] of directions) {
+                        const nx3 = nx2 + dx3;
+                        const ny3 = ny2 + dy3;
+
+                        if (ny3 < 0 || ny3 >= grid.length || nx3 < 0 || nx3 >= grid[0].length) continue;
+                        if (grid[ny3][nx3] === 0) continue;
+                        // don't end up where we started
+                        if (nx3 === currentPos.x && ny3 === currentPos.y) continue;
+
+                        expansions.push({
+                            denergy: chargeAmount - consumption[possibility],
+                            dscore: calculateMoveScore(item.map, { x: nx3, y: ny3 }, item.sequence),
+                            steps: [
+                                { from: currentPos, to: { x: nx1, y: ny1 }, mode: "move" },
+                                { from: { x: nx1, y: ny1 }, to: { x: nx2, y: ny2 }, mode: "move" },
+                                { from: { x: nx2, y: ny2 }, to: { x: nx3, y: ny3 }, mode: "move" },
+                            ],
+                            changes: [],
+                        });
                     }
-                    if (grid[ny][nx] === 0) {
-                        steps.length = 0;
-                        break;
-                    }
-
-                    steps.push({ from: { x: px, y: py }, to: { x: nx, y: ny }, mode: "move" });
-                    px = nx;
-                    py = ny;
                 }
-
-                if (steps.length !== 3) continue;
-                if (px === currentPos.x && py === currentPos.y) continue;
-
-                expansions.push({
-                    denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, item.sequence),
-                    steps,
-                    changes: [],
-                });
             }
             continue;
         }
@@ -361,35 +357,29 @@ function canReach(
     tick: number,
     maxTick: number
 ): boolean {
-
     let dist = pathLength;
     let e = energy;
     let t = tick;
 
     while (dist > 0) {
-
         if (t >= maxTick) return false;
 
         const recharge = t % 48 < 32 ? dayCharge : 0;
 
-        // prefer the longest move we can afford
         if (dist >= 3 && e >= consumption[action.move3]) {
-            e = e - consumption[action.move3] + recharge;
+            e = Math.min(e - consumption[action.move3] + recharge, 100);
             dist -= 3;
-        }
-        else if (dist >= 2 && e >= consumption[action.move2]) {
-            e = e - consumption[action.move2] + recharge;
+        } else if (dist >= 2 && e >= consumption[action.move2]) {
+            e = Math.min(e - consumption[action.move2] + recharge, 100);
             dist -= 2;
-        }
-        else if (e >= consumption[action.move1]) {
-            e = e - consumption[action.move1] + recharge;
+        } else if (e >= consumption[action.move1]) {
+            e = Math.min(e - consumption[action.move1] + recharge, 100);
             dist -= 1;
-        }
-        else {
-            return false;
+        } else {
+            // not enough energy to move this tick — wait to recharge
+            e = Math.min(e - consumption[action.standby] + recharge, 100);
         }
 
-        e = Math.min(e, 100);
         t++;
     }
 
@@ -426,7 +416,6 @@ const calculateMoveScore = (map: Tile[][], pos: Position, sequence: Move[][]): n
     return score;
 };
 
-type MoveDistance = 1 | 2 | 3;
 interface GridNode {
     x: number;
     y: number;
@@ -442,8 +431,7 @@ export function planReturnPath(
     currentTick: number,
     maxTick: number
 ): Move[][] {
-    // graph is the transposedGraph — library uses grid[x][y]
-    // so we access grid[x][y] and swap node coords back to Position on read
+    // graph is transposedGraph — access with grid[x][y], read nodes back as { x: n.x, y: n.y }
     const rawPath = astar.search(
         graph,
         graph.grid[currentPos.x][currentPos.y],
@@ -455,54 +443,33 @@ export function planReturnPath(
         return [];
     }
 
-    // transposedGrid[x][y], so node.x = our x, node.y = our y — swap back
     const posSequence: Position[] = [
-    currentPos,
-    ...rawPath.map(n => ({ x: n.x, y: n.y }))  // no swap
-];
+        currentPos,
+        ...rawPath.map(n => ({ x: n.x, y: n.y }))
+    ];
 
     const ticks: Move[][] = [];
     let e = energy;
     let tick = currentTick;
     let posIndex = 0;
 
-    const canMultiStep = (steps: number): boolean => {
-        if (posIndex + steps >= posSequence.length) return false;
-        const dx = posSequence[posIndex + 1].x - posSequence[posIndex].x;
-        const dy = posSequence[posIndex + 1].y - posSequence[posIndex].y;
-        for (let i = 1; i < steps; i++) {
-            const ndx = posSequence[posIndex + i + 1].x - posSequence[posIndex + i].x;
-            const ndy = posSequence[posIndex + i + 1].y - posSequence[posIndex + i].y;
-            if (ndx !== dx || ndy !== dy) return false;
-        }
-        return true;
-    };
-
     while (posIndex < posSequence.length - 1) {
         const chargeAmount = tick % 48 < 32 ? dayCharge : 0;
+        const remaining = posSequence.length - 1 - posIndex;
 
-        if (canMultiStep(3) && e >= consumption[action.move3]) {
-            const stepMoves: Move[] = [];
-            for (let i = 0; i < 3; i++) {
-                stepMoves.push({
-                    from: posSequence[posIndex + i],
-                    to: posSequence[posIndex + i + 1],
-                    mode: "move",
-                });
-            }
-            ticks.push(stepMoves); // one tick, 3 moves
+        if (remaining >= 3 && e >= consumption[action.move3]) {
+            ticks.push([
+                { from: posSequence[posIndex],     to: posSequence[posIndex + 1], mode: "move" },
+                { from: posSequence[posIndex + 1], to: posSequence[posIndex + 2], mode: "move" },
+                { from: posSequence[posIndex + 2], to: posSequence[posIndex + 3], mode: "move" },
+            ]);
             e = Math.min(e - consumption[action.move3] + chargeAmount, 100);
             posIndex += 3;
-        } else if (canMultiStep(2) && e >= consumption[action.move2]) {
-            const stepMoves: Move[] = [];
-            for (let i = 0; i < 2; i++) {
-                stepMoves.push({
-                    from: posSequence[posIndex + i],
-                    to: posSequence[posIndex + i + 1],
-                    mode: "move",
-                });
-            }
-            ticks.push(stepMoves); // one tick, 2 moves
+        } else if (remaining >= 2 && e >= consumption[action.move2]) {
+            ticks.push([
+                { from: posSequence[posIndex],     to: posSequence[posIndex + 1], mode: "move" },
+                { from: posSequence[posIndex + 1], to: posSequence[posIndex + 2], mode: "move" },
+            ]);
             e = Math.min(e - consumption[action.move2] + chargeAmount, 100);
             posIndex += 2;
         } else if (e >= consumption[action.move1]) {
