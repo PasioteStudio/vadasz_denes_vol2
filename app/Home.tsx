@@ -110,6 +110,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     setDeltas(solve.deltas);
     setPath(solve.path);
     console.log("time: " + (end - start))
+    setIsLoading(false)
 
   }, [initialMap])
 
