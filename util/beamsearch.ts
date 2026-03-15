@@ -111,7 +111,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     console.log("lastMove:", lastMove);
     console.log("start:", start);
     console.log("rawPath nodes:", rawPath.map(n => ({ x: n.x, y: n.y })));
-    
+
     // Plan the return path
     const returnMoves = planReturnPath(
         graph,
@@ -209,7 +209,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][]): Expansion[] => {
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }),
+                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, item.sequence),
                     steps: [{ from: currentPos, to: { x: nx, y: ny }, mode: "move" }],
                     changes: [],
                 });
@@ -248,7 +248,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][]): Expansion[] => {
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, item.sequence),
                     steps,
                     changes: [],
                 });
@@ -287,7 +287,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][]): Expansion[] => {
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, item.sequence),
                     steps,
                     changes: [],
                 });
@@ -399,7 +399,14 @@ function canReach(
     return true;
 }
 
-const calculateMoveScore = (map: Tile[][], pos: Position): number => {
+const calculateMoveScore = (map: Tile[][], pos: Position, sequence: Move[][]): number => {
+    const visitedSet = new Set<string>();
+    for (const tick of sequence) {
+        for (const move of tick) {
+            visitedSet.add(`${move.to.x},${move.to.y}`);
+        }
+    }
+
     const ores: Position[] = [];
     for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[row].length; col++) {
@@ -413,8 +420,10 @@ const calculateMoveScore = (map: Tile[][], pos: Position): number => {
     for (const ore of ores) {
         const dx = Math.abs(pos.x - ore.x);
         const dy = Math.abs(pos.y - ore.y);
-        const dist = Math.max(dx, dy); // Chebyshev distance
-        score += 1 / (dist + 1);      // +1 to avoid division by zero
+        const dist = Math.max(dx, dy);
+        const base = 1 / (dist + 1);
+        const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
+        score += alreadyVisited ? base * 0.5 : base;
     }
 
     return score;
