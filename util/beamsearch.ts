@@ -428,7 +428,7 @@ const calculateMoveScore = (
         const dist = Math.max(dx, dy);
         const base = 1 / Math.pow(dist + 1, 2);
         const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
-        const walkedOver = steppedOver.has(`${ore.x},${ore.y}`);  // ← new
+        const walkedOver = steppedOver.has(`${ore.x},${ore.y}`); 
 
         if (dist === 0) {
             score += alreadyVisited ? -base * 5 : base * 1.5;
@@ -438,8 +438,12 @@ const calculateMoveScore = (
             score += alreadyVisited ? -base : base;
         }
 
-        // Penalize stepping over without stopping
-        if (walkedOver) score -= 0.8;  // ← tune this value
+        if (walkedOver) score -= 30;
+    }
+    for (const step of candidateSteps) {
+        if (visitedSet.has(`${step.to.x},${step.to.y}`)) {
+            score -= 30;
+        }
     }
     return score;
 };
