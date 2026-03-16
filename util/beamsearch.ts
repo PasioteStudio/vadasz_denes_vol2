@@ -411,9 +411,15 @@ const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
         const base = 1 / Math.pow(dist + 1, 2);
-        const adjacent = dist === 1;
-        const visited = visitedSet.has(`${ore.x},${ore.y}`);
-        score += visited ? base * 0.1 : adjacent ? base * 0.8 : base;
+        const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
+
+        if (dist === 0) {
+            score += alreadyVisited ? base * 0.1 : base;
+        } else if (dist === 1) {
+            score += alreadyVisited ? base * 0.1 : base * 0.6;
+        } else {
+            score += alreadyVisited ? base * 0.1 : base;
+        }
     }
     return score;
 };
