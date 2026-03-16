@@ -426,16 +426,16 @@ const calculateMoveScore = (
         const dx = Math.abs(pos.x - ore.x);
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
-        const base = 1 / Math.pow(dist + 1, 2);
+        const base = 1 / Math.pow(dist + 1, 2.5);
         const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
         const walkedOver = steppedOver.has(`${ore.x},${ore.y}`); 
 
         if (dist === 0) {
-            score += alreadyVisited ? -base * 5 : base * 1.5;
+            score += alreadyVisited ? -30 : base * 2;
         } else if (dist === 1) {
-            score += alreadyVisited ? -base : base * 0.5;
+            score += alreadyVisited ? -10 : base * 0.5;
         } else {
-            score += alreadyVisited ? -base : base;
+            score += alreadyVisited ? -10 : base;
         }
 
         if (walkedOver) score -= 30;
