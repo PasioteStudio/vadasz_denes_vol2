@@ -197,7 +197,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
         if (possibility === action.mine) {
             expansions.push({
                 denergy: chargeAmount - consumption[possibility],
-                dscore: 1000,
+                dscore: 1100,
                 steps: [{ from: lastPos, to: lastPos, mode: "mine", ore: item.map[lastPos.y][lastPos.x] }],
                 changes: [{ where: { ...lastPos }, to: Tile.Empty }]
             });
@@ -219,7 +219,9 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, orePositions, item.sequence),
+                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, orePositions, item.sequence, [
+                        { from: currentPos, to: { x: nx, y: ny }, mode: "move" }
+                    ]),
                     steps: [{ from: currentPos, to: { x: nx, y: ny }, mode: "move" }],
                     changes: [],
                 });
@@ -258,7 +260,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
                     steps,
                     changes: [],
                 });
@@ -297,7 +299,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
                 expansions.push({
                     denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence),
+                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
                     steps,
                     changes: [],
                 });
@@ -397,12 +399,25 @@ function canReach(
 }
 
 // orePositions passed in — no recomputation per call
-const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position[], sequence: Move[][]): number => {
+const calculateMoveScore = (
+    map: Tile[][],
+    pos: Position,
+    orePositions: Position[],
+    sequence: Move[][],
+    candidateSteps: Move[]   // ← add this
+): number => {
     const visitedSet = new Set<string>();
     for (const tick of sequence) {
         for (const move of tick) {
             visitedSet.add(`${move.to.x},${move.to.y}`);
         }
+    }
+
+    // Positions stepped OVER (not the final one)
+    const steppedOver = new Set<string>();
+    for (let i = 0; i < candidateSteps.length - 1; i++) {
+        const p = candidateSteps[i].to;
+        steppedOver.add(`${p.x},${p.y}`);
     }
 
     let score = 0;
@@ -413,14 +428,18 @@ const calculateMoveScore = (map: Tile[][], pos: Position, orePositions: Position
         const dist = Math.max(dx, dy);
         const base = 1 / Math.pow(dist + 1, 2);
         const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
+        const walkedOver = steppedOver.has(`${ore.x},${ore.y}`);  // ← new
 
         if (dist === 0) {
-            score += alreadyVisited ? base * 0.1 : base;
+            score += alreadyVisited ? -base * 5 : base * 1.5;
         } else if (dist === 1) {
-            score += alreadyVisited ? base * 0.1 : base * 0.6;
+            score += alreadyVisited ? -base : base * 0.5;
         } else {
-            score += alreadyVisited ? base * 0.1 : base;
+            score += alreadyVisited ? -base : base;
         }
+
+        // Penalize stepping over without stopping
+        if (walkedOver) score -= 0.8;  // ← tune this value
     }
     return score;
 };
