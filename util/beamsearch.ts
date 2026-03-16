@@ -77,7 +77,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
         for (const item of beam) {
             const position = item.lastPos;
-            const returnHome = astar.search(transposedGraph,transposedGraph.grid[position.y][position.x],transposedGraph.grid[start.y][start.x]);
+            const returnHome = astar.search(transposedGraph, transposedGraph.grid[position.y][position.x], transposedGraph.grid[start.y][start.x]);
 
             if (!canReach(returnHome.length, item.energy, step + 2, moves)) {
                 continue;
@@ -125,7 +125,6 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     }
 
     const winner = bestCompleted!;
-    console.log(winner.score)
     const lastMove = winner.lastPos;
 
     const returnMoves = planReturnPath(
@@ -136,6 +135,8 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         winner.sequence.length - 1,
         moves
     );
+
+    console.log(returnMoves)
 
     if (returnMoves) {
         for (const tick of returnMoves) {
@@ -158,17 +159,17 @@ const directions = [
 
 const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Expansion[] => {
 
-    const currentTick = item.sequence.length - 1;
-    const chargeAmount = currentTick % 48 >= 32 ? 0 : dayCharge;
+    const nextTick = item.sequence.length;
+    const chargeAmount = nextTick % 48 >= 32 ? 0 : dayCharge;
 
     const possibleActions: action[] = [];
     const lastPos = item.lastPos;
 
     const standingOnOre = isOre(item.map[lastPos.y][lastPos.x]);
 
-    if(standingOnOre){
+    if (standingOnOre) {
         if (consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
-    } else{
+    } else {
         if (consumption[action.mine] <= item.energy && standingOnOre) possibleActions.push(action.mine);
         if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
         if (consumption[action.move2] <= item.energy) possibleActions.push(action.move2);
@@ -457,6 +458,7 @@ export function planReturnPath(
 
     const ticks: Move[][] = [];
     let e = energy;
+    console.log(e)
     let tick = currentTick;
     let posIndex = 0;
 
@@ -466,7 +468,7 @@ export function planReturnPath(
 
         if (remaining >= 3 && e >= consumption[action.move3]) {
             ticks.push([
-                { from: posSequence[posIndex],     to: posSequence[posIndex + 1], mode: "move" },
+                { from: posSequence[posIndex], to: posSequence[posIndex + 1], mode: "move" },
                 { from: posSequence[posIndex + 1], to: posSequence[posIndex + 2], mode: "move" },
                 { from: posSequence[posIndex + 2], to: posSequence[posIndex + 3], mode: "move" },
             ]);
@@ -474,7 +476,7 @@ export function planReturnPath(
             posIndex += 3;
         } else if (remaining >= 2 && e >= consumption[action.move2]) {
             ticks.push([
-                { from: posSequence[posIndex],     to: posSequence[posIndex + 1], mode: "move" },
+                { from: posSequence[posIndex], to: posSequence[posIndex + 1], mode: "move" },
                 { from: posSequence[posIndex + 1], to: posSequence[posIndex + 2], mode: "move" },
             ]);
             e = Math.min(e - consumption[action.move2] + chargeAmount, 100);
