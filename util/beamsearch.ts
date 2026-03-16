@@ -164,11 +164,16 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
     const possibleActions: action[] = [];
     const lastPos = item.lastPos;
 
-    if (consumption[action.standby] <= item.energy) possibleActions.push(action.standby);
-    if (consumption[action.mine] <= item.energy && isOre(item.map[lastPos.y][lastPos.x])) possibleActions.push(action.mine);
-    if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
-    if (consumption[action.move2] <= item.energy) possibleActions.push(action.move2);
-    if (consumption[action.move3] <= item.energy) possibleActions.push(action.move3);
+    const standingOnOre = isOre(item.map[lastPos.y][lastPos.x]);
+
+    if(standingOnOre){
+        if (consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
+    } else{
+        if (consumption[action.mine] <= item.energy && standingOnOre) possibleActions.push(action.mine);
+        if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
+        if (consumption[action.move2] <= item.energy) possibleActions.push(action.move2);
+        if (consumption[action.move3] <= item.energy) possibleActions.push(action.move3);
+    }
 
     if (possibleActions.length === 0) possibleActions.push(action.standby);
 
