@@ -426,7 +426,7 @@ const calculateMoveScore = (
         const dx = Math.abs(pos.x - ore.x);
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
-        const base = 1 / Math.pow(dist + 1, 2.5);
+        const base = 2 / Math.pow(dist + 2, 2.5);
         const alreadyVisited = visitedSet.has(`${ore.x},${ore.y}`);
         const walkedOver = steppedOver.has(`${ore.x},${ore.y}`); 
 
