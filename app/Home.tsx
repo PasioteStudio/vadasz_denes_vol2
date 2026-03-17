@@ -104,14 +104,24 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     if (deltas.length > 1) return
     flavoredMap.current = generateFlavoredMap(map);
     const start = Date.now();
-    const solve = beamsolve(timeLimit, initialMap);
-    const end = Date.now();
-    setDeltas(solve.deltas);
-    setPath(solve.path);
-    console.log("path:", solve.path)
-    console.log("deltas:", solve.deltas)
-    console.log("time: " + (end - start))
-    setIsLoading(false)
+    const worker = new Worker(new URL('@/util/beamsearch.worker.ts', import.meta.url), { type: 'module' })
+    worker.postMessage({
+      type: "makePath",
+      iterations: timeLimit,
+      map: initialMap
+    });
+    worker.onmessage = (event) => {
+      if (event.data.type === "makePathResult") {
+        const end = Date.now()
+        console.log("time: ", end - start)
+        const path = event.data.result;
+        setPath(path.path);
+        console.log("path:", path.path)
+        setDeltas(path.deltas);
+        setIsLoading(false)
+      }
+      worker.terminate();
+    };
 
   }, [initialMap])
 
