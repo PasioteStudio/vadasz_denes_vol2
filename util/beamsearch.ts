@@ -456,13 +456,6 @@ const calculateMoveScore = (
     return score;
 };
 
-interface GridNode {
-    x: number;
-    y: number;
-    weight: number;
-    isWall(): boolean;
-}
-
 export function planReturnPath(
     graph: InstanceType<typeof Graph>,
     currentPos: Position,
