@@ -409,7 +409,7 @@ const calculateMoveScore = (
 ): number => {
     const visitedSet = new Set<string>();
     
-    const n = 5;
+    const n = 0;
     for (let i = Math.max(sequence.length-n,0); i < sequence.length; i++){
         const tick = sequence[i];
         for (const move of tick) {
