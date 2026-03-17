@@ -122,6 +122,8 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
         candidates.sort((a, b) => b.score - a.score);
         beam = candidates.slice(0, beamWidth);
+        if (beam.length === 0) break;
+
     }
 
     const winner = bestCompleted!;
@@ -403,7 +405,7 @@ const calculateMoveScore = (
     pos: Position,
     orePositions: Position[],
     sequence: Move[][],
-    candidateSteps: Move[]   // ← add this
+    candidateSteps: Move[]  
 ): number => {
     const visitedSet = new Set<string>();
     
