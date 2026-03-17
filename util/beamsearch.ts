@@ -416,11 +416,6 @@ const calculateMoveScore = (
             visitedSet.add(`${move.to.x},${move.to.y}`);
         }
     }
-    // for (const tick of sequence) {
-    //     for (const move of tick) {
-    //         visitedSet.add(`${move.to.x},${move.to.y}`);
-    //     }
-    // }
 
     // Positions stepped OVER (not the final one)
     const steppedOver = new Set<string>();
