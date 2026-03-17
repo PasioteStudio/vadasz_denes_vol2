@@ -27,9 +27,9 @@ type MarsRoverProps = ThreeElements["group"] & {
   onSelect?: () => void
 }
 
-const ROTATE_TIME = 200
-const MOVE_TIME = 200
-const MINE_TIME = 200
+const ROTATE_TIME = 100
+const MOVE_TIME = 100
+const MINE_TIME = 100
 const MODEL_ROTATION_OFFSET = -Math.PI / 2
 
 export function MarsRover({ ...props }: MarsRoverProps) {
