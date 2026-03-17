@@ -405,37 +405,38 @@ const calculateMoveScore = (
     pos: Position,
     orePositions: Position[],
     sequence: Move[][],
-    candidateSteps: Move[]  
+    candidateSteps: Move[]
 ): number => {
-    const visitedSet = new Set<string>();
-    
-    const n = 0;
-    for (let i = Math.max(sequence.length-n,0); i < sequence.length; i++){
-        const tick = sequence[i];
-        for (const move of tick) {
-            visitedSet.add(`${move.to.x},${move.to.y}`);
+    if (orePositions.length === 0) return 10000;
+
+    const encode = (x: number, y: number) => x * 1000 + y;
+
+    const visitedSet = new Set<number>();
+    const n = 0; // can be parameterized
+    for (let i = Math.max(sequence.length - n, 0); i < sequence.length; i++) {
+        for (const move of sequence[i]) {
+            visitedSet.add(encode(move.to.x, move.to.y));
         }
     }
 
-    // Positions stepped OVER (not the final one)
-    const steppedOver = new Set<string>();
+    const steppedOver = new Set<number>();
     for (let i = 0; i < candidateSteps.length - 1; i++) {
-        const p = candidateSteps[i].to;
-        steppedOver.add(`${p.x},${p.y}`);
+        steppedOver.add(encode(candidateSteps[i].to.x, candidateSteps[i].to.y));
     }
 
     let score = 0;
     for (const ore of orePositions) {
         if (!isOre(map[ore.y][ore.x])) continue;
+
         const dx = Math.abs(pos.x - ore.x);
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
         const temp = dist + 0.1;
-        const base = 1 / (temp*temp*Math.sqrt(temp)); // Math.pow(dist+0.1, 2.5) de így gyorsabb
+        const base = 1 / (temp * temp * Math.sqrt(temp));
 
-        const key = `${ore.x},${ore.y}`;
+        const key = encode(ore.x, ore.y);
         const alreadyVisited = visitedSet.has(key);
-        const walkedOver = steppedOver.has(key); 
+        const walkedOver = steppedOver.has(key);
 
         if (dist === 0) {
             score += alreadyVisited ? -30 : base * 10;
@@ -447,12 +448,12 @@ const calculateMoveScore = (
 
         if (walkedOver) score -= 30;
     }
-    if(orePositions.length == 0) {score += 10000}
+
+    // Extra penalty for candidate steps revisiting
     for (const step of candidateSteps) {
-        if (visitedSet.has(`${step.to.x},${step.to.y}`)) {
-            score -= 30;
-        }
+        if (visitedSet.has(encode(step.to.x, step.to.y))) score -= 30;
     }
+
     return score;
 };
 
