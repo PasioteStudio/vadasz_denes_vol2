@@ -33,7 +33,6 @@ const consumption: Record<action, number> = {
 }
 const dayCharge = +10;
 
-// Precompute distances from start using BFS (8-directional)
 function computeDistanceMap(grid: number[][], start: Position): number[][] {
     const rows = grid.length;
     const cols = grid[0].length;
