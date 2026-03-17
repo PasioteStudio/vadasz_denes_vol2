@@ -405,12 +405,20 @@ const calculateMoveScore = (
     sequence: Move[][],
     candidateSteps: Move[]   // ← add this
 ): number => {
+    const n = 0;
     const visitedSet = new Set<string>();
-    for (const tick of sequence) {
+
+    for (let i = Math.max(sequence.length-n,0); i < sequence.length; i++){
+        const tick = sequence[i];
         for (const move of tick) {
             visitedSet.add(`${move.to.x},${move.to.y}`);
         }
     }
+    // for (const tick of sequence) {
+    //     for (const move of tick) {
+    //         visitedSet.add(`${move.to.x},${move.to.y}`);
+    //     }
+    // }
 
     // Positions stepped OVER (not the final one)
     const steppedOver = new Set<string>();
