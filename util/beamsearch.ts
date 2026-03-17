@@ -33,14 +33,50 @@ const consumption: Record<action, number> = {
 }
 const dayCharge = +10;
 
+// Precompute distances from start using BFS (8-directional)
+function computeDistanceMap(grid: number[][], start: Position): number[][] {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const distance: number[][] = Array.from({ length: rows }, () => Array(cols).fill(Infinity));
+    const queue: Position[] = [start];
+    distance[start.y][start.x] = 0;
+
+    const dirs = [
+        [0, 1], [1, 0], [0, -1], [-1, 0],
+        [1, 1], [1, -1], [-1, 1], [-1, -1]
+    ];
+
+    while (queue.length) {
+        const { x, y } = queue.shift()!;
+        const d = distance[y][x];
+
+        for (const [dx, dy] of dirs) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+            if (grid[ny][nx] === 0) continue;
+            if (distance[ny][nx] <= d + 1) continue;
+            distance[ny][nx] = d + 1;
+            queue.push({ x: nx, y: ny });
+        }
+    }
+
+    return distance;
+}
+
+// Helper: top-K selection using partial sort
+function topK<T>(arr: T[], k: number, scoreFn: (x: T) => number = (x: any) => x.score): T[] {
+    if (arr.length <= k) return arr;
+    arr.sort((a, b) => scoreFn(b) - scoreFn(a));
+    return arr.slice(0, k);
+}
+
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
     const beamWidth = 17;
-    const moveableGrid = map.map(row => row.map(tile => tile == Tile.Obstacle ? 0 : 1));
-    const graph = new Graph(moveableGrid, { diagonal: true });
+    const rows = map.length;
+    const cols = map[0].length;
 
-    // Transposed grid for planReturnPath — library uses grid[x][y] in that context
-    const rows = moveableGrid.length;
-    const cols = moveableGrid[0].length;
+    const moveableGrid = map.map(row => row.map(tile => tile != Tile.Obstacle ? 1 : 0));
     const transposedGrid = Array.from({ length: cols }, (_, x) =>
         Array.from({ length: rows }, (_, y) => moveableGrid[y][x])
     );
@@ -48,82 +84,70 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
     const start = getStartingPoint(map);
 
-    // Precompute ore positions once — passed into expand/calculateMoveScore
+    // Precompute ore positions
     const orePositions: Position[] = [];
-    for (let row = 0; row < map.length; row++) {
-        for (let col = 0; col < map[row].length; col++) {
-            if (isOre(map[row][col])) orePositions.push({ x: col, y: row });
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (isOre(map[y][x])) orePositions.push({ x, y });
         }
     }
 
-    let beam: BeamItem[] = [
-        {
-            score: 0,
-            sequence: [[{ from: start, to: start, mode: "move" }]],
-            energy: 100,
-            map: map.map(row => [...row]),
-            lastPos: start,
-            prevPos: start,
-        },
-    ]
+    // Precompute distance map from start
+    const distanceFromStart = computeDistanceMap(moveableGrid, start);
 
-    // Track only the single best completed item instead of all of them
+    let beam: BeamItem[] = [{
+        score: 0,
+        sequence: [[{ from: start, to: start, mode: "move" }]],
+        energy: 100,
+        map: map.map(row => [...row]),
+        lastPos: start,
+        prevPos: start,
+    }];
+
     let bestCompleted: BeamItem | null = null;
 
-    //solve
     for (let step = 0; step < moves; step++) {
-
         const candidates: BeamItem[] = [];
 
         for (const item of beam) {
-            const position = item.lastPos;
-            const returnHome = astar.search(transposedGraph, transposedGraph.grid[position.x][position.y], transposedGraph.grid[start.x][start.y]);
-
-            if (!canReach(returnHome.length, item.energy, step + 2, moves)) {
-                continue;
-            }
+            const pos = item.lastPos;
+            if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue;
 
             const expansions = expand(item, moveableGrid, orePositions);
 
             for (const e of expansions) {
                 const lastStep = e.steps[e.steps.length - 1];
                 const newPos = lastStep.to;
-                const newScore = item.score + e.dscore;
                 const newEnergy = Math.max(0, Math.min(item.energy + e.denergy, 100));
 
-                const returnHome = astar.search(transposedGraph, transposedGraph.grid[newPos.x][newPos.y], transposedGraph.grid[start.x][start.y]);
-                if (!canReach(returnHome.length, newEnergy, step + 2, moves)) continue;
+                if (!canReach(distanceFromStart[newPos.y][newPos.x], newEnergy, step + 2, moves)) continue;
 
-                const newmap = item.map.map(row => [...row]);
-                e.changes.forEach(change => {
-                    newmap[change.where.y][change.where.x] = change.to;
-                });
+                // Shallow copy rows only
+                const newmap = item.map.slice();
+                for (const change of e.changes) {
+                    const y = change.where.y;
+                    newmap[y] = [...newmap[y]];
+                    newmap[y][change.where.x] = change.to;
+                }
 
-                // prevPos: second-to-last position across the whole sequence
-                const prevPos = e.steps.length >= 2
-                    ? e.steps[e.steps.length - 2].from
-                    : item.lastPos;
+                const prevPos = e.steps.length >= 2 ? e.steps[e.steps.length - 2].from : item.lastPos;
 
                 const newItem: BeamItem = {
                     sequence: [...item.sequence, e.steps],
-                    score: newScore,
+                    score: item.score + e.dscore,
                     energy: newEnergy,
                     map: newmap,
                     lastPos: newPos,
                     prevPos,
-                }
+                };
 
-                if (bestCompleted === null || newScore > bestCompleted.score) {
-                    bestCompleted = newItem;
-                }
+                if (!bestCompleted || newItem.score > bestCompleted.score) bestCompleted = newItem;
                 candidates.push(newItem);
             }
         }
 
-        candidates.sort((a, b) => b.score - a.score);
-        beam = candidates.slice(0, beamWidth);
-        if (beam.length === 0) break;
-
+        beam = topK(candidates, beamWidth);
+        if (!beam.length) break;
     }
 
     const winner = bestCompleted!;
@@ -138,8 +162,6 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         moves
     );
 
-    console.log(returnMoves)
-
     if (returnMoves) {
         for (const tick of returnMoves) {
             winner.sequence.push(tick);
@@ -147,10 +169,11 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     } else {
         console.warn("Could not return to start within energy/ticks");
     }
+
     const path = winner.sequence.map(ms => ms.map(m => m.to));
     const deltas = generateDeltas(winner.sequence, map);
 
-    return { path, deltas }
+    return { path, deltas };
 }
 
 const directions = [
