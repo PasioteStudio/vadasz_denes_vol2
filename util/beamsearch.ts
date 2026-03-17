@@ -77,7 +77,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
         for (const item of beam) {
             const position = item.lastPos;
-            const returnHome = astar.search(transposedGraph, transposedGraph.grid[position.y][position.x], transposedGraph.grid[start.y][start.x]);
+            const returnHome = astar.search(transposedGraph, transposedGraph.grid[position.x][position.y], transposedGraph.grid[start.x][start.y]);
 
             if (!canReach(returnHome.length, item.energy, step + 2, moves)) {
                 continue;
@@ -91,7 +91,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
                 const newScore = item.score + e.dscore;
                 const newEnergy = Math.max(0, Math.min(item.energy + e.denergy, 100));
 
-                const returnHome = astar.search(transposedGraph, transposedGraph.grid[newPos.y][newPos.x], transposedGraph.grid[start.y][start.x]);
+                const returnHome = astar.search(transposedGraph, transposedGraph.grid[newPos.x][newPos.y], transposedGraph.grid[start.x][start.y]);
                 if (!canReach(returnHome.length, newEnergy, step + 2, moves)) continue;
 
                 const newmap = item.map.map(row => [...row]);
