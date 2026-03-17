@@ -24,7 +24,7 @@ export default function CurrentAction() {
     return (
         <div
             className={`
-        w-max p-2
+        w-[15vw] p-2
         bg-[#1e1e2f]/90 border border-[#ff4500]
         rounded-lg shadow-lg
         text-[#ffdda0] font-mono

@@ -12,6 +12,7 @@ import { generateFlavoredMap, getStartingPoint } from "@/util/map";
 import { clamp } from "three/src/math/MathUtils.js";
 import { deepCopy } from "@/util/path";
 import LoadingScreen from "@/components/loading/LoadingScreen";
+import { beamsolve } from "@/util/beamsearch";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "direction" | "setDirection">>({
@@ -63,7 +64,6 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   }, [deltas, map, cycle.currentTick]);
 
   const recalculateSnapshots = useCallback((fromTick: number, toTick: number) => {
-    const cTick = fromTick;
     const direction = toTick < fromTick ? -1 : 1
     const deltasToExecute =
       toTick < fromTick
@@ -81,7 +81,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     let newMap = deepCopy(flavoredMap.current);
 
     deltasToExecute.forEach(d => {
-      energy = getEnergyForTick(cTick, deltas);
+      energy = getEnergyForTick(toTick+1, deltas);
       position = processPositionChanges(position, d.moves, direction)
       inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
       logs = processLogChanges(logs, d.logsAdded, direction)
@@ -103,8 +103,8 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   useEffect(() => {
     if (deltas.length > 1) return
     flavoredMap.current = generateFlavoredMap(map);
-    const start = new Date()
-    const worker = new Worker(new URL('@/util/algorithm.worker.ts', import.meta.url), { type: 'module' })
+    const start = Date.now();
+    const worker = new Worker(new URL('@/util/beamsearch.worker.ts', import.meta.url), { type: 'module' })
     worker.postMessage({
       type: "makePath",
       iterations: timeLimit,
@@ -112,17 +112,17 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     });
     worker.onmessage = (event) => {
       if (event.data.type === "makePathResult") {
-        const end = new Date()
-        console.log("time: ", end.getTime() - start.getTime())
+        const end = Date.now()
+        console.log("time: ", end - start)
         const path = event.data.result;
         setPath(path.path);
-        // console.log("deltas: ", path.deltas)
         console.log("path:", path.path)
         setDeltas(path.deltas);
         setIsLoading(false)
       }
       worker.terminate();
     };
+
   }, [initialMap])
 
 
