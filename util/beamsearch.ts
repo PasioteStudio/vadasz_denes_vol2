@@ -64,7 +64,6 @@ function computeDistanceMap(grid: number[][], start: Position): number[][] {
     return distance;
 }
 
-// Helper: top-K selection using partial sort
 function topK<T>(arr: T[], k: number, scoreFn: (x: T) => number = (x: any) => x.score): T[] {
     if (arr.length <= k) return arr;
     arr.sort((a, b) => scoreFn(b) - scoreFn(a));
