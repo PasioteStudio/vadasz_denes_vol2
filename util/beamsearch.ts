@@ -160,33 +160,30 @@ const directions = [
 ]
 
 const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Expansion[] => {
-
     const nextTick = item.sequence.length;
     const chargeAmount = nextTick % 48 >= 32 ? 0 : dayCharge;
-
-    const possibleActions: action[] = [];
     const lastPos = item.lastPos;
+    const prevPos = item.prevPos;
 
     const standingOnOre = isOre(item.map[lastPos.y][lastPos.x]);
+    const possibleActions: action[] = [];
 
-    if (standingOnOre) {
-        if (consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
-    } else {
+    if (standingOnOre && consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
+    if (!standingOnOre) {
         if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
         if (consumption[action.move2] <= item.energy) possibleActions.push(action.move2);
         if (consumption[action.move3] <= item.energy) possibleActions.push(action.move3);
     }
-
     if (possibleActions.length === 0) possibleActions.push(action.standby);
 
     const expansions: Expansion[] = [];
 
-    for (const possibility of possibleActions) {
+    for (const act of possibleActions) {
+        const dEnergy = chargeAmount - consumption[act];
 
-        // STANDBY
-        if (possibility === action.standby) {
+        if (act === action.standby) {
             expansions.push({
-                denergy: chargeAmount - consumption[possibility],
+                denergy: dEnergy,
                 dscore: 0,
                 steps: [{ from: lastPos, to: lastPos, mode: "wait" }],
                 changes: [],
@@ -194,123 +191,50 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
             continue;
         }
 
-        // MINE
-        if (possibility === action.mine) {
+        if (act === action.mine) {
             expansions.push({
-                denergy: chargeAmount - consumption[possibility],
+                denergy: dEnergy,
                 dscore: 1100,
                 steps: [{ from: lastPos, to: lastPos, mode: "mine", ore: item.map[lastPos.y][lastPos.x] }],
-                changes: [{ where: { ...lastPos }, to: Tile.Empty }]
+                changes: [{ where: { ...lastPos }, to: Tile.Empty }],
             });
             continue;
         }
 
-        const currentPos = lastPos;
-        const prevPos = item.prevPos;
+        // For MOVE1, MOVE2, MOVE3
+        const moveLength = act === action.move1 ? 1 : act === action.move2 ? 2 : 3;
 
-        // MOVE1
-        if (possibility === action.move1) {
-            for (const [dx, dy] of directions) {
-                const nx = currentPos.x + dx;
-                const ny = currentPos.y + dy;
+        for (const [dx, dy] of directions) {
+            let px = lastPos.x;
+            let py = lastPos.y;
+            const steps: Move[] = [];
+            let valid = true;
 
-                if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) continue;
-                if (grid[ny][nx] === 0) continue;
-                if (nx === prevPos.x && ny === prevPos.y) continue;
+            for (let step = 0; step < moveLength; step++) {
+                const nx = px + dx;
+                const ny = py + dy;
 
-                expansions.push({
-                    denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: nx, y: ny }, orePositions, item.sequence, [
-                        { from: currentPos, to: { x: nx, y: ny }, mode: "move" }
-                    ]),
-                    steps: [{ from: currentPos, to: { x: nx, y: ny }, mode: "move" }],
-                    changes: [],
-                });
+                if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) { valid = false; break; }
+                if (grid[ny][nx] === 0) { valid = false; break; }
+                if (nx === prevPos.x && ny === prevPos.y) { valid = false; break; }
+
+                steps.push({ from: { x: px, y: py }, to: { x: nx, y: ny }, mode: "move" });
+                px = nx; py = ny;
             }
-            continue;
-        }
 
-        // MOVE2
-        if (possibility === action.move2) {
-            for (const [dx, dy] of directions) {
+            if (!valid || steps.length !== moveLength) continue;
 
-                let px = currentPos.x;
-                let py = currentPos.y;
-                const steps: Move[] = [];
-
-                for (let step = 0; step < 2; step++) {
-                    const nx = px + dx;
-                    const ny = py + dy;
-
-                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
-                        steps.length = 0;
-                        break;
-                    }
-                    if (grid[ny][nx] === 0) {
-                        steps.length = 0;
-                        break;
-                    }
-
-                    steps.push({ from: { x: px, y: py }, to: { x: nx, y: ny }, mode: "move" });
-                    px = nx;
-                    py = ny;
-                }
-
-                if (steps.length !== 2) continue;
-                if (px === currentPos.x && py === currentPos.y) continue;
-
-                expansions.push({
-                    denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
-                    steps,
-                    changes: [],
-                });
-            }
-            continue;
-        }
-
-        // MOVE3
-        if (possibility === action.move3) {
-            for (const [dx, dy] of directions) {
-
-                let px = currentPos.x;
-                let py = currentPos.y;
-                const steps: Move[] = [];
-
-                for (let step = 0; step < 3; step++) {
-                    const nx = px + dx;
-                    const ny = py + dy;
-
-                    if (ny < 0 || ny >= grid.length || nx < 0 || nx >= grid[0].length) {
-                        steps.length = 0;
-                        break;
-                    }
-                    if (grid[ny][nx] === 0) {
-                        steps.length = 0;
-                        break;
-                    }
-
-                    steps.push({ from: { x: px, y: py }, to: { x: nx, y: ny }, mode: "move" });
-                    px = nx;
-                    py = ny;
-                }
-
-                if (steps.length !== 3) continue;
-                if (px === currentPos.x && py === currentPos.y) continue;
-
-                expansions.push({
-                    denergy: chargeAmount - consumption[possibility],
-                    dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
-                    steps,
-                    changes: [],
-                });
-            }
-            continue;
+            expansions.push({
+                denergy: dEnergy,
+                dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
+                steps,
+                changes: [],
+            });
         }
     }
 
     return expansions;
-}
+};
 
 const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
     const deltas: Delta[] = [];
@@ -399,7 +323,6 @@ function canReach(
     return true;
 }
 
-// orePositions passed in — no recomputation per call
 const calculateMoveScore = (
     map: Tile[][],
     pos: Position,
