@@ -170,7 +170,6 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
     if (standingOnOre) {
         if (consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
     } else {
-        if (consumption[action.mine] <= item.energy && standingOnOre) possibleActions.push(action.mine);
         if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
         if (consumption[action.move2] <= item.energy) possibleActions.push(action.move2);
         if (consumption[action.move3] <= item.energy) possibleActions.push(action.move3);
