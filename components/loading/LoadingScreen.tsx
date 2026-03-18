@@ -2,30 +2,28 @@
 import { useEffect, useState } from "react";
 
 export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
-    const [visible, setVisible] = useState(isLoading); // track visibility
-    const [fade, setFade] = useState(false); // for fade-in/out
-    const MIN_DISPLAY_TIME = 1500;
+    const [visible, setVisible] = useState(isLoading);
+    const [fade, setFade] = useState(false);
+    const MIN_DISPLAY_TIME = 1500; // Ezzel elkerüljük a hirtelen felvillanást és javítjuk a felhasználói élményt.
     const [startTime, setStartTime] = useState<number | null>(null);
 
-    // Handle mount: start fade-in and record start time
     useEffect(() => {
         if (isLoading) {
             setVisible(true);
-            setFade(true); // fade in
+            setFade(true);
             setStartTime(Date.now());
         }
     }, [isLoading]);
 
-    // Handle loading finished
+    // Ha a töltésnek vége
     useEffect(() => {
         if (!isLoading && visible) {
             const elapsed = startTime ? Date.now() - startTime : 0;
             const remaining = Math.max(MIN_DISPLAY_TIME - elapsed, 0);
 
             const timeout = setTimeout(() => {
-                setFade(false); // start fade out
-                // remove component after fade out duration
-                const fadeDuration = 500; // match CSS transition
+                setFade(false); 
+                const fadeDuration = 500;
                 setTimeout(() => setVisible(false), fadeDuration);
             }, remaining);
 
