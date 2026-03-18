@@ -28,7 +28,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   });
   const t = useRef(0);
   const startingPoint = getStartingPoint(initialMap)
-  const [map, setMap] = useState<Tile[][]>(initialMap);
+  const [map] = useState<Tile[][]>(initialMap);
   const flavoredMap = useRef<[boolean, Tile, Tile | null][][]>([])
   const [deltas, setDeltas] = useState<Delta[]>([]);
   const [isLoading, setIsLoading] = useState(true);

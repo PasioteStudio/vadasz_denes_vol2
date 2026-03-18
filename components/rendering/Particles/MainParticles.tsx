@@ -35,7 +35,7 @@ export function MainParticle({ camPosition }: IMainParticle) {
     if (!dustRef.current) return
 
     //megnézzük a camera pozícióját, és ha túl messze van a legutóbbi reset pozíciótól, akkor reseteljük a dustot
-    const [lastX, lastY, lastZ] = lastResetPos.current
+    const [lastX, , lastZ] = lastResetPos.current
     const dx = Math.abs(camPosition[0] - lastX)
     const dz = Math.abs(camPosition[2] - lastZ)
     
