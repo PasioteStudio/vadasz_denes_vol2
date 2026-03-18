@@ -87,15 +87,14 @@ export const isValidMap = (map: Tile[][]): boolean => {
  * @returns {Position} `Position`
  */
 export const getStartingPoint = (map: Tile[][]): Position | undefined => {
-  let position: Position | undefined = undefined;
   for (let y = 0; y < map.length; y++) {
     for (let x = 0; x < map[y].length; x++) {
       if (map[y][x] === Tile.Start) {
-        position = { x: x, y: y };
+        return { x, y };
       }
     }
   }
-  return position
+  return undefined
 }
 
 /**
@@ -108,10 +107,9 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
   for (let y = 0; y < map.length; y++) {
     flavoredMap.push([]);
     for (let x = 0; x < map[y].length; x++) {
-      const tiletype = map[y][x];
       flavoredMap[y].push([
         false,
-        randomTileFrom(tiletype),
+        randomTileFrom(map[y][x]),
         null,
       ])
     }
@@ -147,6 +145,6 @@ export const randomTileFrom = (t: Tile): Tile => {
       break;
   }
 
-  let int = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
-  return int as Tile;
+  let tileValue = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+  return tileValue as Tile;
 };
