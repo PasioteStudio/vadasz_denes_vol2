@@ -39,21 +39,22 @@ export function Sky() {
   }, [scene]);
 
 
-useFrame(() => {
+useFrame((_,delta) => {
     if (!skyRef.current) return;
     //kiszámoljuk a fordulást úgy mint a fényeknél.
-    const duration = timeOfDay === "day" ? day : night;
+    skyRef.current.rotation.y += delta *0.1
+    // const duration = timeOfDay === "day" ? day : night;
 
-    const tickInPhase =
-      timeOfDay === "day"
-        ? currentTick % day
-        : currentTick % night;
+    // const tickInPhase =
+    //   timeOfDay === "day"
+    //     ? currentTick % day
+    //     : currentTick % night;
 
-    const ratio = tickInPhase / duration;
+    // const ratio = tickInPhase / duration;
 
-    const angle = ratio * Math.PI * 2;
+    // const angle = ratio * Math.PI * 2;
 
-    skyRef.current.rotation.y = angle;
+    // skyRef.current.rotation.y = angle;
   });
 
   return null;

@@ -3,7 +3,7 @@ import { MarsRover } from '@/Prefabs/MarsRover';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
 import { PerspectiveCamera as PerspectiveCameraComponent } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
@@ -16,6 +16,8 @@ import { MainParticle } from './Particles/MainParticles';
 import { clampNum } from '@/util/math';
 import { BottomPlane } from '@/Prefabs/BottomPlane';
 import { lerp } from 'three/src/math/MathUtils.js';
+import * as THREE from "three"
+import { BackgroundSky } from './BackgroundSky';
 
 const CAM_HEIGHT = 60;
 
@@ -156,10 +158,13 @@ export const Renderer = () => {
     return () => {
       window.removeEventListener('wheel', handleScroll);
     };
+
+    
   }, []);
 
   const toggleInventory = () => setInventoryOpen(p => !p);
   const camPos: [number, number, number] = [direction.x, CAM_HEIGHT, direction.y];
+
 
   return (
     <>
@@ -168,6 +173,7 @@ export const Renderer = () => {
         style={{ width: '100vw', height: '100vh' }}
         className="bg-[#1b0000]"
       >
+
         <PerspectiveCameraComponent
           ref={cameraRef}
           makeDefault
@@ -176,10 +182,15 @@ export const Renderer = () => {
           fov={fov}
         />
 
+
         <ambientLight
           intensity={timeOfDay === 'day' ? 0.6 : 0.3}
           color={0xff6666}
         />
+
+
+        <BackgroundSky/>
+        <ambientLight intensity={timeOfDay == 'day' ? 0.6 : 0.3} color={0xff6666} />
 
         <DayNightDirectionalLights />
 
@@ -204,7 +215,11 @@ export const Renderer = () => {
 
         <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
 
-        <Sky />
+
+        {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
+        {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
+         <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
+       
       </Canvas>
 
       {isInventoryOpen && (
