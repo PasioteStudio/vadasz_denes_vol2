@@ -71,11 +71,11 @@ export const processInventoryChanges = (startInv: Item[], delta: InventoryChange
 }
 
 /**
- * Adott delta, irány, napló állapot alapján megadja az új naptárat.
+ * Adott delta, irány, napló állapot alapján megadja az új naplót.
  * @param {Log[]} startLogs `Log[]` - Eredeti napló
  * @param {Delta} delta `Delta` - A változás objektuma
  * @param {1|-1} direction `1|-1` - A lejátszási irány 
- * @returns {Log[]} `Log[]` - Az új naptár
+ * @returns {Log[]} `Log[]` - Az új napló
  */
 export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction: -1 | 1): Log[] => {
     const deltas = direction == 1 ? [...addedLogs] : [...addedLogs].reverse()
