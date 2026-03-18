@@ -10,7 +10,7 @@ export default function App() {
     const [timeLimit, setTimeLimit] = useState(0);
     const [initialMap, setInitialMap] = useState<Tile[][]>([]);
     return <>
-        {timeLimit >= 48 && initialMap != undefined ?
+        {timeLimit >= 48 && initialMap.length > 0 ?
             <Home initialMap={initialMap} timeLimit={timeLimit} />
             : <InitialPage setTimeLimit={setTimeLimit} setInitialMap={setInitialMap} />
         }
