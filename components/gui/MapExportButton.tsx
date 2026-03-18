@@ -8,13 +8,13 @@ export default function MapExportButton() {
     const firstmap = useTimeline().map;
 
     useEffect(() => {
-        let _txt = "";
+        const lines: string[] = [];
         firstmap?.forEach(r => {
-            const line = r.map(f => toMapTile(f)).join(',')
-            _txt += line + "\n"
-        })
-        setText(_txt);
-    }, [])
+            const line = r.map(f => toMapTile(f)).join(',');
+            lines.push(line);
+        });
+        setText(lines.join("\n"));
+    }, [firstmap])
     return <button className="cursor-pointer bg-[#1e1e2f]/90 border border-[#ff4500] text-[#ffdda0] rounded-lg shadow-lg p-2 text-sm" onClick={() => {
         const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);

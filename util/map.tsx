@@ -100,19 +100,19 @@ export const getStartingPoint = (map: Tile[][]): Position => {
  * @returns {[boolean, Tile, Tile|null][][]} finom térkép [bányászott-e, eredeti, módosított?][][]
  */
 export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][][] => {
-  const falvoredMap: [boolean, Tile, Tile|null][][] = [];
+  const flavoredMap: [boolean, Tile, Tile|null][][] = [];
   for (let y = 0; y < map.length; y++) {
-    falvoredMap.push([]);
+    flavoredMap.push([]);
     for (let x = 0; x < map.length; x++) {
       const tiletype = map[y][x];
-      falvoredMap[y].push([
+      flavoredMap[y].push([
         false,
         randomTileFrom(tiletype),
         null,
       ])
     }
   }
-  return falvoredMap;
+  return flavoredMap;
 }
 
 /**
