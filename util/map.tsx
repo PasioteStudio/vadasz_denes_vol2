@@ -56,6 +56,7 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
       lines = data.split("\n").filter(line => line.trim() !== "");
     }).catch(() => {
       alert("Hiba a térkép beolvasásakor!");
+      throw new Error("Hiba a térkép beolvasásakor!");
     })
   } else {
     lines = url.split("\n").filter(line => line.trim() !== "");
