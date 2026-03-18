@@ -202,7 +202,7 @@ export const Renderer = () => {
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
          <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
-        <Sky isDay={timeOfDay == "day"}/>
+        <Sky stopped={timeOfDay == "day"}/>
       </Canvas>
 
       {isInventoryOpen && (
