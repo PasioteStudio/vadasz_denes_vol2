@@ -65,11 +65,7 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
   for (let i = 0; i < lines.length; i++) {
     map.push([]);
     const currentRow = map[map.length - 1];
-    const tiles = lines[i].trim().split(',').map((s): Tile => {
-      return toTile(s)
-    })
-    tiles.forEach(t => currentRow.push(t));
-
+    currentRow.push(...lines[i].trim().split(',').map(toTile));
   }
   return map;
 }
