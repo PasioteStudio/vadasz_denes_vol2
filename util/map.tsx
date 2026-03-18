@@ -12,7 +12,7 @@ export function generateMap(): Tile[][] {
     width: 50
   }
   const mapArray: Tile[][] = [];
-  let startingPointSet = false
+  let startingPointSet = false;
   for (let i = 0; i < mapConstraints.height; i++) {
     const row: Tile[] = [];
     for (let j = 0; j < mapConstraints.width; j++) {
@@ -20,7 +20,7 @@ export function generateMap(): Tile[][] {
 
       const rand2 = Math.random();
       if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
-        startingPointSet = true
+        startingPointSet = true;
         row.push(Tile.Start); // Kezdőpont
       } else if (rand < 0.70) {
         row.push(Tile.Empty); // Mozgást nem gátló mező
@@ -60,7 +60,7 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
     if (lines[i].trim() == "") continue;
     map.push([]);
     const currentRow = map[map.length - 1];
-    const tiles = lines[i].trim().split(',').map((s, _i): Tile => {
+    const tiles = lines[i].trim().split(',').map((s): Tile => {
       return toTile(s)
     })
     tiles.forEach(t => currentRow.push(t));
@@ -103,7 +103,7 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
   const flavoredMap: [boolean, Tile, Tile|null][][] = [];
   for (let y = 0; y < map.length; y++) {
     flavoredMap.push([]);
-    for (let x = 0; x < map.length; x++) {
+    for (let x = 0; x < map[y].length; x++) {
       const tiletype = map[y][x];
       flavoredMap[y].push([
         false,
