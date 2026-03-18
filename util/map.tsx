@@ -19,7 +19,10 @@ export function generateMap(): Tile[][] {
       const rand = Math.random();
 
       const rand2 = Math.random();
-      if ((rand2 < 0.0005 && !startingPointSet) || (i === mapConstraints.height - 1 && j === mapConstraints.width - 1 && !startingPointSet)) {
+
+      const shouldSetStartHere = rand2 < 0.0005 && !startingPointSet;
+      const isLastCellWithoutStart = i === mapConstraints.height - 1 && j === mapConstraints.width - 1 && !startingPointSet;
+      if (shouldSetStartHere || isLastCellWithoutStart) {
         startingPointSet = true;
         row.push(Tile.Start); // Kezdőpont
       } else if (rand < 0.70) {
@@ -42,18 +45,20 @@ export function generateMap(): Tile[][] {
 /**
  * @async
  * URL-lel megadott fájlból készít mező-térképet.
- * @param {string} URL fájl URL
+ * @param {string} url fájl URL
  * @param {boolean} isText
  * @returns {Promise<Tile[][]>} map `Promise<Tile[][]>`
  */
-export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
+export async function readMap(url: string, isText = false): Promise<Tile[][]> {
   let lines: string[] = [];
   if (!isText) {
-    await fetch(URL).then(res => res.text()).then((data) => {
+    await fetch(url).then(res => res.text()).then((data) => {
       lines = data.split("\n").filter(line => line.trim() !== "");
+    }).catch(() => {
+      alert("Hiba a térkép beolvasásakor!");
     })
   } else {
-    lines = URL.split("\n").filter(line => line.trim() !== "");
+    lines = url.split("\n").filter(line => line.trim() !== "");
   }
   const map: Tile[][] = [];
   for (let i = 0; i < lines.length; i++) {
@@ -74,7 +79,7 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
  * @return {boolean} `true` ha érvényes, `false` ha nem
  */
 export const isValidMap = (map: Tile[][]): boolean => {
-  return map.length > 0 && map.find(row => row.find(tile => tile == Tile.Start)) != undefined;
+  return map.length > 0 && map.find(row => row.find(tile => tile === Tile.Start)) != undefined;
 }
 
 /**
@@ -86,7 +91,7 @@ export const getStartingPoint = (map: Tile[][]): Position => {
   const position: Position = { x: 0, y: 0 }
   for (let y = 0; y < map.length; y++) {
     for (let x = 0; x < map[y].length; x++) {
-      if (map[y][x] == Tile.Start) {
+      if (map[y][x] === Tile.Start) {
         return { x: x, y: y }
       }
     }
