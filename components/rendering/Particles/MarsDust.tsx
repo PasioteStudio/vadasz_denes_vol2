@@ -1,6 +1,4 @@
 import * as THREE from "three"
-import { useFrame, useThree } from "@react-three/fiber"
-import { useEffect, useRef } from "react"
 
 export class Dust {
   dustCount = 2000

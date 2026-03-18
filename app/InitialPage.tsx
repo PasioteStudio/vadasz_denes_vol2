@@ -8,7 +8,6 @@ import { Terrain } from "@/Prefabs/static/Terrain";
 import { Tile } from "@/lib/constants";
 import { ParticleManager } from "@/components/rendering/Particles/ParticleManager";
 import Sky from "@/components/rendering/Sky";
-import { Vector3 } from "three";
 
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (tiles: Tile[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);

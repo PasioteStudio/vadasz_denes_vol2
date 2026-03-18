@@ -5,14 +5,12 @@ import { CycleContextT } from "@/types/CycleContextTypes";
 import { GUI } from "@/components/gui/GUI";
 import { Renderer } from "@/components/rendering/Renderer";
 import { Tile } from "@/lib/constants";
-import { Delta, Move } from "@/types/MapTimelineContextTypes";
+import { Delta } from "@/types/MapTimelineContextTypes";
 import { Item, Log, Position, RoverT } from "@/types/RoverContextTypes";
 import { getEnergyForTick, processInventoryChanges, processLogChanges, processMapChanges, processPositionChanges } from "@/util/deltas";
 import { generateFlavoredMap, getStartingPoint } from "@/util/map";
-import { clamp } from "three/src/math/MathUtils.js";
-import { deepCopy } from "@/util/path";
+import { deepCopy } from "@/util/math";
 import LoadingScreen from "@/components/loading/LoadingScreen";
-import { beamsolve } from "@/util/beamsearch";
 
 export default function Home({ timeLimit, initialMap }: { timeLimit: number, initialMap: Tile[][] }) {
   const [cycle, setCycle] = useState<Omit<CycleContextT, "t" | "player" | "timeLimit" | "direction" | "setDirection">>({

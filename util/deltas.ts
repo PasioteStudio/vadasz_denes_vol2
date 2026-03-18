@@ -3,7 +3,6 @@ import { Item, Log, Position } from "@/types/RoverContextTypes"
 import { Tile } from "../lib/constants"
 import { clamp } from "three/src/math/MathUtils.js"
 import { randomTileFrom } from "./map"
-import { deepCopy } from "./path"
 
 export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()

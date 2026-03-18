@@ -1,4 +1,4 @@
-import { SPEED, Tile } from "@/lib/constants"
+import { Tile } from "@/lib/constants"
 
 export type Position = {
     x: number,

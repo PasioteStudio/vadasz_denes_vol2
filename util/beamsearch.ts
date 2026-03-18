@@ -2,9 +2,8 @@ import { isOre, Tile } from "@/lib/constants";
 import { Delta, InventoryChange, Move } from "@/types/MapTimelineContextTypes";
 import { Log, Position } from "@/types/RoverContextTypes";
 import { getStartingPoint } from "./map";
-import { mapToOrePositions } from "./ore";
 import { Graph, astar } from "@/lib/astar"
-import { getlast, tileToString } from "./tile";
+import { tileToString } from "./tile";
 import { clamp } from "three/src/math/MathUtils.js";
 
 type BeamItem = {

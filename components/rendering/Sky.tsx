@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useCycle } from "@/lib/contexts"
 import { useThree, useFrame } from "@react-three/fiber";
@@ -9,7 +9,7 @@ export function Sky() {
   const { scene } = useThree();
   const skyRef = useRef<THREE.Mesh | null>(null);
   
-  const { currentTick, timeOfDay, day, night, t, direction } = useCycle()
+  const { currentTick, timeOfDay, day, night } = useCycle()
 
   useEffect(() => {
     const loader = new THREE.TextureLoader();
