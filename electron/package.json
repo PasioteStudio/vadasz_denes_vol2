@@ -5,13 +5,12 @@
   "author": {
     "name": "SzigMakik"
   },
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "package": "electron-builder -w --x64"
   },
   "dependencies": {
-    "electron-updater": "^6.8.3",
     "express": "^5.2.1"
   },
   "devDependencies": {
@@ -29,9 +28,8 @@
     "publish": {
       "provider": "github",
       "owner": "PasioteStudio",
-      "releaseType": "prerelease",
-      "repo": "vadasz_denes_vol2",
-      "publishAutoUpdate": true
+      "releaseType": "release",
+      "repo": "vadasz_denes_vol2"
     },
     "asar": true
   }
