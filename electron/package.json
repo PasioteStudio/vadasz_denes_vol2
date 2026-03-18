@@ -20,6 +20,9 @@
   },
   "build": {
     "appId": "vadasz.denes.szigmakik",
+    "directories": {
+      "output": "../electron-builded"
+    },
     "productName": "Vadász Dénes",
     "compression": "maximum",
     "electronLanguages": "hu",
