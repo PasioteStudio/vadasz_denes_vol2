@@ -15,7 +15,7 @@ export default function MapExportButton() {
         })
         setText(_txt);
     }, [])
-    return <button className="bg-[#1e1e2f]/90 border border-[#ff4500] text-[#ffdda0] rounded-lg shadow-lg p-2 text-sm" onClick={() => {
+    return <button className="cursor-pointer bg-[#1e1e2f]/90 border border-[#ff4500] text-[#ffdda0] rounded-lg shadow-lg p-2 text-sm" onClick={() => {
         const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
 
