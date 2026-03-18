@@ -11,7 +11,6 @@ type BeamItem = {
     score: number,
     energy: number,
     map: Tile[][],
-    // cached to avoid recomputing in expand
     lastPos: Position,
     prevPos: Position,
 }
@@ -32,6 +31,8 @@ const consumption: Record<action, number> = {
 }
 const dayCharge = +10;
 
+
+// Ide a legegyszerűbb a BFS, mert nincs minden "él" súlya ugyanannyi
 function computeDistanceMap(grid: number[][], start: Position): number[][] {
     const rows = grid.length;
     const cols = grid[0].length;
@@ -62,6 +63,7 @@ function computeDistanceMap(grid: number[][], start: Position): number[][] {
     return distance;
 }
 
+// egy, a látszatnál sokkal egyszerűbb funkció a "legjobb generáció" kiválasztására minden expansion után
 function topK<T>(arr: T[], k: number, scoreFn: (x: T) => number = (x: any) => x.score): T[] {
     if (arr.length <= k) return arr;
     arr.sort((a, b) => scoreFn(b) - scoreFn(a));
@@ -81,7 +83,6 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
     const start = getStartingPoint(map);
 
-    // Precompute ore positions
     const orePositions: Position[] = [];
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
@@ -89,10 +90,12 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         }
     }
 
-    // Precompute distance map from start
+    // Ha az elején kiszámoljuk az összes tile-on a távolságot a starthoz, akkor nagyon, nagyon sok computing powert 
+    // megspórolunk ahhoz képest, mintha minden mozdulat után pathfinding-ot használnánk...
     const distanceFromStart = computeDistanceMap(moveableGrid, start);
 
-    let beam: BeamItem[] = [{
+    // kezdő pont a beam-hez
+    let beam: BeamItem[] = [{ 
         score: 0,
         sequence: [[{ from: start, to: start, mode: "move" }]],
         energy: 100,
@@ -103,23 +106,27 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
 
     let bestCompleted: BeamItem | null = null;
 
+    // itt loopolunk végig az összes lépésen, amíg van időnk
     for (let step = 0; step < moves; step++) {
         const candidates: BeamItem[] = [];
 
         for (const item of beam) {
             const pos = item.lastPos;
-            if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue;
 
-            const expansions = expand(item, moveableGrid, orePositions);
+            // ha nem érünk innen haza, akkor nincs értelme tovább számolni.
+            if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue; 
 
-            for (const e of expansions) {
+            const expansions = expand(item, moveableGrid, orePositions); // bővítés
+
+            for (const e of expansions) { // bővítések kezelése
                 const lastStep = e.steps[e.steps.length - 1];
                 const newPos = lastStep.to;
                 const newEnergy = Math.max(0, Math.min(item.energy + e.denergy, 100));
 
                 if (!canReach(distanceFromStart[newPos.y][newPos.x], newEnergy, step + 2, moves)) continue;
 
-                // Shallow copy rows only
+                // Igazából elég csak a változott sorokat shallow copyzni, 
+                // mert ami nem változik, annak nem baj, ha ugyanaz a referenciája
                 const newmap = item.map.slice();
                 for (const change of e.changes) {
                     const y = change.where.y;
@@ -143,6 +150,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
             }
         }
 
+        //legjobb "generáció" kiválasztása
         beam = topK(candidates, beamWidth);
         if (!beam.length) break;
     }
@@ -150,6 +158,9 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     const winner = bestCompleted!;
     const lastMove = winner.lastPos;
 
+    // maga a beam search csak addig számol, ameddig ki tudja használni az időt és pontot tud gyűjteni. 
+    // Amikor eléri azt a pontot, hogy haza kell érkeznie (idő vagy elfogyott ércek miatt), 
+    // akkor megtervezzük a hazautat és greedy módon hazamegyünk.
     const returnMoves = planReturnPath(
         transposedGraph,
         lastMove,
@@ -159,15 +170,18 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         moves
     );
 
-    if (returnMoves) {
+    // A hazaút mozdulataival kiegészítjük a nyertes beam szekvenciáját.
+    if (returnMoves) { 
         for (const tick of returnMoves) {
             winner.sequence.push(tick);
         }
     } else {
-        console.warn("Could not return to start within energy/ticks");
+        console.warn("Valami világrengető borzalom történt...");
     }
 
     const path = winner.sequence.map(ms => ms.map(m => m.to));
+    // A szekvenciából legeneráltatjuk a változásokat. Ez eredetileg minden tick-re egy snapshot volt.
+    // Erről váltottunk át deltákra, mert a snapshotok nagyon memory-heavy objektumok voltak.
     const deltas = generateDeltas(winner.sequence, map);
 
     return { path, deltas };
@@ -179,6 +193,11 @@ const directions = [
     [-1, 1], [0, 1], [1, 1],
 ]
 
+
+// Ez a funkció bővíti a sugarat. Működése:
+// Végigmegy a jelenlegi beam item helyzetéből megengedhető összes lehetőségen a szabályoknak megfelelően.
+// (Ilyen szabály például, hogy nem léphet akadályra, illetve ha ércre lép, akkor csak bányászást priorizálhat.)
+// Mozgásokhoz pedig kiszámít egy pontszámot. Ez a calculateMoveScore() dolga. Bővebben erről lentebb.
 const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Expansion[] => {
     const nextTick = item.sequence.length;
     const chargeAmount = nextTick % 48 >= 32 ? 0 : dayCharge;
@@ -188,6 +207,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
     const standingOnOre = isOre(item.map[lastPos.y][lastPos.x]);
     const possibleActions: action[] = [];
 
+    // szabályok a jelenleg lehetséges mozdulatokhoz (ércen áll-e, energia figyelembe vétele)
     if (standingOnOre && consumption[action.mine] <= item.energy) possibleActions.push(action.mine);
     if (!standingOnOre) {
         if (consumption[action.move1] <= item.energy) possibleActions.push(action.move1);
@@ -198,10 +218,13 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
     const expansions: Expansion[] = [];
 
+    // Végigmegyünk az előzőleg kiválasztott lehetőségeken.
+    // Emellett mindegyik mozdulathoz kiszámolunk egy pontszámot. 
     for (const act of possibleActions) {
         const dEnergy = chargeAmount - consumption[act];
 
         if (act === action.standby) {
+            // Nem szeretjük a semmit tevést, így ez nem prioritás. Nem kap pontot.
             expansions.push({
                 denergy: dEnergy,
                 dscore: 0,
@@ -212,6 +235,9 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
         }
 
         if (act === action.mine) {
+            // Igazából ez az egyik legfontosabb dolog. Aránytalanul sok pontot adunk, hogy ne lehessen ezt elérni csak mozgással.
+            // Az első verziókban az "AI" kijátszotta a szabályokat azzal, hogy egy érc mellett mozgott oda-vissza, mert abból - az akkori szabályok miatt -
+            // több pontot kapott.
             expansions.push({
                 denergy: dEnergy,
                 dscore: 1100,
@@ -221,7 +247,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
             continue;
         }
 
-        // For MOVE1, MOVE2, MOVE3
+        // Mozgások szimulálása
         const moveLength = act === action.move1 ? 1 : act === action.move2 ? 2 : 3;
 
         for (const [dx, dy] of directions) {
@@ -256,6 +282,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
     return expansions;
 };
 
+// A deltákat le tudjuk képezni a szekvenciákból és az ahhoz tartozó térképből.
 const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
     const deltas: Delta[] = [];
     let energy = 100;
@@ -276,6 +303,7 @@ const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
     return deltas;
 }
 
+// Helper funkció a delták leképezéséhez.
 const getActionCost = (moves: Move[]): number => {
     if (moves.length === 1) {
         if (moves[0].mode === "wait") return consumption[action.standby];
@@ -288,11 +316,13 @@ const getActionCost = (moves: Move[]): number => {
     return 0;
 }
 
+// Helper funkció a delták leképezéséhez.
 const getInventoryChanges = (moves: Move[], map: Tile[][]): InventoryChange[] => {
     if (moves.find(m => m.mode == "mine") === undefined) return [];
     return [{ mode: "add", amount: 1, ore: map[moves[0].to.y][moves[0].to.x] as Tile.Blue | Tile.Yellow | Tile.Green }]
 }
 
+// Helper funkció a delták leképezéséhez.
 const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
     const logs: Log[] = [];
     for (let i = 0; i < moves.length; i++) {
@@ -308,6 +338,9 @@ const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
     return logs;
 }
 
+// Ez a funkció segíti a hazaút lehetőségének ellenőrzését.
+// Hatékony módszernek ennél a projektnél a greedy metódus bizonyult.
+// Ahol tudunk, ott 3-at mozgunk. Ha nagyon elnéztük, akkor nincs mit tenni, várunk a napra.
 function canReach(
     pathLength: number,
     energy: number,
@@ -343,6 +376,13 @@ function canReach(
     return true;
 }
 
+// A legfontosabb része az egész algoritmusnak. Ez a "Heuristic", illetve az "AI" fő pontozó mechanizmusa.
+// Ezzel volt a legtöbb teendő és finomítani való, mert az első szabályokat mindig kijátszotta az algoritmus.
+// Jelenlegi szabályok:
+// - ha ércen átlép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
+// - ha érc mellé lép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
+// - a közelebbi ércek exponenciálisan több pontot adnak. --> az ércek felé mozgás bíztatása.
+// - ha az összes ércet felszedi a pályáról, nagyon magas pontot kap --> utolsó érc meghagyásának elkerülése, mert így több pontot kapott volna csak a mozgásból.
 const calculateMoveScore = (
     map: Tile[][],
     pos: Position,
@@ -350,17 +390,11 @@ const calculateMoveScore = (
     sequence: Move[][],
     candidateSteps: Move[]
 ): number => {
+    // Ha már nincs érc, nagyon sok pontot kap. Végtére ez a cél.
     if (orePositions.length === 0) return 10000;
 
-    const encode = (x: number, y: number) => x * 1000 + y;
-
-    const visitedSet = new Set<number>();
-    const n = 0; // can be parameterized
-    for (let i = Math.max(sequence.length - n, 0); i < sequence.length; i++) {
-        for (const move of sequence[i]) {
-            visitedSet.add(encode(move.to.x, move.to.y));
-        }
-    }
+    // Ez egy gyorsított kulcs készítő az adott lépésekhez. Maximum 1000 méretű (szélesség vagy hosszúság) térképnél működik.
+    const encode = (x: number, y: number) => x * 1000 + y; 
 
     const steppedOver = new Set<number>();
     for (let i = 0; i < candidateSteps.length - 1; i++) {
@@ -368,6 +402,21 @@ const calculateMoveScore = (
     }
 
     let score = 0;
+
+    // Ez egy próbálkozás volt, hogy engedjük-e neki, hogy hátráljon. 0-nál nem kap büntetést. Így a legjobb.
+    // Hagyjunk neki egy kis teret kiteljesedni :)
+    const n = 0; 
+    const visitedSet = new Set<number>();
+    for (let i = Math.max(sequence.length - n, 0); i < sequence.length; i++) {
+        for (const move of sequence[i]) {
+            visitedSet.add(encode(move.to.x, move.to.y));
+        }
+    }
+    for (const step of candidateSteps) {
+        if (visitedSet.has(encode(step.to.x, step.to.y))) score -= 30;
+    }
+
+    // Ércektől való távolság alapján pontozzuk a mozgást.
     for (const ore of orePositions) {
         if (!isOre(map[ore.y][ore.x])) continue;
 
@@ -375,12 +424,14 @@ const calculateMoveScore = (
         const dy = Math.abs(pos.y - ore.y);
         const dist = Math.max(dx, dy);
         const temp = dist + 0.1;
+        // Ez az ocsmányság 1 / Math.pow(dist+0.1, 2.5), de így egy fokkal gyorsabb.
         const base = 1 / (temp * temp * Math.sqrt(temp));
 
         const key = encode(ore.x, ore.y);
         const alreadyVisited = visitedSet.has(key);
         const walkedOver = steppedOver.has(key);
 
+        // büntetések és jutalmak
         if (dist === 0) {
             score += alreadyVisited ? -30 : base * 10;
         } else if (dist === 1) {
@@ -392,14 +443,11 @@ const calculateMoveScore = (
         if (walkedOver) score -= 30;
     }
 
-    // Extra penalty for candidate steps revisiting
-    for (const step of candidateSteps) {
-        if (visitedSet.has(encode(step.to.x, step.to.y))) score -= 30;
-    }
-
     return score;
 };
 
+
+// Hazaút elkészítése. Greedy, mivel működik a fentebbi funkció is.
 export function planReturnPath(
     graph: InstanceType<typeof Graph>,
     currentPos: Position,
@@ -415,7 +463,7 @@ export function planReturnPath(
     );
 
     if (rawPath.length === 0 && (currentPos.x !== start.x || currentPos.y !== start.y)) {
-        console.warn("No path found to start");
+        console.warn("Na ezt elnéztük.");
         return [];
     }
 
@@ -426,7 +474,6 @@ export function planReturnPath(
 
     const ticks: Move[][] = [];
     let e = energy;
-    console.log(e);
     let tick = currentTick;
     let posIndex = 0;
 
