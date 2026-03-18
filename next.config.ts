@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: "export",
   logging: {
-    browserToTerminal:"error",
+    browserToTerminal: "error",
   },
   reactStrictMode: false,
 };

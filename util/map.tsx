@@ -19,7 +19,7 @@ export function generateMap(): Tile[][] {
       const rand = Math.random();
 
       const rand2 = Math.random();
-      if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
+      if ((rand2 < 0.0005 && !startingPointSet) || (i === mapConstraints.height - 1 && j === mapConstraints.width - 1 && !startingPointSet)) {
         startingPointSet = true;
         row.push(Tile.Start); // Kezdőpont
       } else if (rand < 0.70) {
@@ -49,15 +49,15 @@ export function generateMap(): Tile[][] {
 export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
   let lines: string[] = [];
   if (!isText) {
-    await fetch(URL).then(res => res.text()).then(async (data) => {
-      lines = data.split("\n").filter(line => line.trim() != "");
+    await fetch(URL).then(res => res.text()).then((data) => {
+      lines = data.split("\n").filter(line => line.trim() !== "");
     })
   } else {
-    lines = URL.split("\n").filter(line => line.trim() != "");
+    lines = URL.split("\n").filter(line => line.trim() !== "");
   }
   const map: Tile[][] = [];
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim() == "") continue;
+    if (lines[i].trim() === "") continue;
     map.push([]);
     const currentRow = map[map.length - 1];
     const tiles = lines[i].trim().split(',').map((s): Tile => {
