@@ -9,7 +9,7 @@ export type ParticleType = {
         type: "rotate" | "move" | "mine"}[]
 }
 export class RoverDust {
-  dustCount = 2000
+  dustCount: number
   geometry: THREE.BufferGeometry
   points: THREE.Points
   velocities: Float32Array

@@ -3,8 +3,6 @@ import * as THREE from "three";
 import { useCycle } from "@/lib/contexts"
 import { useThree, useFrame } from "@react-three/fiber";
 
-
-
 export function Sky() {
   const { scene } = useThree();
   const skyRef = useRef<THREE.Mesh | null>(null);

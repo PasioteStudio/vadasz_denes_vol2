@@ -1,7 +1,7 @@
 import * as THREE from "three"
 
 export class Dust {
-  dustCount = 2000
+  dustCount: number
   geometry: THREE.BufferGeometry
   points: THREE.Points
   velocities: Float32Array

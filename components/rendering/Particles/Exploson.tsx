@@ -2,7 +2,7 @@ import * as THREE from "three"
 
 
 export class Explosion {
-  particleCount = 2000
+  particleCount: number
   geometry: THREE.BufferGeometry
   points: THREE.Points
   velocities: Float32Array

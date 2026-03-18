@@ -28,7 +28,6 @@ export default function TimeControlButtons() {
   // key events
   useEffect(() => {
     const handleKeyEvents = (e: KeyboardEvent) => {
-      console.log(e.code)
       if (e.code == "Space"){
         cycle.player.setPlaying(
           cycle.player.playing === "playing" ? "paused" : "playing"

@@ -1,12 +1,8 @@
 import * as THREE from 'three'
-import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import type { GLTF } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
 
-interface TileProps {
-  position: [number, number, number]
-}
 
 type GLTFResult = GLTF & {
   nodes: {

@@ -3,8 +3,8 @@ import { useGLTF } from '@react-three/drei';
 import { useRef, useLayoutEffect, useMemo } from 'react';
 import { Tile } from '@/lib/constants';
 import { getTileModelPath, TILE_REGISTRY } from '@/util/tileRegistry';
-import type { GLTF } from 'three-stdlib';
 import type { ReactElement } from "react";
+
 interface InstancedTileGroupProps {
   tileType: Tile;
   positions: Array<{ x: number; y: number; index: number }>;

@@ -1,6 +1,6 @@
 import { useCycle, useTimeline } from '@/lib/contexts'
 import { Tile } from '@/lib/constants'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export type InvenotryPopupType = {
   onClose: () => void

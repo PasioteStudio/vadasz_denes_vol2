@@ -426,7 +426,7 @@ export function planReturnPath(
 
     const ticks: Move[][] = [];
     let e = energy;
-    console.log(e)
+    console.log(e);
     let tick = currentTick;
     let posIndex = 0;
 

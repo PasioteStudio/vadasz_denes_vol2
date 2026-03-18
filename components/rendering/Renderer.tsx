@@ -7,17 +7,15 @@ import { Canvas } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
-import { PerspectiveCamera, Vector3 } from 'three';
+import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
 import Sky from './Sky';
 import { PathDisplayer } from './PathDisplayer';
 import { MainParticle } from './Particles/MainParticles';
 import { clampNum } from '@/util/math';
-import { Explosion } from './Particles/Exploson';
 import { BottomPlane } from '@/Prefabs/BottomPlane';
 import { lerp } from 'three/src/math/MathUtils.js';
-import { time } from 'console';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -26,7 +24,7 @@ export const Renderer = () => {
   const { timeOfDay,player } = useCycle();
   const timeline = useTimeline();
 
-  const cameraRef = useRef<PerspectiveCamera | null>(null)
+  const cameraRef = useRef<PerspectiveCamera | null>(null);
   const GAP = TILE_GAP;
 
   const [direction, setDirection] = useState<Position>({
@@ -92,7 +90,7 @@ export const Renderer = () => {
       cancelAnimationFrame(animFrameId);
       isSnappingRef.current = false;
     }
-  }, [player.snapToggle, rover.position])
+  }, [player.snapToggle, rover.position]);
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);

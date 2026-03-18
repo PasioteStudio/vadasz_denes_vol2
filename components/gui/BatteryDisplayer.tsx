@@ -1,5 +1,5 @@
 "use client"
-import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
+import { useTimeline, useUIHelper } from "@/lib/contexts";
 import { MouseEvent, useState } from "react";
 
 export default function BatteryDisplayer() {

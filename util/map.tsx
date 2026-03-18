@@ -99,7 +99,6 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
 }
 
 export const randomTileFrom = (t: Tile): Tile => { 
-  let int = 6;
   let range: [number, number] = [0, 0];
 
   switch (t) {
@@ -122,6 +121,6 @@ export const randomTileFrom = (t: Tile): Tile => {
       break;
   }
 
-  int = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+  let int = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
   return int as Tile;
 };
