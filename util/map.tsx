@@ -17,17 +17,17 @@ export function generateMap(): Tile[][] {
       const rand2 = Math.random();
       if ((rand2 < 0.0005 && !startingPointSet) || (i == mapConstraints.height - 1 && j == mapConstraints.width - 1 && !startingPointSet)) {
         startingPointSet = true
-        row.push(Tile.Start); // Rover starting point
+        row.push(Tile.Start); // Kezdőpont
       } else if (rand < 0.70) {
-        row.push(Tile.Empty); // Passable terrain
+        row.push(Tile.Empty); // Mozgást nem gátló mező
       } else if (rand < 0.85) {
-        row.push(Tile.Obstacle); // Obstacles
+        row.push(Tile.Obstacle); // Akadály
       } else if (rand < 0.90) {
-        row.push(Tile.Blue); // Blue mineral
+        row.push(Tile.Blue); // Kék ásvány
       } else if (rand < 0.95) {
-        row.push(Tile.Yellow); // Yellow mineral
+        row.push(Tile.Yellow); // Sárga ásvány
       } else {
-        row.push(Tile.Green); // Green mineral
+        row.push(Tile.Green); // Zöld ásvány
       }
     }
     mapArray.push(row);
