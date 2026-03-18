@@ -3,11 +3,9 @@ import * as THREE from "three";
 import { useCycle } from "@/lib/contexts"
 import { useThree, useFrame } from "@react-three/fiber";
 
-type SkyType = {
-  stopped: boolean;
-};
 
-export function Sky({ stopped }: SkyType) {
+
+export function Sky() {
   const { scene } = useThree();
   const skyRef = useRef<THREE.Mesh | null>(null);
   
@@ -44,7 +42,7 @@ export function Sky({ stopped }: SkyType) {
 
 
 useFrame(() => {
-    if (!skyRef.current || stopped) return;
+    if (!skyRef.current) return;
     //kiszámoljuk a fordulást úgy mint a fényeknél.
     const duration = timeOfDay === "day" ? day : night;
 

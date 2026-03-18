@@ -20,6 +20,7 @@ import { MainParticle } from './Particles/MainParticles';
 import { clamp } from 'three/src/math/MathUtils.js';
 import { clampNum } from '@/util/math';
 import { Explosion } from './Particles/Exploson';
+import { BottomPlane } from '@/Prefabs/BottomPlane';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
@@ -193,7 +194,7 @@ export const Renderer = () => {
         <directionalLight position={[0,1,1]} intensity={timeOfDay == "day" ? 0.2 : 0.1} color={0xffffff} />
 
         <MapRenderer map={map!} camPos={camPos} rover={rover!} camH={CAM_HEIGHT} />
-
+        <BottomPlane gap={GAP} ></BottomPlane>
         <PathDisplayer/>
 
         {rover && <MarsRover onSelect={showInventory} />}
@@ -202,7 +203,7 @@ export const Renderer = () => {
         {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
         {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
          <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
-        <Sky stopped={timeOfDay == "day"}/>
+        <Sky />
       </Canvas>
 
       {isInventoryOpen && (
