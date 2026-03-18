@@ -74,7 +74,7 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
  * @return {boolean} `true` ha érvényes, `false` ha nem
  */
 export const isValidMap = (map: Tile[][]): boolean => {
-  return map.length > 0 && map.find(row => row.find(tile => tile === Tile.Start)) !== undefined;
+  return map.length > 0 && map.some(row => row.some(tile => tile === Tile.Start));
 }
 
 /**
@@ -127,9 +127,6 @@ export const randomTileFrom = (t: Tile): Tile => {
     case Tile.Obstacle:
       range = [18, 21];
       break;
-    case Tile.Empty:
-      range = [6, 9];
-      break;
     case Tile.Blue:
       range = [9, 12];
       break;
@@ -138,6 +135,10 @@ export const randomTileFrom = (t: Tile): Tile => {
       break;
     case Tile.Green:
       range = [15, 18];
+      break;
+    case Tile.Empty:
+    default:
+      range = [6, 9];
       break;
   }
 
