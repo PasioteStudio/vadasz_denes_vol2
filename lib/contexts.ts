@@ -48,20 +48,20 @@ export const DefaultUIHelperContextObject: UIHelperContextT = {
 export const CycleContext = createContext<CycleContextT>({ ...DefaultCycleContextObject })
 export const useCycle = (): CycleContextT => {
     const ctx = useContext(CycleContext);
-    if (!ctx) throw new Error("Context needs to be initialized, ya buffoon");
+    if (!ctx) throw new Error("Ciklus kontextus nincs inicializálva.");
     return ctx;
 }
 
 export const MapTimeLineContext = createContext<MapTimelineContextT>({ ...DefaultTimelineContextObject })
 export const useTimeline = (): MapTimelineContextT => {
     const ctx = useContext(MapTimeLineContext);
-    if (!ctx) throw new Error("Context needs to be initialized, ya buffoon");
+    if (!ctx) throw new Error("Idősík kontextus nincs inicializálva.");
     return ctx;
 }
 
 export const UIHelperContext = createContext<UIHelperContextT>({ ...DefaultUIHelperContextObject })
 export const useUIHelper = (): UIHelperContextT => {
     const ctx = useContext(UIHelperContext);
-    if (!ctx) throw new Error("Context needs to be initialized, ya buffoon");
+    if (!ctx) throw new Error("UI Segítő kontextus nincs inicializálva.");
     return ctx;
 }

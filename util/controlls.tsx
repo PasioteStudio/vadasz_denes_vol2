@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 /**
  * Billentyűzet listener
- * @returns RefObject a figyelt gombokkal, booleanként (lenyomva?)
+ * @returns `RefObject` a figyelt gombokkal, booleanként (lenyomva?)
  */
 export function useKeyboard() {
   const keys = useRef({

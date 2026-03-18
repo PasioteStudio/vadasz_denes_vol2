@@ -6,10 +6,10 @@ import { randomTileFrom } from "./map"
 
 /**
  * Adott delta, irány és pozíció alapján visszaadja az új pozíciót.
- * @param {Position} startPos Position - A jelenlegi pozíció
- * @param {Delta} delta Delta - A változás objektuma
- * @param {1|-1} direction 1|-1 - A lejátszási irány
- * @returns {Position} Position - Az új pozíció
+ * @param {Position} startPos `Position` - A jelenlegi pozíció
+ * @param {Delta} delta `Delta` - A változás objektuma
+ * @param {1|-1} direction `1|-1` - A lejátszási irány
+ * @returns {Position} `Position` - Az új pozíció
  */
 export const processPositionChanges = (startPos: Position, delta: Move[], direction: -1 | 1): Position => {
     const deltas: Move[] = direction == 1 ? [...delta] : [...delta].reverse()
@@ -23,10 +23,10 @@ export const processPositionChanges = (startPos: Position, delta: Move[], direct
 
 /**
  * Adott delta, irány, leltár állapot alapján megadja az új leltárt.
- * @param {Item[]} startInv Item[] - Eredeti leltár
- * @param {Delta} delta Delta - A változás objektuma
- * @param {1|-1} direction 1|-1 - A lejátszási irány 
- * @returns {Item[]} Item[] - Az új leltár
+ * @param {Item[]} startInv `Item[]` - Eredeti leltár
+ * @param {Delta} delta `Delta` - A változás objektuma
+ * @param {1|-1} direction `1|-1` - A lejátszási irány 
+ * @returns {Item[]} `Item[]` - Az új leltár
  */
 export const processInventoryChanges = (startInv: Item[], delta: InventoryChange[], direction: -1 | 1): Item[] => {
     const deltas = direction == 1 ? [...delta] : [...delta].reverse()
@@ -72,10 +72,10 @@ export const processInventoryChanges = (startInv: Item[], delta: InventoryChange
 
 /**
  * Adott delta, irány, napló állapot alapján megadja az új naptárat.
- * @param {Log[]} startLogs Log[] - Eredeti napló
- * @param {Delta} delta Delta - A változás objektuma
- * @param {1|-1} direction 1|-1 - A lejátszási irány 
- * @returns {Log[]} Log[] - Az új naptár
+ * @param {Log[]} startLogs `Log[]` - Eredeti napló
+ * @param {Delta} delta `Delta` - A változás objektuma
+ * @param {1|-1} direction `1|-1` - A lejátszási irány 
+ * @returns {Log[]} `Log[]` - Az új naptár
  */
 export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction: -1 | 1): Log[] => {
     const deltas = direction == 1 ? [...addedLogs] : [...addedLogs].reverse()
@@ -93,10 +93,10 @@ export const processLogChanges = (startLogs: Log[], addedLogs: Log[], direction:
 
 /**
  * Adott delta, irány, térkép állapot alapján megadja az új térképet.
- * @param {[boolean, Tile, Tile|null][][]} startMap [boolean, Tile, Tile|null][][] - Eredeti térkép
- * @param {Delta} delta Delta - A változás objektuma
- * @param {1|-1} direction 1|-1 - A lejátszási irány 
- * @returns {[boolean, Tile, Tile|null][][]} [boolean, Tile, Tile|null][][] - Az új térkép
+ * @param {[boolean, Tile, Tile|null][][]} startMap `[boolean, Tile, Tile|null][][]` - Eredeti térkép
+ * @param {Delta} delta `Delta` - A változás objektuma
+ * @param {1|-1} direction `1|-1` - A lejátszási irány 
+ * @returns {[boolean, Tile, Tile|null][][]} `[boolean, Tile, Tile|null][][]` - Az új térkép
  */
 export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], roverMoves: Move[], direction: -1 | 1): [boolean, Tile, Tile|null][][] => {
     const deltas = direction == 1 ? [...roverMoves] : [...roverMoves].reverse()
@@ -120,9 +120,9 @@ export const processMapChanges = (startMap: [boolean, Tile, Tile|null][][], rove
 
 /**
  * Kiszámolja az energiát az adott fél órára, a delták alapján.
- * @param {number} tick number - a fél óra indexe
- * @param {Delta[]} deltas Delta[] - a változások objektuma
- * @returns {number} number - az energia az adott tick-hez. 
+ * @param {number} tick `number` - a fél óra indexe
+ * @param {Delta[]} deltas `Delta[]` - a változások objektuma
+ * @returns {number} `number` - az energia az adott tick-hez. 
  */
 export const getEnergyForTick = (tick: number, deltas: Delta[]): number => {
     const energyDeltas = deltas.slice(0,tick).map(d => d.energy);

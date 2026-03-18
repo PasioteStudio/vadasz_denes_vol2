@@ -1,9 +1,10 @@
 import { Tile } from '../lib/constants';
 
 /**
- * Tile Registry: Maps Tile enum to GLTF model paths
- * This is the single source of truth for tile-to-model mapping.
- * Add new tiles here to enable instancing automatically.
+ * Tile Registry: Mezők GLTF model útvonallá alakítása
+ * 
+ * Kicsit rút szegény, de ez volt a leggyorsabb megoldás két este között, 
+ * mikor nap közben az életemért küzdök.
  */
 export const TILE_REGISTRY: Record<Tile, string> = {
   [Tile.Obstacle]: '/Modells/akadaly.glb',
@@ -30,7 +31,8 @@ export const TILE_REGISTRY: Record<Tile, string> = {
 };
 
 /**
- * Get the GLTF path for a given tile type
+ * GLTF útvonal lekérése az adott Mező típushoz
+ * @returns `string` elérési út
  */
 export function getTileModelPath(tileType: Tile): string | string[] {
   const path = TILE_REGISTRY[tileType];
@@ -48,7 +50,8 @@ export function getTileModelPath(tileType: Tile): string | string[] {
 }
 
 /**
- * Check if a tile type is registered
+ * Regisztrálva van a mező modellje?
+ * @returns `boolean`
  */
 export function isTileTypeRegistered(tileType: Tile): boolean {
   return TILE_REGISTRY[tileType] !== undefined;
