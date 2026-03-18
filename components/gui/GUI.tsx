@@ -5,7 +5,7 @@ import LogDisplayer from "@/components/gui/LogDisplayer";
 import TimeControlButtons from "@/components/gui/TimeControlButtons";
 import MapExportButton from "./MapExportButton";
 export function GUI() {
-    return <>
+    return <div className="select-none">
         <div className="pointer-events-none absolute w-full h-full top-0 left-0 bg-radial from-transparent from-20% to-85% to-black/80"></div>
         <DayNightCycleDisplayer />
         <BatteryDisplayer />
@@ -15,5 +15,5 @@ export function GUI() {
             <CurrentAction />
             <MapExportButton />
         </div>
-    </>
+    </div>
 }

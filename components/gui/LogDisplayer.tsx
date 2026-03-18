@@ -79,9 +79,9 @@ export default function LogDisplayer() {
                 }}
             >
                 {freshLogs.map((log, i) => {
-                    const ageKey = logs.length - 1 - i;
+                    const stableKey = logs.length - freshLogs.length + i;
                     const color = getLogColor(log.message);
-                    return <FreshLog key={ageKey} message={log.message} color={color} />;
+                    return <FreshLog key={stableKey} message={log.message} color={color} />;
                 })}
             </div>
         </>

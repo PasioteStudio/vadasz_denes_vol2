@@ -7,6 +7,8 @@ export type CycleContextT = {
     night: number,
     setTick: (tick: number) => void,
     player: {
+        snapToggle: boolean,
+        setSnapToggle: (toggle:boolean) => void,
         playing: "playing" | "paused",
         setPlaying: (state: "playing"|"paused") => void,
         speed: 1|2|-1|-2,

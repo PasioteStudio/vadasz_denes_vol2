@@ -11,22 +11,19 @@ import { PerspectiveCamera, Vector3 } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
 import Sky from './Sky';
-
-import { ParticleManager } from './Particles/ParticleManager';
-import { RareTile } from '@/Prefabs/RareTile';
 import { PathDisplayer } from './PathDisplayer';
-
 import { MainParticle } from './Particles/MainParticles';
-import { clamp } from 'three/src/math/MathUtils.js';
 import { clampNum } from '@/util/math';
 import { Explosion } from './Particles/Exploson';
 import { BottomPlane } from '@/Prefabs/BottomPlane';
+import { lerp } from 'three/src/math/MathUtils.js';
+import { time } from 'console';
 
 // Layout / rendering constants
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { timeOfDay } = useCycle();
+  const { timeOfDay,player } = useCycle();
   const timeline = useTimeline();
 
   const cameraRef = useRef<PerspectiveCamera | null>(null)
@@ -53,15 +50,49 @@ export const Renderer = () => {
   const map = timeline.flavoredMap;
   const rover = timeline.rover;
 
-  const jumpToRoverOnMove = false;
+  const isSnappingRef = useRef(false);
+
   //snap to rover
   useEffect(() => {
-    if (!jumpToRoverOnMove) return;
-    setDirection({
-      x: rover.position.x * GAP,
-      y: rover.position.y * GAP,
-    })
-  }, [rover])
+    if (!player.snapToggle) {
+      isSnappingRef.current = false;
+      return;
+    }
+    if (isSnappingRef.current) return; // already snapping, let it continue with updated target
+    isSnappingRef.current = true;
+    let lastTime = Date.now();
+    const speedFactor = 4
+    let current = {
+      x:direction.x,
+      y:direction.y
+    }
+    let animFrameId: number;
+    const snapping = ()=>{
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+      const targetX = rover.position.x * GAP;
+      const targetY = rover.position.y * GAP + 110;
+      const lerpPos:{x:number,y:number} = {
+        x:lerp(current.x, targetX, deltaTime * speedFactor),
+        y:lerp(current.y, targetY, deltaTime * speedFactor)
+      }
+      if (Math.abs(lerpPos.x - targetX) < 0.05 && Math.abs(lerpPos.y - targetY) < 0.05) {
+        setDirection({x: targetX, y: targetY});
+        cancelAnimationFrame(animFrameId);
+        isSnappingRef.current = false;
+        return;
+      }
+      current = lerpPos
+      setDirection(current)
+      animFrameId = requestAnimationFrame(snapping)
+    }
+    animFrameId = requestAnimationFrame(snapping)
+    return () => {
+      cancelAnimationFrame(animFrameId);
+      isSnappingRef.current = false;
+    }
+  }, [player.snapToggle, rover.position])
 
   const keys = useKeyboard();
   const directionRef = useRef<Position>(direction);
@@ -117,6 +148,7 @@ export const Renderer = () => {
   // keyboard-based camera movement
   useEffect(() => {
     if (isInventoryOpen) return;
+    if (player.snapToggle) return;
     const speed = 40;
     let lastTime = Date.now();
     let animFrameId: number;
@@ -132,20 +164,11 @@ export const Renderer = () => {
       let actualSpeed = speed;
 
       if (keys.current.shift) actualSpeed *= 2;
-
-
-        if (keys.current.a) dx -= actualSpeed * deltaTime;
-      
-
-        if (keys.current.d) dx += actualSpeed * deltaTime;
-      
-      
+      if (keys.current.a) dx -= actualSpeed * deltaTime;
+      if (keys.current.d) dx += actualSpeed * deltaTime;
       if (keys.current.w) dy -= actualSpeed * deltaTime;
-
       if (keys.current.s) dy += actualSpeed * deltaTime;
-    
       if (dx === 0 && dy === 0) return prev;
-
       return { x: clampNum((prev.x + dx), 0, 50 * GAP), y: clampNum((prev.y + dy), 92, 220) };
 
     });
@@ -155,7 +178,7 @@ export const Renderer = () => {
 
     animFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameId);
-  }, [keys, isInventoryOpen]);
+  }, [keys, isInventoryOpen,player]);
 
   // scroll-to-zoom
   useEffect(() => {

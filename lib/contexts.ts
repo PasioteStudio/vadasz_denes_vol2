@@ -19,8 +19,10 @@ export const DefaultCycleContextObject: CycleContextT = {
     night: 8*2,
     setTick: () => { },
     player: {
+        snapToggle : false,
         speed: 1,
         playing: "paused",
+        setSnapToggle: () => { },
         setPlaying: () => { },
         setSpeed: () => { },
     },

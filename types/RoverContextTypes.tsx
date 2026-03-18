@@ -12,7 +12,7 @@ export type Log = {
     message: string,
 }
 export type RoverT = {
-    position: Position
+    position: Position,
     logs: Log[],
     inventory: Item[],
     startingPosition: Position

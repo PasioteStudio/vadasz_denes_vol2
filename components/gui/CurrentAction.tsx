@@ -34,7 +34,7 @@ export default function CurrentAction() {
         >
             <p className="text-sm w-max font-semibold my-0">Jelenleg:</p>
             <p className="text-sm w-max mb-3 my-0">{actionMap[currentAction.mode] ?? currentAction.mode}</p>
-            <p className="text-xs w-max">Cél Pozíció: {pos.x}, {pos.y}</p>
+            <p className="text-xs w-max">Cél Pozíció: {Math.round(pos.x)}, {Math.round(pos.y)}</p>
             <p className="text-xs w-max">Energia változás: {consumption > 0 ? "+"+consumption : consumption}</p>
         </div>
     );

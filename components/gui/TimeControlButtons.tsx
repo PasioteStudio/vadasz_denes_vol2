@@ -1,11 +1,18 @@
 "use client"
 import { useCycle, useUIHelper } from "@/lib/contexts";
+import { MouseEvent, useEffect } from "react";
 
 export default function TimeControlButtons() {
   const { resting, restingOpacity } = useUIHelper();
   const cycle = useCycle();
 
-  const handleButton = (amount: 1 | 2 | -1 | -2) => {
+  const handleButton = (amount: 1 | 2 | -1 | -2 | -3,e?:MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    e?.currentTarget.blur()
+    if(amount == -3){
+      //toggle snap
+      cycle.player.setSnapToggle(!cycle.player.snapToggle)
+      return
+    }
     const isDouble = Math.abs(amount) === 2;
     cycle.setDirection(amount > 0 ? 1 : -1)
 
@@ -18,13 +25,33 @@ export default function TimeControlButtons() {
       cycle.setTick(cycle.currentTick + amount);
     }
   };
-
-  const renderButtonContent = (amount: 1 | 2 | -1 | -2, type: "single" | "double") => {
-    const baseIcon = type === "single" ? "/time/single.png" : "/time/double.png";
+  // key events
+  useEffect(() => {
+    const handleKeyEvents = (e: KeyboardEvent) => {
+      console.log(e.code)
+      if (e.code == "Space"){
+        cycle.player.setPlaying(
+          cycle.player.playing === "playing" ? "paused" : "playing"
+        )
+      }
+      else if(e.code == "ArrowRight") handleButton(1)
+      else if(e.code == "ArrowLeft") handleButton(-1)
+      else if(e.code == "ControlLeft" && cycle.player.speed === 1) handleButton(2)
+      else if(e.code == "ControlLeft" && cycle.player.speed === -1) handleButton(-2)
+      else if(e.key.toLowerCase() == "q") handleButton(-3)
+    }
+    window.addEventListener('keydown', handleKeyEvents);
+    return () => {
+      window.removeEventListener('keydown', handleKeyEvents);
+    };
+  }, [cycle]);
+  const renderButtonContent = (amount: 1 | 2 | -1 | -2, type: "single" | "double" | "snapToggle") => {
+    const baseIcon = type === "single" ? "/time/single.png" : 
+    type === "snapToggle" ? "/time/snap.png" : "/time/double.png";
     const rotate = amount > 0 ? "rotate-180" : "";
 
     // Filter to color chevron based on active speed
-    const isActive = cycle.player.speed === amount;
+    const isActive = type == "snapToggle" ? cycle.player.snapToggle : cycle.player.speed === amount;
     const filter = isActive
       ? "invert(50%) sepia(100%) saturate(800%) hue-rotate(15deg) brightness(1.2)" // orange-ish
       : "invert(100%)"; // default white
@@ -49,22 +76,29 @@ export default function TimeControlButtons() {
       <p className="absolute bottom-full left-1/2 -translate-x-1/2 text-xs font-mono text-[#ffdda0] mb-1 w-max">
         Eltelt: {cycle.currentTick / 2} / {cycle.timeLimit / 2} óra
       </p>
-
       <div className="flex items-center gap-2">
+        {/* Snap Toggle Button */}
+        <div className="absolute left-[-25%] -translate-x-1/2 bg-[#1e1e2f]/80 border-2 border-[#ff4500] rounded-lg p-3 shadow-lg flex items-center justify-center">
+          <button title="Q" className="hover:bg-[#ff4500]/20 cursor-pointer p-1 rounded" onClick={(e) => handleButton(-3,e)}>
+            {renderButtonContent(-2, "snapToggle")}
+          </button>
+        </div>
         {/* Backward Buttons */}
-        <button onClick={() => handleButton(-2)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
+        <button onClick={(e) => handleButton(-2,e)} title="<- + Ctrl" className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
           {renderButtonContent(-2, "double")}
         </button>
-        <button onClick={() => handleButton(-1)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
+        <button onClick={(e) => handleButton(-1,e)} title="<-" className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
           {renderButtonContent(-1, "single")}
         </button>
 
         {/* Play/Pause */}
-        <button
-          onClick={() =>
-            cycle.player.setPlaying(
-              cycle.player.playing === "playing" ? "paused" : "playing"
-            )
+        <button title="⌞___⌟"
+          onClick={(e) => {
+              cycle.player.setPlaying(
+                cycle.player.playing === "playing" ? "paused" : "playing"
+              )
+              e.currentTarget.blur()
+            } 
           }
           className="cursor-pointer bg-[#ff4500]/10 hover:bg-[#ff4500]/30 p-2 rounded-full"
         >
@@ -76,10 +110,10 @@ export default function TimeControlButtons() {
         </button>
 
         {/* Forward Buttons */}
-        <button onClick={() => handleButton(1)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
+        <button title="->" onClick={(e) => handleButton(1,e)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
           {renderButtonContent(1, "single")}
         </button>
-        <button onClick={() => handleButton(2)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
+        <button title="-> + Ctrl" onClick={(e) => handleButton(2,e)} className="cursor-pointer hover:bg-[#ff4500]/20 p-1 rounded">
           {renderButtonContent(2, "double")}
         </button>
       </div>

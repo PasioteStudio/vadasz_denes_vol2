@@ -24,6 +24,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
   });
   const [cycleDirection, setCycleDirection] = useState<-1 | 1>(1);
   const [player, setPlayer] = useState({
+    snapToggle: false,
     speed: 1 as 1 | 2 | -1 | -2,
     playing: "paused" as "paused" | "playing",
   });
@@ -70,13 +71,12 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         ? deltas.filter((d, i) => {
           return i <= fromTick && i > toTick;
         })
-        : deltas.filter((_, i) => i > fromTick && i <= toTick)
-
+        : deltas.filter((_, i) => i > fromTick && i <= toTick);
+    
     let position: Position = { ...rover!.position }
     let inventory: Item[] = [...rover!.inventory]
     let energy = rover!.energy;
     let logs: Log[] = [...rover!.logs];
-
 
     let newMap = deepCopy(flavoredMap.current);
 
@@ -94,11 +94,11 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
         energy: energy,
         inventory: inventory,
         logs: logs,
-        position: position,
+        position:position
       }
     })
     flavoredMap.current = newMap;
-  }, [deltas, rover])
+  }, [deltas,rover])
 
   useEffect(() => {
     if (deltas.length > 1) return
@@ -132,8 +132,10 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
       timeOfDay: cycle.timeOfDay,
       setTick: (t: number) => { setTickTo(t) },
       player: {
+        snapToggle: player.snapToggle,
         playing: player.playing,
         speed: player.speed,
+        setSnapToggle: (toggle) => { setPlayer(p => { return { ...p,snapToggle:toggle } }) },
         setPlaying: (state) => { setPlayer(p => { return { ...p, playing: state } }) },
         setSpeed: (speed) => { setPlayer(p => { return { ...p, speed: speed } }) }
       },
