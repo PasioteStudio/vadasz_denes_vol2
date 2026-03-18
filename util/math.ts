@@ -1,3 +1,10 @@
+/**
+ * @description Minimum és maximum érték közé szorít egy számot
+ * @param {number} v a szám, amit szorítani szeretnénk
+ * @param {number} min a minimum érték, amit a szám nem lehet kisebb
+ * @param {number} max a maximum érték, amit a szám nem lehet nagyobb
+ * @returns {number} a szorított szám, ami minimum és maximum között van
+ */
 export function clampNum(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
 }

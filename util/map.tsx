@@ -71,7 +71,7 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
 
 /**
  * Megnézi, hogy a térkép nem 0 és van kezdőpontja.
- * @return {boolean} boolean
+ * @return {boolean} `true` ha érvényes, `false` ha nem
  */
 export const isValidMap = (map: Tile[][]): boolean => {
   return map.length > 0 && map.find(row => row.find(tile => tile == Tile.Start)) != undefined;
@@ -79,8 +79,8 @@ export const isValidMap = (map: Tile[][]): boolean => {
 
 /**
  * Visszaadja a kezdőpont pozícióját.
- * @param {Tile[][]} map Tile[][]
- * @returns {Position} Position
+ * @param {Tile[][]} map `Tile[][]`
+ * @returns {Position} `Position`
  */
 export const getStartingPoint = (map: Tile[][]): Position => {
   const position: Position = { x: 0, y: 0 }
@@ -96,7 +96,7 @@ export const getStartingPoint = (map: Tile[][]): Position => {
 
 /**
  * "Primitív" mezőkből álló térképet alakít át változatosabb mezőkké.
- * @param {Tile[][]} map Tile[][]
+ * @param {Tile[][]} map `Tile[][]`
  * @returns {[boolean, Tile, Tile|null][][]} finom térkép [bányászott-e, eredeti, módosított?][][]
  */
 export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][][] => {

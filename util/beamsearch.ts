@@ -316,13 +316,23 @@ const getActionCost = (moves: Move[]): number => {
     return 0;
 }
 
-// Helper funkció a delták leképezéséhez.
+/**
+ * @description Helper funkció a delták leképezéséhez.
+ * @param {Move[]} moves a mozgások tömbje, amit szeretnénk inventory változásokká alakítani
+ * @param {Tile[][]} map a térkép, amelyből leképezzük a változásokat
+ * @returns {InventoryChange[]} az inventory változások tömbje, amely megmutatja, hogy milyen ásványokat szedtünk fel a mozgások során
+ */
 const getInventoryChanges = (moves: Move[], map: Tile[][]): InventoryChange[] => {
     if (moves.find(m => m.mode == "mine") === undefined) return [];
     return [{ mode: "add", amount: 1, ore: map[moves[0].to.y][moves[0].to.x] as Tile.Blue | Tile.Yellow | Tile.Green }]
 }
 
-// Helper funkció a delták leképezéséhez.
+/**
+ * @description Helper funkció a delták leképezéséhez. Ez a `log` változásokért felelős, amelyeket a GUI-ban megjelenítünk. Ez egy egyszerű leképezés a mozgásokból szöveges `log` üzenetekké.
+ * @param {Move[]} moves a mozgások tömbje, amit szeretnénk `log` változásokká alakítani
+ * @param {Tile[][]} map a térkép, amelyből leképezzük a változásokat
+ * @returns {Log[]} a `log` változások tömbje, amely megmutatja, hogy milyen üzeneteket szeretnénk megjeleníteni a GUI-ban a mozgások során
+ */
 const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
     const logs: Log[] = [];
     for (let i = 0; i < moves.length; i++) {
@@ -338,9 +348,18 @@ const getLogChanges = (moves: Move[], map: Tile[][]): Log[] => {
     return logs;
 }
 
-// Ez a funkció segíti a hazaút lehetőségének ellenőrzését.
-// Hatékony módszernek ennél a projektnél a greedy metódus bizonyult.
-// Ahol tudunk, ott 3-at mozgunk. Ha nagyon elnéztük, akkor nincs mit tenni, várunk a napra.
+/**
+ * @description Ez a funkció segíti a hazaút lehetőségének ellenőrzését. 
+ * 
+ * Hatékony módszernek ennél a projektnél a greedy metódus bizonyult.
+ * 
+ * Ahol tudunk, ott 3-at mozgunk. Ha nagyon elnéztük, akkor nincs mit tenni, várunk a napra.
+ * @param {number} pathLength 
+ * @param {number} energy 
+ * @param {number} tick 
+ * @param {number} maxTick 
+ * @returns {boolean} `true`, ha a jelenlegi állapotból kiindulva még haza tudunk érni a megadott időn belül, `false` ha nem tudunk hazaérni
+ */
 function canReach(
     pathLength: number,
     energy: number,

@@ -1,10 +1,4 @@
-import { Position } from "@/types/RoverContextTypes";
 import { Tile } from "../lib/constants";
-
-export interface Action {
-    action:"move"|"mine"|"move2"|"wait",
-    positions:Position[]
-}
 
 /**
  * Átalakítja a `string` karakterláncot `enum` felsorolássá
