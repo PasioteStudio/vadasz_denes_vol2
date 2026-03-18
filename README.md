@@ -37,7 +37,3 @@ When you are done, run this command in the `electron` folder:
 ```
 npm run package
 ```
-
-## BENCHMARK
-
-140ms - 1000 iterations (500 hour)
