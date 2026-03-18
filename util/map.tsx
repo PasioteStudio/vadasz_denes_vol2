@@ -2,6 +2,10 @@ import { Tile } from "../lib/constants";
 import { Position } from "@/types/RoverContextTypes";
 import { toTile } from "./tile";
 
+/**
+ * Véletlenszerű térképet generál.
+ * @returns {Tile[][]} map `Tile[][]`
+ */
 export function generateMap(): Tile[][] {
   const mapConstraints = {
     height: 50,
@@ -37,8 +41,8 @@ export function generateMap(): Tile[][] {
 
 /**
  * @async
- * Creates a map from a file using an URL
- * @param {string} URL the path to the file
+ * URL-lel megadott fájlból készít mező-térképet.
+ * @param {string} URL fájl URL
  * @param {boolean} isText
  * @returns {Promise<Tile[][]>} map `Promise<Tile[][]>`
  */
@@ -65,10 +69,19 @@ export async function readMap(URL: string, isText = false): Promise<Tile[][]> {
   return map;
 }
 
+/**
+ * Megnézi, hogy a térkép nem 0 és van kezdőpontja.
+ * @return {boolean} boolean
+ */
 export const isValidMap = (map: Tile[][]): boolean => {
   return map.length > 0 && map.find(row => row.find(tile => tile == Tile.Start)) != undefined;
 }
 
+/**
+ * Visszaadja a kezdőpont pozícióját.
+ * @param {Tile[][]} map Tile[][]
+ * @returns {Position} Position
+ */
 export const getStartingPoint = (map: Tile[][]): Position => {
   const position: Position = { x: 0, y: 0 }
   for (let y = 0; y < map.length; y++) {
@@ -81,7 +94,11 @@ export const getStartingPoint = (map: Tile[][]): Position => {
   return position
 }
 
-
+/**
+ * "Primitív" mezőkből álló térképet alakít át változatosabb mezőkké.
+ * @param {Tile[][]} map Tile[][]
+ * @returns {[boolean, Tile, Tile|null][][]} finom térkép [bányászott-e, eredeti, módosított?][][]
+ */
 export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][][] => {
   const falvoredMap: [boolean, Tile, Tile|null][][] = [];
   for (let y = 0; y < map.length; y++) {
@@ -98,6 +115,11 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
   return falvoredMap;
 }
 
+/**
+ * Primitív mezőből készít véletlenszerűen egy részleteset.
+ * @param {Tile} t Tile 
+ * @returns {Tile} Részletes mező - Tile
+ */
 export const randomTileFrom = (t: Tile): Tile => { 
   let range: [number, number] = [0, 0];
 
