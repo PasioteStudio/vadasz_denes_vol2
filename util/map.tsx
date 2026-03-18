@@ -100,7 +100,7 @@ export const getStartingPoint = (map: Tile[][]): Position | undefined => {
 /**
  * "Primitív" mezőkből álló térképet alakít át változatosabb mezőkké.
  * @param {Tile[][]} map `Tile[][]`
- * @returns {[boolean, Tile, Tile|null][][]} finom térkép [bányászott-e, eredeti, módosított?][][]
+ * @returns {[boolean, Tile, Tile|null][][]} finom térkép `[bányászott-e, eredeti, módosított?][][]`
  */
 export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][][] => {
   const flavoredMap: [boolean, Tile, Tile|null][][] = [];
@@ -119,8 +119,8 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
 
 /**
  * Primitív mezőből készít véletlenszerűen egy részleteset.
- * @param {Tile} t Tile 
- * @returns {Tile} Részletes mező - Tile
+ * @param {Tile} t `Tile`
+ * @returns {Tile} `Tile` - Részletes mező
  */
 export const randomTileFrom = (t: Tile): Tile => { 
   let range: [number, number] = [0, 0];

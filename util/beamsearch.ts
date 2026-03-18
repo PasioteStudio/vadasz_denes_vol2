@@ -22,6 +22,7 @@ type Expansion = {
 }
 
 enum action { standby, mine, move1, move2, move3 };
+
 const consumption: Record<action, number> = {
     [action.standby]: 1,
     [action.mine]: 2,
@@ -32,7 +33,12 @@ const consumption: Record<action, number> = {
 const dayCharge = +10;
 
 
-// Ide a legegyszerűbb a BFS, mert nincs minden "él" súlya ugyanannyi
+/**
+ * Breadth-first search a `start` ponttól való távolság kiszámítására.
+ * @param grid 
+ * @param start `Position`
+ * @returns `number[][]`
+ */
 function computeDistanceMap(grid: number[][], start: Position): number[][] {
     const rows = grid.length;
     const cols = grid[0].length;
@@ -63,13 +69,27 @@ function computeDistanceMap(grid: number[][], start: Position): number[][] {
     return distance;
 }
 
-// egy, a látszatnál sokkal egyszerűbb funkció a "legjobb generáció" kiválasztására minden expansion után
+
+/**
+ * Egy adott array `scoreFn` alapján pontozott legmagasabb pontozású `k` elem kiválasztása
+ * @param arr 
+ * @param k 
+ * @param scoreFn 
+ * @returns `T[]`
+ */
 function topK<T>(arr: T[], k: number, scoreFn: (x: T) => number = (x: any) => x.score): T[] {
     if (arr.length <= k) return arr;
     arr.sort((a, b) => scoreFn(b) - scoreFn(a));
     return arr.slice(0, k);
 }
 
+
+/**
+ * Módosított beamsearch algoritmus.
+ * @param moves `number` - a maximális lépésszám (tick-ek)
+ * @param map `Tile[][]` - a kezdeti térkép
+ * @returns `{ path: Position[][], deltas: Delta[] }`
+ */
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
     const beamWidth = 17; // valamiért a 17 az egy ilyen "sweet spot"
     const rows = map.length;
@@ -194,10 +214,17 @@ const directions = [
 ]
 
 
-// Ez a funkció bővíti a sugarat. Működése:
-// Végigmegy a jelenlegi beam item helyzetéből megengedhető összes lehetőségen a szabályoknak megfelelően.
-// (Ilyen szabály például, hogy nem léphet akadályra, illetve ha ércre lép, akkor csak bányászást priorizálhat.)
-// Mozgásokhoz pedig kiszámít egy pontszámot. Ez a calculateMoveScore() dolga. Bővebben erről lentebb.
+/**
+ * Ez a funkció bővíti a sugarat. Működése:
+ * 
+ * Végigmegy a jelenlegi beam item helyzetéből megengedhető összes lehetőségen a szabályoknak megfelelően.
+ * (Ilyen szabály például, hogy nem léphet akadályra, illetve ha ércre lép, akkor csak bányászást priorizálhat.)
+ * Mozgásokhoz pedig kiszámít egy pontszámot. Ez a calculateMoveScore() dolga. Bővebben erről annál a funkciónál.
+ * @param item `BeamItem`
+ * @param grid `(0 | 1)[][]`
+ * @param orePositions `Position[]`
+ * @returns `Expansion[]`
+ */
 const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Expansion[] => {
     const nextTick = item.sequence.length;
     const chargeAmount = nextTick % 48 >= 32 ? 0 : dayCharge;
@@ -282,7 +309,12 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
     return expansions;
 };
 
-// A deltákat le tudjuk képezni a szekvenciákból és az ahhoz tartozó térképből.
+/**
+ * Szekvenciához tartozó delták leképezése
+ * @param sequence `Move[][]`
+ * @param map `Tile[][]`
+ * @returns `Delta[]`
+ */
 const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
     const deltas: Delta[] = [];
     let energy = 100;
@@ -303,7 +335,11 @@ const generateDeltas = (sequence: Move[][], map: Tile[][]): Delta[] => {
     return deltas;
 }
 
-// Helper funkció a delták leképezéséhez.
+/**
+ * Visszaadja egy adott mozdulat energia fogyasztását.
+ * @param moves `Move[]`
+ * @returns `number`
+ */
 const getActionCost = (moves: Move[]): number => {
     if (moves.length === 1) {
         if (moves[0].mode === "wait") return consumption[action.standby];
@@ -395,13 +431,21 @@ function canReach(
     return true;
 }
 
-// A legfontosabb része az egész algoritmusnak. Ez a "Heuristic", illetve az "AI" fő pontozó mechanizmusa.
-// Ezzel volt a legtöbb teendő és finomítani való, mert az első szabályokat mindig kijátszotta az algoritmus.
-// Jelenlegi szabályok:
-// - ha ércen átlép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
-// - ha érc mellé lép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
-// - a közelebbi ércek exponenciálisan több pontot adnak. --> az ércek felé mozgás bíztatása.
-// - ha az összes ércet felszedi a pályáról, nagyon magas pontot kap --> utolsó érc meghagyásának elkerülése, mert így több pontot kapott volna csak a mozgásból.
+/**
+ * A legfontosabb része az egész algoritmusnak. Ez a "Heuristic", illetve az "AI" fő pontozó mechanizmusa.
+ * Ezzel volt a legtöbb teendő és finomítani való, mert az első szabályokat mindig kijátszotta az algoritmus.
+ * Jelenlegi szabályok:
+ * - ha ércen átlép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
+ * - ha érc mellé lép, büntetést kap. --> felesleges mozdulatok és pontvadászat csökkentése.
+ * - a közelebbi ércek exponenciálisan több pontot adnak. --> az ércek felé mozgás bíztatása.
+ * - ha az összes ércet felszedi a pályáról, nagyon magas pontot kap --> utolsó érc meghagyásának elkerülése, mert így több pontot kapott volna csak a mozgásból.
+ * @param map `Tile[][]`
+ * @param pos `Position`
+ * @param orePositions `Position[]`
+ * @param sequence `Move[][]`
+ * @param candidateSteps `Move[]`
+ * @returns `number`
+ */
 const calculateMoveScore = (
     map: Tile[][],
     pos: Position,
@@ -466,7 +510,16 @@ const calculateMoveScore = (
 };
 
 
-// Hazaút elkészítése. Greedy, mivel működik a fentebbi funkció is.
+/**
+ * Hazaút elkészítése. Greedy, mivel működik a fentebbi funkció is.
+ * @param graph `Graph` - Astar gráf
+ * @param currentPos `Position`
+ * @param start `Position`
+ * @param energy `number`
+ * @param currentTick `number`
+ * @param maxTick `number`
+ * @returns {Move[][]} `Move[][]`
+ */
 export function planReturnPath(
     graph: InstanceType<typeof Graph>,
     currentPos: Position,
