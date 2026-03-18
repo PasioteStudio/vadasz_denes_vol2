@@ -69,7 +69,7 @@ function topK<T>(arr: T[], k: number, scoreFn: (x: T) => number = (x: any) => x.
 }
 
 export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], deltas: Delta[] } {
-    const beamWidth = 17;
+    const beamWidth = 17; // valamiért a 17 az egy ilyen "sweet spot"
     const rows = map.length;
     const cols = map[0].length;
 
