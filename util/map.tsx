@@ -16,22 +16,22 @@ export function generateMap(): Tile[][] {
   for (let i = 0; i < mapConstraints.height; i++) {
     const row: Tile[] = [];
     for (let j = 0; j < mapConstraints.width; j++) {
-      const rand = Math.random();
+      const tileTypeRandom = Math.random();
 
-      const rand2 = Math.random();
+      const startPointRandom = Math.random();
 
-      const shouldSetStartHere = rand2 < 0.0005 && !startingPointSet;
+      const shouldSetStartHere = startPointRandom < 0.0005 && !startingPointSet;
       const isLastCellWithoutStart = i === mapConstraints.height - 1 && j === mapConstraints.width - 1 && !startingPointSet;
       if (shouldSetStartHere || isLastCellWithoutStart) {
         startingPointSet = true;
         row.push(Tile.Start); // Kezdőpont
-      } else if (rand < 0.70) {
+      } else if (tileTypeRandom < 0.70) {
         row.push(Tile.Empty); // Mozgást nem gátló mező
-      } else if (rand < 0.85) {
+      } else if (tileTypeRandom < 0.85) {
         row.push(Tile.Obstacle); // Akadály
-      } else if (rand < 0.90) {
+      } else if (tileTypeRandom < 0.90) {
         row.push(Tile.Blue); // Kék ásvány
-      } else if (rand < 0.95) {
+      } else if (tileTypeRandom < 0.95) {
         row.push(Tile.Yellow); // Sárga ásvány
       } else {
         row.push(Tile.Green); // Zöld ásvány
@@ -55,7 +55,6 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
     await fetch(url).then(res => res.text()).then((data) => {
       lines = data.split("\n").filter(line => line.trim() !== "");
     }).catch(() => {
-      alert("Hiba a térkép beolvasásakor!");
       throw new Error("Hiba a térkép beolvasásakor!");
     })
   } else {
@@ -124,7 +123,7 @@ export const randomTileFrom = (t: Tile): Tile => {
 
   switch (t) {
     case Tile.Start: 
-      return 5 as Tile;
+      return Tile.Start;
     case Tile.Obstacle:
       range = [18, 21];
       break;
