@@ -23,14 +23,14 @@ export default function BatteryDisplayer() {
             onMouseOut={() => setPosition({ x: -100, y: -100 })}
         >
 
-            {/* Battery segments */}
+            {/* AKKSI */}
             <div className="flex grow h-7 justify-start rounded bg-[#0b1a0f] overflow-hidden gap-1">
                 {Array.from({ length: segments }).map((_, i) => {
                     if (i < fullSegments) {
-                        // Fully filled segments
+                        // TELI RÉSZEK
                         return <div key={i} className="flex-1 h-full rounded-[1px] bg-[#0f9d58]"></div>;
                     } else if (i === fullSegments && partialSegmentFraction > 0) {
-                        // Partial segment: inner div controls width
+                        // RÉSZLEGES RÉSZEK (nagyon intuitív, tudom)
                         return (
                             <div key={i} className="flex-1 h-full rounded-[1px] bg-[#143222] relative overflow-hidden">
                                 <div
@@ -40,14 +40,14 @@ export default function BatteryDisplayer() {
                             </div>
                         );
                     } else {
-                        // Empty segments
+                        // ÜRES RÉSZEK
                         return <div key={i} className="flex-1 h-full rounded-[1px] bg-[#143222]"></div>;
                     }
                 })}
             </div>
             <div className="w-3 h-5 bg-[#1e1e2f]/90 absolute left-full rounded-r-sm border border-[#ff4500] border-l-transparent"></div>
 
-            {/* Tooltip on hover */}
+            {/* A TOOLTIP */}
             <div
                 className="hidden group-hover:flex items-center justify-center px-2 py-1 rounded-sm text-xs font-mono text-[#ffdda0] shadow-md"
                 style={{

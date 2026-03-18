@@ -2,6 +2,9 @@ import { Tile } from "@/lib/constants";
 import { useTimeline, useUIHelper } from "@/lib/contexts";
 import { useState, useEffect } from "react";
 
+/**
+ * Random térkép esetén felettébb hasznos gomb.
+ */
 export default function MapExportButton() {
     const {resting, restingOpacity} = useUIHelper();
     const [text, setText] = useState("");

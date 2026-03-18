@@ -2,6 +2,9 @@
 
 import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts";
 
+/**
+ * Jelenlegi tevékenység részeleteit megjelenítő elem. Ki gondolta volna?
+ */
 export default function CurrentAction() {
     const { currentTick } = useCycle();
     const { deltas, rover } = useTimeline();

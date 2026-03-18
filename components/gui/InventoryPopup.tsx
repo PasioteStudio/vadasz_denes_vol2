@@ -2,6 +2,9 @@ import { useCycle, useTimeline } from '@/lib/contexts'
 import { Tile } from '@/lib/constants'
 import { useEffect, useMemo, useState } from 'react'
 
+/**
+ * A leltárt megjelenítő elem.
+ */
 export type InvenotryPopupType = {
   onClose: () => void
 }

@@ -3,6 +3,11 @@
 import { useTimeline, useUIHelper } from "@/lib/contexts";
 import { useMemo, useEffect, useState } from "react";
 
+/**
+ * Tartalom alapján színt ad a naplónak
+ * @param message 
+ * @returns tailwind szín osztály
+ */
 function getLogColor(message: string): string {
     if (message.includes("Kék")) return "text-cyan-500";
     if (message.includes("Zöld")) return "text-green-600";
@@ -10,6 +15,10 @@ function getLogColor(message: string): string {
     return "text-[#ffdda0]";
 }
 
+/**
+ * A középen megjelenő legfrissebb pár napló sor.
+ * @returns 
+ */
 function FreshLog({ message, color }: { message: string; color: string }) {
     const [visible, setVisible] = useState(false);
 

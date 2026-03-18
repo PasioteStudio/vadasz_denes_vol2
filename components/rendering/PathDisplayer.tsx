@@ -5,6 +5,10 @@ import { useTimeline } from "@/lib/contexts";
 import { useCycle } from "@/lib/contexts";
 import { Position } from "@/types/RoverContextTypes";
 
+
+/**
+ * Az algoritmus által kiszámolt út megjelenítése.
+ */
 export const PathDisplayer = () => {
   const { path } = useTimeline();
   const { currentTick } = useCycle();
@@ -23,7 +27,7 @@ export const PathDisplayer = () => {
     const current = path[i];
 
     for (let j = 0; j < current.length; j++) {
-      if (i < currentTick) {
+      if (i <= currentTick) {
         completed.push(current[j]);
       } else {
         remaining.push(current[j]);
@@ -31,7 +35,7 @@ export const PathDisplayer = () => {
     }
   }
 
-  // ensure lines connect
+  // kapcsolódjanak a vonalak
   if (completed.length > 0 && remaining.length > 0) {
     remaining.unshift(completed[completed.length - 1]);
   }
