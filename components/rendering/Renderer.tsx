@@ -159,7 +159,7 @@ export const Renderer = () => {
       window.removeEventListener('wheel', handleScroll);
     };
 
-    
+
   }, []);
 
   const toggleInventory = () => setInventoryOpen(p => !p);
@@ -189,7 +189,7 @@ export const Renderer = () => {
         />
 
 
-        <BackgroundSky/>
+        <BackgroundSky />
         <ambientLight intensity={timeOfDay == 'day' ? 0.6 : 0.3} color={0xff6666} />
 
         <DayNightDirectionalLights />
@@ -215,11 +215,8 @@ export const Renderer = () => {
 
         <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
 
+        <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
 
-        {/* itt is megcsinálnom, csak még a pozícionálást a kamerához akarom kötni valahogy */}
-        {/* ZSOLTI szerintem csinálj egy másik komponenst ehhez. ne ugyanaz legyen, mint ami a home screenen. */}
-         <MainParticle camPosition={[camPos[0], 10, camPos[2]]}/>
-       
       </Canvas>
 
       {isInventoryOpen && (
