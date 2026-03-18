@@ -6,15 +6,14 @@ export function BackgroundSky() {
   const { scene } = useThree();
   const { currentTick, day, night, t } = useCycle();
 //színek
-  const colors = [
-    //sok szín hogy ne legyen zöld átmenet
-  new THREE.Color("#ff4d00"), // piros-narancs
-  new THREE.Color("#ffcc00"), // sárga
-  new THREE.Color("#ff8800"), // narancs
-  new THREE.Color("#552200"), // barna átmenet
-  new THREE.Color("#0b0f2a"), // sötétkék
-  new THREE.Color("#ff4d00"), // vissza
-  ];
+const colors = [
+  new THREE.Color("#b3472a"), 
+  new THREE.Color("#c28b3c"),
+  new THREE.Color("#a8733a"), 
+  new THREE.Color("#5a3b2a"), 
+  new THREE.Color("#1a1d2e"), 
+  new THREE.Color("#b3472a"), 
+];
 
   function getSkyColor(t: number) {
     const scaled = t * (colors.length - 1);
