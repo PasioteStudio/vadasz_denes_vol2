@@ -81,7 +81,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     );
     const transposedGraph = new Graph(transposedGrid, { diagonal: true });
 
-    const start = getStartingPoint(map);
+    const start = getStartingPoint(map)!;
 
     const orePositions: Position[] = [];
     for (let y = 0; y < rows; y++) {

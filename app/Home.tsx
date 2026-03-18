@@ -27,7 +27,7 @@ export default function Home({ timeLimit, initialMap }: { timeLimit: number, ini
     playing: "paused" as "paused" | "playing",
   });
   const t = useRef(0);
-  const startingPoint = getStartingPoint(initialMap)
+  const startingPoint = getStartingPoint(initialMap)!;
   const [map] = useState<Tile[][]>(initialMap);
   const flavoredMap = useRef<[boolean, Tile, Tile | null][][]>([])
   const [deltas, setDeltas] = useState<Delta[]>([]);

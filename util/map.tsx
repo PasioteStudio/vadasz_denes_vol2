@@ -10,7 +10,7 @@ export function generateMap(): Tile[][] {
   const mapConstraints = {
     height: 50,
     width: 50
-  }
+  };
   const mapArray: Tile[][] = [];
   let startingPointSet = false;
   for (let i = 0; i < mapConstraints.height; i++) {
@@ -62,7 +62,6 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
   }
   const map: Tile[][] = [];
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim() === "") continue;
     map.push([]);
     const currentRow = map[map.length - 1];
     const tiles = lines[i].trim().split(',').map((s): Tile => {
@@ -79,7 +78,7 @@ export async function readMap(url: string, isText = false): Promise<Tile[][]> {
  * @return {boolean} `true` ha érvényes, `false` ha nem
  */
 export const isValidMap = (map: Tile[][]): boolean => {
-  return map.length > 0 && map.find(row => row.find(tile => tile === Tile.Start)) != undefined;
+  return map.length > 0 && map.find(row => row.find(tile => tile === Tile.Start)) !== undefined;
 }
 
 /**
@@ -87,12 +86,12 @@ export const isValidMap = (map: Tile[][]): boolean => {
  * @param {Tile[][]} map `Tile[][]`
  * @returns {Position} `Position`
  */
-export const getStartingPoint = (map: Tile[][]): Position => {
-  const position: Position = { x: 0, y: 0 }
+export const getStartingPoint = (map: Tile[][]): Position | undefined => {
+  let position: Position | undefined = undefined;
   for (let y = 0; y < map.length; y++) {
     for (let x = 0; x < map[y].length; x++) {
       if (map[y][x] === Tile.Start) {
-        return { x: x, y: y }
+        position = { x: x, y: y };
       }
     }
   }
