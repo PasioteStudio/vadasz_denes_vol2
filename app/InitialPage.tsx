@@ -9,6 +9,7 @@ import { Tile } from "@/lib/constants";
 import { ParticleManager } from "@/components/rendering/Particles/ParticleManager";
 import Sky from "@/components/rendering/Sky";
 
+/** Ez a "Welcome Page" */
 export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLimit: (limit: number) => void, setInitialMap: (tiles: Tile[][]) => void }) {
     const [delayDone, setDelayDone] = useState(false);
 
@@ -19,6 +20,8 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
     const [currentPanel, setPanel] = useState<"map" | "time">("map");
     const [visitedTimePanel, setVisitedTimePanel] = useState(false);
 
+
+    // A két része az inicializálásnak: a térkép kiválasztása és az időkorlát megadása.
     const panels = {
         "map": <MapPanel current={{
             loadedMap: loadedMap,
@@ -61,7 +64,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
             <StaticRover rotation={[0.1, 3.4, -0.1]} position={[-3.3, -0.1, -20]} scale={0.8} />
 
             <Terrain receiveShadow />
-            {/* TODO: Gálati, majd ha a pálya megoldhatatlan, akkor ez legyen true */}
+            {/* TODO: Ha a pálya lehetetlen (pl el van zárva az összes érc), akkor a rover robbanjon fel. Me mé ne? */}
             <ParticleManager blowUp={false} />
             <Sky />
         </Canvas>

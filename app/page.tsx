@@ -4,6 +4,8 @@ import Home from "./Home";
 import InitialPage from "./InitialPage";
 import { Tile } from "@/lib/constants";
 
+
+/**  Ez az alkalmazás Entry pointja.  */
 export default function App() {
     const [timeLimit, setTimeLimit] = useState(0);
     const [initialMap, setInitialMap] = useState<Tile[][]>([]);
