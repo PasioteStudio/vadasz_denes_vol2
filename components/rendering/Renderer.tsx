@@ -22,7 +22,7 @@ import { BackgroundSky } from './BackgroundSky';
 const CAM_HEIGHT = 60;
 
 export const Renderer = () => {
-  const { timeOfDay, player } = useCycle();
+  const { timeOfDay, player, t } = useCycle();
   const timeline = useTimeline();
   const keys = useKeyboard();
 
@@ -85,8 +85,8 @@ export const Renderer = () => {
       const targetY = rover.position.y * GAP + 110;
 
       const next = {
-        x: lerp(current.x, targetX, delta * 4),
-        y: lerp(current.y, targetY, delta * 4)
+        x: lerp(current.x, targetX, t.current),
+        y: lerp(current.y, targetY, t.current)
       };
 
       if (Math.abs(next.x - targetX) < 0.05 && Math.abs(next.y - targetY) < 0.05) {
