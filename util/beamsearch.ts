@@ -617,7 +617,7 @@ function idleSolution(
 
     const sequence: Move[][] = [];
 
-    for (let i = 0; i < moves; i++) {
+    for (let i = 0; i <= moves; i++) {
         sequence.push([
             { from: start, to: start, mode: "wait" }
         ]);
