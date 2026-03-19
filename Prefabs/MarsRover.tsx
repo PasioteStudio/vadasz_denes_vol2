@@ -28,9 +28,9 @@ type GLTFResult = GLTF & {
 // Az inventory popup megnyitásához
 type MarsRoverProps = ThreeElements["group"]
 
-const ROTATE_TIME = 100
-const MOVE_TIME = 100
-const MINE_TIME = 100
+const ROTATE_TIME = 200
+const MOVE_TIME = 200
+const MINE_TIME = 200
 const MODEL_ROTATION_OFFSET = -Math.PI / 2
 
 // Minden tick-ben megteendő mozdulatsort subtick-ekre osztunk
