@@ -507,9 +507,6 @@ const calculateMoveScore = (
         const distMap = oreDistanceMaps.get(key)!;
         const dist = distMap[pos.y][pos.x];
 
-        // const dx = Math.abs(pos.x - ore.x);
-        // const dy = Math.abs(pos.y - ore.y);
-        // const dist = Math.max(dx, dy);
         const temp = dist + 0.1;
         // Ez az ocsmányság 1 / Math.pow(dist+0.1, 2.5), de így egy fokkal gyorsabb.
         const base = 1 / (temp * temp * Math.sqrt(temp));
