@@ -16,14 +16,15 @@ const colors = [
 ];
 
   function getSkyColor(t: number) {
-    const scaled = t * (colors.length - 1);
-    const index = Math.floor(scaled);
-    const localT = scaled - index;
+    // const scaled = t * (colors.length - 1);
+    // const index = Math.floor(scaled);
+    // const localT = scaled - index;
 
-    const c1 = colors[index];
-    const c2 = colors[Math.min(index + 1, colors.length-1)];
+    // const c1 = colors[index];
+    // const c2 = colors[Math.min(index + 1, colors.length-1)];
 
-    return c1.clone().lerp(c2, localT);
+    // return c1.clone().lerp(c2, localT);
+    return colors[4]
   }
 
   useFrame(() => {
