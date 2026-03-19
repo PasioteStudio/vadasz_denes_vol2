@@ -283,7 +283,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         </group>
       </group>
 
-      <RoverDustParticle
+      {/* <RoverDustParticle
         offset={[
           group.current?.getWorldPosition(new THREE.Vector3()).x ?? 0,
           0.3,
@@ -291,7 +291,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
         ]}
         rotation={rotationY.current}
         stepType={subticks.current}
-      />
+      /> */}
     </group>
   )
 }
