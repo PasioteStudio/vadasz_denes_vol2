@@ -213,9 +213,6 @@ export const Renderer = () => {
         {rover && <MarsRover />}
 
         <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
-
-        <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
-
       </Canvas>
     </>
   );

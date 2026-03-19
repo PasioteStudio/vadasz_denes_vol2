@@ -3,11 +3,7 @@ import { useEffect, useRef } from "react"
 import { Dust } from "./MarsDust"
 import { Explosion } from "./Exploson"
 
-export type ParticleType = {
-  blowUp: boolean
-}
-
-export function ParticleManager(props: ParticleType) {
+export function ParticleManager() {
 
   const { scene } = useThree()
   const dustRef = useRef<Dust | null>(null)
@@ -15,9 +11,6 @@ export function ParticleManager(props: ParticleType) {
 
   useEffect(() => {
     dustRef.current = new Dust(scene, 200, 50, [-10, 10, -30], 0)
-    if(props.blowUp) {
-      explosionRef.current = new Explosion(scene, 2000, 30, [-3.3, 1, -20], 0, 0.5, 10)
-    }
     return () => {
       if (dustRef.current) {
         scene.remove(dustRef.current.points)

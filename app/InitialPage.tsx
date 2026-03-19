@@ -64,8 +64,7 @@ export default function InitialPage({ setTimeLimit, setInitialMap }: { setTimeLi
             <StaticRover rotation={[0.1, 3.4, -0.1]} position={[-3.3, -0.1, -20]} scale={0.8} />
 
             <Terrain receiveShadow />
-            {/* TODO: Ha a pálya lehetetlen (pl el van zárva az összes érc), akkor a rover robbanjon fel. Me mé ne? */}
-            <ParticleManager blowUp={false} />
+            <ParticleManager />
             <Sky />
         </Canvas>
         <div className="w-full h-screen flex items-center justify-left absolute top-0 left-0 z-999 overflow-hidden ">
