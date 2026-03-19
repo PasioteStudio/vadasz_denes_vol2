@@ -18,7 +18,7 @@ export const PathDisplayer = () => {
     return { completedPoints: [], remainingPoints: [] };
   }
 
-  const height = 0.3;
+  const height = 0.1;
 
   const completed: Position[] = [];
   const remaining: Position[] = [];
