@@ -21,7 +21,7 @@ const colors = [
     const localT = scaled - index;
 
     const c1 = colors[index];
-    const c2 = colors[index + 1];
+    const c2 = colors[Math.min(index + 1, colors.length-1)];
 
     return c1.clone().lerp(c2, localT);
   }
