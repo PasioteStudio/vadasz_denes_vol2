@@ -476,7 +476,7 @@ const calculateMoveScore = (
 
     // Ez egy próbálkozás volt, hogy engedjük-e neki, hogy hátráljon. 0-nál nem kap büntetést. Így a legjobb.
     // Hagyjunk neki egy kis teret kiteljesedni :)
-    const n = 0;
+    const n = 3;
     const visitedSet = new Set<number>();
     for (let i = Math.max(sequence.length - n, 0); i < sequence.length; i++) {
         for (const move of sequence[i]) {
