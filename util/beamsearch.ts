@@ -114,8 +114,17 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     // megspórolunk ahhoz képest, mintha minden mozdulat után pathfinding-ot használnánk...
     const distanceFromStart = computeDistanceMap(moveableGrid, start);
 
+    const reachableOres = orePositions.filter(
+        ore => distanceFromStart[ore.y][ore.x] !== Infinity
+    );
+
+    // Ha nincs elérhető érc, akkor csak.. létezzünk.
+    if (reachableOres.length === 0) {
+        return idleSolution(moves, start, map);
+    }
+
     // kezdő pont a beam-hez
-    let beam: BeamItem[] = [{ 
+    let beam: BeamItem[] = [{
         score: 0,
         sequence: [[{ from: start, to: start, mode: "move" }]],
         energy: 100,
@@ -134,9 +143,9 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
             const pos = item.lastPos;
 
             // ha nem érünk innen haza, akkor nincs értelme tovább számolni.
-            if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue; 
+            if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue;
 
-            const expansions = expand(item, moveableGrid, orePositions); // bővítés
+            const expansions = expand(item, moveableGrid, reachableOres); // bővítés
 
             for (const e of expansions) { // bővítések kezelése
                 const lastStep = e.steps[e.steps.length - 1];
@@ -191,7 +200,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
     );
 
     // A hazaút mozdulataival kiegészítjük a nyertes beam szekvenciáját.
-    if (returnMoves) { 
+    if (returnMoves) {
         for (const tick of returnMoves) {
             winner.sequence.push(tick);
         }
@@ -456,7 +465,7 @@ const calculateMoveScore = (
     if (orePositions.length === 0) return 10000;
 
     // Ez egy gyorsított kulcs készítő az adott lépésekhez. Maximum 1000 méretű (szélesség vagy hosszúság) térképnél működik.
-    const encode = (x: number, y: number) => x * 1000 + y; 
+    const encode = (x: number, y: number) => x * 1000 + y;
 
     const steppedOver = new Set<number>();
     for (let i = 0; i < candidateSteps.length - 1; i++) {
@@ -467,7 +476,7 @@ const calculateMoveScore = (
 
     // Ez egy próbálkozás volt, hogy engedjük-e neki, hogy hátráljon. 0-nál nem kap büntetést. Így a legjobb.
     // Hagyjunk neki egy kis teret kiteljesedni :)
-    const n = 0; 
+    const n = 0;
     const visitedSet = new Set<number>();
     for (let i = Math.max(sequence.length - n, 0); i < sequence.length; i++) {
         for (const move of sequence[i]) {
@@ -591,4 +600,31 @@ export function planReturnPath(
     }
 
     return ticks;
+}
+
+/**
+ * Ha nincs elérhető érc, akkor akkumulátort optimalizálva csak vár.
+ * @param moves 
+ * @param start 
+ * @param map 
+ * @returns 
+ */
+function idleSolution(
+    moves: number,
+    start: Position,
+    map: Tile[][]
+): { path: Position[][], deltas: Delta[] } {
+
+    const sequence: Move[][] = [];
+
+    for (let i = 0; i < moves; i++) {
+        sequence.push([
+            { from: start, to: start, mode: "wait" }
+        ]);
+    }
+
+    return {
+        path: sequence.map(ms => ms.map(m => m.to)),
+        deltas: generateDeltas(sequence, map),
+    };
 }
