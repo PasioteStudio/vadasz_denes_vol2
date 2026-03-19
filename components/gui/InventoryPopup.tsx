@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
  */
 const InventoryPopup = () => {
   const { inventoryOpen, toggleInventoryOpen } = useUIHelper();
+  const {resting,restingOpacity} = useUIHelper();
   const { currentTick } = useCycle();
   const inventory = useTimeline().rover.inventory;
   const [items, setItems] = useState({
@@ -32,8 +33,10 @@ const InventoryPopup = () => {
 
   return (
     <>
-      <div className='w-32 aspect-square'>
-
+      <div className='fixed right-[22vw] bottom-2 w-14 flex items-center justify-center aspect-square bg-[#1e1e2f]/90 border border-[#ff4500] rounded-lg shadow-lg' style={{ opacity: resting ? restingOpacity / 100 : 1 }}>
+        <button className='cursor-pointer hover:bg-[#ff4500]/30 rounded-md w-9 aspect-square flex items-center justify-center' onClick={toggleInventoryOpen}>
+          <img src="/inventory.svg" alt="Leltár" className='w-7 h-7' style={{filter:inventoryOpen ? "invert(50%) sepia(100%) saturate(800%) hue-rotate(15deg) brightness(1.2)" : "invert(100%)"}} />
+        </button>
       </div>
       {inventoryOpen && <>
         <div className="fixed w-full h-full left-0 top-0 bg-linear-0 from-black/50 from-40% to-transparent">

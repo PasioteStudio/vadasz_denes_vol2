@@ -18,7 +18,7 @@ export function MainParticle({ camPosition }: IMainParticle) {
     const dust = new Dust(
       scene, DUSTCOUNT, 50,
       [camPosition[0] - 10, 10, camPosition[2] - 100],
-      0, 2
+      0, 1
     )
     dustRef.current = dust
     //legutóbbi reset pozíció az a camera offsetje
