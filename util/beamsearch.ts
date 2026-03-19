@@ -518,7 +518,7 @@ const calculateMoveScore = (
         if (dist === 0) {
             score += alreadyVisited ? -30 : base * 10;
         } else if (dist === 1) {
-            score += alreadyVisited ? -10 : base * 0.5;
+            score += alreadyVisited ? -10 : base;
         } else {
             score += alreadyVisited ? -10 : base;
         }
