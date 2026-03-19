@@ -43,6 +43,8 @@ export const DefaultTimelineContextObject: MapTimelineContextT = {
 export const DefaultUIHelperContextObject: UIHelperContextT = {
     resting: false,
     restingOpacity: 30,
+    inventoryOpen: false,
+    toggleInventoryOpen: () => {}
 }
 
 export const CycleContext = createContext<CycleContextT>({ ...DefaultCycleContextObject })

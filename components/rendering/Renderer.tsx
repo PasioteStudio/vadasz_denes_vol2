@@ -1,4 +1,4 @@
-import { useCycle, useTimeline } from '@/lib/contexts';
+import { useCycle, useTimeline, useUIHelper } from '@/lib/contexts';
 import { MarsRover } from '@/Prefabs/MarsRover';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
@@ -42,7 +42,7 @@ export const Renderer = () => {
   });
 
   const [fov, setFov] = useState(10);
-  const [isInventoryOpen, setInventoryOpen] = useState(false);
+  const {inventoryOpen} = useUIHelper();
 
   useEffect(() => {
     directionRef.current = direction;
@@ -111,7 +111,7 @@ export const Renderer = () => {
 
   // Kamera mozgása, ha nincs engedélyezve a "snap to rover"
   useEffect(() => {
-    if (isInventoryOpen || player.snapToggle) return;
+    if (inventoryOpen || player.snapToggle) return;
 
     let lastTime = Date.now();
     let animFrameId: number;
@@ -145,7 +145,7 @@ export const Renderer = () => {
 
     animFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameId);
-  }, [keys, isInventoryOpen, player]);
+  }, [keys, inventoryOpen, player]);
 
   // Kamera látótere, görgővel változtatható.
   useEffect(() => {
@@ -162,7 +162,6 @@ export const Renderer = () => {
 
   }, []);
 
-  const toggleInventory = () => setInventoryOpen(p => !p);
   const camPos: [number, number, number] = [direction.x, CAM_HEIGHT, direction.y];
 
 
@@ -211,17 +210,13 @@ export const Renderer = () => {
 
         <PathDisplayer />
 
-        {rover && <MarsRover onSelect={toggleInventory} />}
+        {rover && <MarsRover />}
 
         <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
 
         <MainParticle camPosition={[camPos[0], 10, camPos[2]]} />
 
       </Canvas>
-
-      {isInventoryOpen && (
-        <InventoryPopup onClose={() => setInventoryOpen(false)} />
-      )}
     </>
   );
 };

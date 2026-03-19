@@ -7,7 +7,7 @@ import { useFrame } from "@react-three/fiber"
 import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/lib/constants"
-import { useCycle, useTimeline } from "@/lib/contexts"
+import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts"
 import { RoverDustParticle } from "@/components/rendering/Particles/RoverDustParticle"
 
 // ez sajnos ilyen...
@@ -26,9 +26,7 @@ type GLTFResult = GLTF & {
 }
 
 // Az inventory popup megnyitásához
-type MarsRoverProps = ThreeElements["group"] & {
-  onSelect?: () => void
-}
+type MarsRoverProps = ThreeElements["group"]
 
 const ROTATE_TIME = 100
 const MOVE_TIME = 100
@@ -59,6 +57,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const group = useRef<THREE.Group>(null!)
   const cycle = useCycle()
   const timeline = useTimeline()
+  const {toggleInventoryOpen} = useUIHelper();
 
   const position = useRef(new THREE.Vector3())
   const rotationY = useRef(0)
@@ -252,7 +251,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
       scale={0.5}
       onClick={(e) => {
         e.stopPropagation()
-        props.onSelect?.()
+        toggleInventoryOpen()
       }}
     >
       <group name="Scene">

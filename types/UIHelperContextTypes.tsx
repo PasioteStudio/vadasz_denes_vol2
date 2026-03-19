@@ -1,4 +1,6 @@
 export type UIHelperContextT = {
     restingOpacity: number,
-    resting: boolean
+    resting: boolean,
+    inventoryOpen: boolean,
+    toggleInventoryOpen: () => void,
 }

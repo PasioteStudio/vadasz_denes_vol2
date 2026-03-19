@@ -25,6 +25,7 @@ export default function RootLayout({
 	const [UIisResting, setUIResting] = useState({
 		isResting: false,
 	});
+	const [invOpen, setInvOpen] = useState(false);
 	const lastMoveRef = useRef<number>(Date.now());
 
 
@@ -55,7 +56,9 @@ export default function RootLayout({
 			>
 				<UIHelperContext.Provider value={{
 					restingOpacity: 30,
-					resting: UIisResting.isResting
+					resting: UIisResting.isResting,
+					inventoryOpen: invOpen,
+					toggleInventoryOpen: () => {setInvOpen(p => !p)}
 				}}>
 					{children}
 				</UIHelperContext.Provider>
