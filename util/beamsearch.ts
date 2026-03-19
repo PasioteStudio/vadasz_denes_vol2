@@ -421,7 +421,6 @@ function canReach(
             e = Math.min(e - consumption[action.move1] + recharge, 100);
             dist -= 1;
         } else {
-            // wait to recharge
             e = Math.min(e - consumption[action.standby] + recharge, 100);
         }
 
