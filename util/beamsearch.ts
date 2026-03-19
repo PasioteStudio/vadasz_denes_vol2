@@ -118,6 +118,15 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
         ore => distanceFromStart[ore.y][ore.x] !== Infinity
     );
 
+    const encode = (x: number, y: number) => x * 1000 + y;
+
+    const oreDistanceMaps = new Map<number, number[][]>();
+
+    for (const ore of reachableOres) {
+        const key = encode(ore.x, ore.y);
+        oreDistanceMaps.set(key, computeDistanceMap(moveableGrid, ore));
+    }
+
     // Ha nincs elérhető érc, akkor csak.. létezzünk.
     if (reachableOres.length === 0) {
         return idleSolution(moves, start, map);
@@ -145,7 +154,7 @@ export function beamsolve(moves: number, map: Tile[][]): { path: Position[][], d
             // ha nem érünk innen haza, akkor nincs értelme tovább számolni.
             if (!canReach(distanceFromStart[pos.y][pos.x], item.energy, step + 2, moves)) continue;
 
-            const expansions = expand(item, moveableGrid, reachableOres); // bővítés
+            const expansions = expand(item, moveableGrid, reachableOres, oreDistanceMaps); // bővítés
 
             for (const e of expansions) { // bővítések kezelése
                 const lastStep = e.steps[e.steps.length - 1];
@@ -233,8 +242,9 @@ const directions = [
  * @param grid `(0 | 1)[][]`
  * @param orePositions `Position[]`
  * @returns `Expansion[]`
+ * 
  */
-const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Expansion[] => {
+const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[], oreDistanceMaps: Map<number, number[][]>): Expansion[] => {
     const nextTick = item.sequence.length;
     const chargeAmount = nextTick % 48 >= 32 ? 0 : dayCharge;
     const lastPos = item.lastPos;
@@ -308,7 +318,7 @@ const expand = (item: BeamItem, grid: (0 | 1)[][], orePositions: Position[]): Ex
 
             expansions.push({
                 denergy: dEnergy,
-                dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps),
+                dscore: calculateMoveScore(item.map, { x: px, y: py }, orePositions, item.sequence, steps, grid, oreDistanceMaps),
                 steps,
                 changes: [],
             });
@@ -459,7 +469,9 @@ const calculateMoveScore = (
     pos: Position,
     orePositions: Position[],
     sequence: Move[][],
-    candidateSteps: Move[]
+    candidateSteps: Move[],
+    grid: (0 | 1)[][],
+    oreDistanceMaps: Map<number, number[][]>
 ): number => {
     // Ha már nincs érc, nagyon sok pontot kap. Végtére ez a cél.
     if (orePositions.length === 0) return 10000;
@@ -491,14 +503,17 @@ const calculateMoveScore = (
     for (const ore of orePositions) {
         if (!isOre(map[ore.y][ore.x])) continue;
 
-        const dx = Math.abs(pos.x - ore.x);
-        const dy = Math.abs(pos.y - ore.y);
-        const dist = Math.max(dx, dy);
+        const key = encode(ore.x, ore.y);
+        const distMap = oreDistanceMaps.get(key)!;
+        const dist = distMap[pos.y][pos.x];
+
+        // const dx = Math.abs(pos.x - ore.x);
+        // const dy = Math.abs(pos.y - ore.y);
+        // const dist = Math.max(dx, dy);
         const temp = dist + 0.1;
         // Ez az ocsmányság 1 / Math.pow(dist+0.1, 2.5), de így egy fokkal gyorsabb.
         const base = 1 / (temp * temp * Math.sqrt(temp));
 
-        const key = encode(ore.x, ore.y);
         const alreadyVisited = visitedSet.has(key);
         const walkedOver = steppedOver.has(key);
 
@@ -627,4 +642,62 @@ function idleSolution(
         path: sequence.map(ms => ms.map(m => m.to)),
         deltas: generateDeltas(sequence, map),
     };
+}
+
+function calculateDistance(
+    start: Position,
+    target: Position,
+    grid: (0 | 1)[][]
+): number {
+    const rows = grid.length;
+    const cols = grid[0].length;
+
+    // Check bounds
+    const inBounds = (x: number, y: number) =>
+        x >= 0 && y >= 0 && x < cols && y < rows;
+
+    // If start or target is invalid
+    if (
+        !inBounds(start.x, start.y) ||
+        !inBounds(target.x, target.y) ||
+        grid[start.y][start.x] === 0 ||
+        grid[target.y][target.x] === 0
+    ) {
+        return -1;
+    }
+
+    const visited = Array.from({ length: rows }, () =>
+        Array(cols).fill(false)
+    );
+
+    const queue: [number, number, number][] = []; // [x, y, distance]
+
+    queue.push([start.x, start.y, 0]);
+    visited[start.y][start.x] = true;
+
+    while (queue.length > 0) {
+        const [x, y, dist] = queue.shift()!;
+
+        // Reached target
+        if (x === target.x && y === target.y) {
+            return dist;
+        }
+
+        for (const [dx, dy] of directions) {
+            const nx = x + dx;
+            const ny = y + dy;
+
+            if (
+                inBounds(nx, ny) &&
+                !visited[ny][nx] &&
+                grid[ny][nx] === 1
+            ) {
+                visited[ny][nx] = true;
+                queue.push([nx, ny, dist + 1]);
+            }
+        }
+    }
+
+    // No path found
+    return -1;
 }
