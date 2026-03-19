@@ -62,6 +62,9 @@ export const Renderer = () => {
   }, [timeline.startingPoint]);
 
   // Kamera mozgása, ha engedélyezve van a "snap to rover"
+  const SMOOTH_SPEED_FACTOR = 0.07
+  const FAST_SPEED_FACTOR = 0.25
+  const RANGE_SPEED_FACTOR = 10
   useEffect(() => {
     if (!player.snapToggle) {
       isSnappingRef.current = false;
@@ -76,16 +79,18 @@ export const Renderer = () => {
     let current = { ...direction };
     let animFrameId: number;
 
+    const targetX = rover.position.x * GAP;
+    const targetY = rover.position.y * GAP + 110;
+
+    const speedFactor = (Math.abs(targetX-current.x) > RANGE_SPEED_FACTOR) && (Math.abs(targetY-current.y) > RANGE_SPEED_FACTOR) ? FAST_SPEED_FACTOR : SMOOTH_SPEED_FACTOR
+
     const snapping = () => {
       const now = Date.now();
       lastTime = now;
 
-      const targetX = rover.position.x * GAP;
-      const targetY = rover.position.y * GAP + 110;
-
       const next = {
-        x: lerp(current.x, targetX, t.current),
-        y: lerp(current.y, targetY, t.current)
+        x: lerp(current.x, targetX, t.current * speedFactor),
+        y: lerp(current.y, targetY, t.current * speedFactor)
       };
 
       if (Math.abs(next.x - targetX) < 0.05 && Math.abs(next.y - targetY) < 0.05) {
