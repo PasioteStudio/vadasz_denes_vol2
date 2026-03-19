@@ -78,7 +78,6 @@ export const Renderer = () => {
 
     const snapping = () => {
       const now = Date.now();
-      const delta = (now - lastTime) / 1000;
       lastTime = now;
 
       const targetX = rover.position.x * GAP;
