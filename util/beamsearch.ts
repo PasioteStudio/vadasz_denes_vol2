@@ -508,7 +508,6 @@ const calculateMoveScore = (
         const dist = distMap[pos.y][pos.x];
 
         const temp = dist + 0.1;
-        // Ez az ocsmányság 1 / Math.pow(dist+0.1, 2.5), de így egy fokkal gyorsabb.
         const base = 1 / (temp * temp * Math.sqrt(temp));
 
         const alreadyVisited = visitedSet.has(key);
