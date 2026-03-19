@@ -16,7 +16,7 @@ export function Sky() {
       texture.colorSpace = THREE.SRGBColorSpace;
       
 
-      const skyGeo = new THREE.SphereGeometry(400, 32, 32);
+      const skyGeo = new THREE.SphereGeometry(200, 10, 10);
 
       const skyMat = new THREE.MeshBasicMaterial({
         map: texture,

@@ -14,7 +14,7 @@ export function ParticleManager(props: ParticleType) {
   const explosionRef = useRef<Explosion | null>(null)
 
   useEffect(() => {
-    dustRef.current = new Dust(scene, 700, 50, [-10, 10, -30], 0)
+    dustRef.current = new Dust(scene, 200, 50, [-10, 10, -30], 0)
     if(props.blowUp) {
       explosionRef.current = new Explosion(scene, 2000, 30, [-3.3, 1, -20], 0, 0.5, 10)
     }
