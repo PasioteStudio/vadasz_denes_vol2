@@ -4,12 +4,16 @@
 
 Ez a projekt a 2026-ban megrendezett Vadász Dénes Informatikai Versenyre készült.
 
-Csapattagok:
+**Csapattagok:**
 - Magi Zsolt (modellek, vágás, animációk)
 - Pápa Attila (algoritmus, frontend, quality control)
 - Gál Attila Péter (algoritmus, frontend, quality control)
 
+**Iskola:** Debreceni SZC Mechwart András Gépipari és Informatikai Technikum
 
+**Elérhetőség**: gal.attila0204@gmail.com (Gál Attila Péter)
+
+**Felkészítő Tanár**: Nemes Tamás
 ## Fejlesztői környezet
 **Programnyelv:** TypeScript
 
