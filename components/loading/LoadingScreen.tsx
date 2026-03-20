@@ -3,21 +3,20 @@ import { useEffect, useRef, useState } from "react";
 
 const TIPS = [
     "A Marson található legmagasabb hegy a Mount Everest háromszorosa.",
-    "Ez év a Marson körülbelül 687 földi nap.",
+    "Egy év a Marson körülbelül 687 földi nap.",
     "A Mars felszínén a naplemente kéknek tűnik az atmoszféra miatt.",
     "A Mars gravitációja harmad akkora, mint a Földé.",
     "A marsi napot 'sol'-nak hívják.",
     "A Marson található jég, vékony felhők és még áradások jelei is felbukkantak.",
 ];
 const TIP_INTERVAL = 4000;
+const MIN_DISPLAY_TIME = 1500;
 
 export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
     const [visible, setVisible] = useState(isLoading);
     const [fade, setFade] = useState(false);
-    const MIN_DISPLAY_TIME = 1500;
     const [startTime, setStartTime] = useState<number | null>(null);
-
-    const [currentTipIndex, setTipIndex] = useState(0);
+    const [currentTipIndex, setTipIndex] = useState(Math.floor(Math.random() * (TIPS.length - 1)));
     const [tipFade, setTipFade] = useState(true);
 
     useEffect(() => {
@@ -28,7 +27,6 @@ export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
         }
     }, [isLoading]);
 
-    // Handle loading exit
     useEffect(() => {
         if (!isLoading && visible) {
             const elapsed = startTime ? Date.now() - startTime : 0;
@@ -44,7 +42,6 @@ export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
         }
     }, [isLoading, visible, startTime]);
 
-    // Rotate tips
     useEffect(() => {
         if (!visible) return;
 
@@ -52,9 +49,12 @@ export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
             setTipFade(false);
 
             setTimeout(() => {
-                setTipIndex((prev) => (prev + 1) % TIPS.length);
+                setTipIndex((prev) => {
+                    const step = Math.floor(Math.random() * (TIPS.length - 1)) + 1;
+                    return (prev + step) % TIPS.length;
+                });
                 setTipFade(true);
-            }, 300); // fade-out duration
+            }, 300);
         }, TIP_INTERVAL);
 
         return () => clearInterval(interval);
@@ -65,9 +65,8 @@ export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
     return (
         <div className="fixed top-0 left-0 w-full h-full bg-black">
             <div
-                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${
-                    fade ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${fade ? "opacity-100" : "opacity-0"
+                    }`}
             >
                 <video
                     src="/videos/marsLoadingScreen.mp4"
@@ -78,12 +77,10 @@ export default function LoadingScreen({ isLoading }: { isLoading: boolean }) {
                 />
             </div>
 
-            {/* Tip overlay */}
-            <div className="absolute bottom-10 w-max flex justify-center left-1/2 -translate-x-1/2 px-6 bg-black/30">
+            <div className="absolute bottom-10 w-max flex justify-center left-1/2 -translate-x-1/2 px-6 bg-black/30 rounded-md p-3">
                 <p
-                    className={`text-gray-100 text-center md:text-base max-w-xl transition-opacity duration-300 text-4xl ${
-                        tipFade ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`text-gray-100 text-center md:text-base max-w-xl transition-opacity duration-300 text-4xl ${tipFade ? "opacity-100" : "opacity-0"
+                        }`}
                 >
                     {TIPS[currentTipIndex]}
                 </p>
