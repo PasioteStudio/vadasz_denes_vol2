@@ -48,6 +48,8 @@ A projekt NextJS-t használ, így a fejlesztői környezet futtatása a követke
 
 Az alkalmazás fejlesztői környezetben való használata a localhost:3000 címen történik a böngészőben.
 A lefejlesztett alkalmazást .exe fájl formájában külön találják. A fordításhoz Electron-t használtunk.
+
+Mivel csak self signed certificated áll a rendelkezésünkre, ezért majd el kell fogadniuk a futtatásnál felugró Windows ablakot: "Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk."
 ## Használat
 Megnyitáskor a kezkdőképernyő fogad minket, ahol választhatunk az alap térkép használata, véletlenszerű generálása és saját térkép feltöltése között. Ha kiválasztottunk egy lehetőséget, alul a jobbra nyíllal átléphetünk az idő megadására. Miután megadtuk az időmennyiséget, elérhetővé válik az Indítás gomb.
 
