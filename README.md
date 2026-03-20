@@ -31,6 +31,22 @@ Ez a projekt a 2026-ban megrendezett Vadász Dénes Informatikai Versenyre kész
 
 **Konfliktuskezelés:** _Ököljog_
 
+## Futtatás
+A fejlesztői környezet futtatásához szükséges nodeJS v22.15+ és Node Package Manager 10.9.2+.
+A projekt NextJS-t használ, így a fejlesztői környezet futtatása a következkő módon érhető el:
+- függőségek telepítése (a packages.json-nal egy mappában):
+
+    ```bash
+    npm install
+    ```
+
+- fejlesztői környezet futtatása:
+
+    ```bash
+    npm run dev
+    ```
+
+A lefejlesztett alkalmazást .exe fájl formájában a FINAL mappában találják. A fordításhoz Electron-t használtunk.
 ## Projekt struktúra
 A kezdőképernyő és az adatok megadása után a projekt működése három részre osztható.
 
@@ -49,21 +65,6 @@ A megjelenítés:
 Az algoritmus és a megjelenítési réteg nem avatkozik egymásba.
 
 
-## Futtatás
-A projekt NextJS-t használ, így a fejlesztői környezet futtatása a következkő módon érhető el:
-- függőségek telepítése (a packages.json-nal egy mappában):
-
-    ```bash
-    npm install
-    ```
-
-- fejlesztői környezet futtatása:
-
-    ```bash
-    npm run dev
-    ```
-
-A lefejlesztett alkalmazást .exe fájl formájában a FINAL mappában találják. A fordításhoz Electron-t használtunk.
 ## Algoritmus működése
 Az algoritmus a beam search ötletére épül, a szabályoknak megfelelő változtatásokkal.
 Az inicializálás fázisban meghatározza, hogy egyáltalán van-e elérhető érc. Ha nincs, akkor egész egyszerűen kitölti a megteendő mozdulatokat várakozással. Ha van, akkor pedig legenerálja a mezők távolságát Breafth-first kereséssel, hogy azokat minden ponton a térképen konstans időben el tudjuk érni. Éppen ezért a mozdulatért rövid időtartamoknál ez az algoritmus gyengébben teljesíthet, viszont több száz óránál is akár egy teljesen elfogadható futási időt produkál.
