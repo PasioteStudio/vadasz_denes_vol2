@@ -7,14 +7,8 @@
   },
   "version": "1.1.0",
   "private": true,
-  "//": [
-    "WARNING The sign script can only be executed with admin privilege",
-    "WARNING The openssl script can only be executed in the OpenSSL CMD" 
-  ],
   "scripts": {
-    "package": "electron-builder -w --x64",
-    "sign":"electron-builder create-self-signed-cert -p Szigmakik_no_password",
-    "openssl":"openssl pkcs12 -in Szigmakik_no_password.pfx -out temp.pem -nodes && openssl pkcs12 -export -in temp.pem -out Szigmakik.pfx -password pass:VadaszDenes && del temp.pem && del Szigmakik_no_password.pfx"
+    "package": "electron-builder -w --x64"
   },
   "dependencies": {
     "express": "^5.2.1"
@@ -40,13 +34,7 @@
       "releaseType": "release",
       "repo": "vadasz_denes_vol2"
     },
-    "asar": true,
-    "win": {
-      "signtoolOptions":{
-        "certificateFile": "./Szigmakik.pfx",
-        "certificatePassword": "VadaszDenes"
-      }
-    }
+    "asar": true
   }
 }
 
