@@ -41,11 +41,15 @@ Az algoritmus és a megjelenítési réteg nem avatkozik egymásba.
 A projekt NextJS-t használ, így a fejlesztői környezet futtatása a következkő módon érhető el:
 - függőségek telepítése (a packages.json-nal egy mappában):
 
-    `npm install`
+    ```bash
+    npm install
+    ```
 
 - fejlesztői környezet futtatása:
 
-    `npm run dev`
+    ```bash
+    npm run dev
+    ```
 
 A lefejlesztett alkalmazást .exe fájl formájában a FINAL mappában találják. A fordításhoz Electron-t használtunk.
 ## Algoritmus működése
