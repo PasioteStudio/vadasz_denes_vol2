@@ -23,34 +23,33 @@ function createWindowWithPort(port) {
     width: 800,
     height: 600,
     webPreferences: {
-      devTools: false, // Disable dev tools
-      nodeIntegration: false, // Disable node integration for security
-      contextIsolation: true, // Enable context isolation
-      backgroundThrottling: false, // Prevent background throttling
-      preload: path.join(__dirname, 'preload.js'), // Preload script
-      sandbox: true // Enable sandbox for security
+      devTools: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      backgroundThrottling: false,
+      sandbox: true
     },
-    autoHideMenuBar: true, // Hide menu bar
+    autoHideMenuBar: true,
     show: true,
-    frame: true // Keep window frame for OS controls
+    frame: true
   });
   window.setMenuBarVisibility(false);
   window.loadURL(`http://localhost:${port}`);
 
-  // Remove window reference on close
   window.on('closed', () => {
     window = null;
   });
 }
 
+app.commandLine.appendSwitch('--force_high_performance_gpu');
+
 app.whenReady().then(() => createServer((port) => {
-  // Set process priority to highest for main and child process
   try {
     if (process.platform === 'win32') {
       const pid = process.pid;
-      execSync(`wmic process where processid=${pid} CALL setpriority "realtime"`); // Highest priority
+      execSync(`wmic process where processid=${pid} CALL setpriority "realtime"`);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      process.setPriority && process.setPriority(-20); // -20 is highest, 0 is default
+      process.setPriority && process.setPriority(-20);
     }
   } catch (e) {
     console.warn('Could not set process priority:', e.message);
