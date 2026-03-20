@@ -56,6 +56,8 @@ export default function Home({
     position: startingPoint,
     startingPosition: startingPoint
   })
+  
+  const roverRef = useRef<RoverT>(rover)
 
   const t = useRef(0)
   const flavoredMap = useRef<[boolean, Tile, Tile | null][][]>([])
@@ -69,36 +71,40 @@ export default function Home({
     (fromTick: number, toTick: number) => {
       const direction = toTick < fromTick ? -1 : 1
 
-      const deltasToExecute =
+      let deltasToExecute =
         toTick < fromTick
           ? deltas.filter((_, i) => i <= fromTick && i > toTick)
           : deltas.filter((_, i) => i > fromTick && i <= toTick)
 
-      let position: Position = { ...rover.position }
-      let inventory: Item[] = [...rover.inventory]
-      let energy = rover.energy
-      let logs: Log[] = [...rover.logs]
+      if (direction === -1) deltasToExecute = deltasToExecute.reverse()
+
+      const baseRover = roverRef.current
+      let position: Position = { ...baseRover.position }
+      let inventory: Item[] = [...baseRover.inventory]
+      let logs: Log[] = [...baseRover.logs]
       let newMap = deepCopy(flavoredMap.current)
 
       for (const d of deltasToExecute) {
-        energy = getEnergyForTick(toTick + 1, deltas)
         position = processPositionChanges(position, d.moves, direction)
         inventory = processInventoryChanges(inventory, d.inventoryChanges, direction)
         logs = processLogChanges(logs, d.logsAdded, direction)
         newMap = processMapChanges(newMap, d.moves, direction)
       }
 
-      setRover(prev => ({
-        ...prev,
+      const energy = getEnergyForTick(toTick + 1, deltas)
+      const nextRover: RoverT = {
+        ...baseRover,
         energy,
         inventory,
         logs,
         position
-      }))
+      }
+      roverRef.current = nextRover
+      setRover(nextRover)
 
       flavoredMap.current = newMap
     },
-    [deltas, rover]
+    [deltas]
   )
 
   /**
@@ -108,10 +114,10 @@ export default function Home({
   const setTickTo = useCallback(
     (next: number) => {
       const actualTick = Math.max(0, Math.min(deltas.length - 1, next))
-      if (actualTick === cycle.currentTick) return
       if (!deltas[actualTick]) throw Error()
 
       setCycle(prev => {
+        if (actualTick === prev.currentTick) return prev
         recalculateSnapshots(prev.currentTick, actualTick)
 
         return {
@@ -121,7 +127,7 @@ export default function Home({
         }
       })
     },
-    [deltas, cycle.currentTick, recalculateSnapshots]
+    [deltas, recalculateSnapshots]
   )
 
   // INIT useEffect, mikor megkapjuk a kiindulási mapot.
