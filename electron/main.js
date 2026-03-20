@@ -20,8 +20,7 @@ function createServer(callback) {
 let window = null;
 function createWindowWithPort(port) {
   window = new BrowserWindow({
-    width: 800,
-    height: 600,
+    title: "Vadász Dénes",
     webPreferences: {
       devTools: false,
       nodeIntegration: false,
@@ -31,7 +30,7 @@ function createWindowWithPort(port) {
     },
     autoHideMenuBar: true,
     show: true,
-    frame: true
+    frame: true,
   });
   window.setMenuBarVisibility(false);
   window.loadURL(`http://localhost:${port}`);
@@ -39,6 +38,8 @@ function createWindowWithPort(port) {
   window.on('closed', () => {
     window = null;
   });
+
+  window.maximize();
 }
 
 app.commandLine.appendSwitch('--force_high_performance_gpu');
