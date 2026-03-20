@@ -63,3 +63,14 @@ Minden bővítés után kiválasztjuk a legjobb W elemet a pontok alapján, és 
 A következő iteráció a W megtartott sugárból készít bővítményeket, ameddig kimerülünk a lehetőségekből vagy elérjük a moves mennyiséget.
 
 Utolsó lépésként a nyertes sugárhoz hozzáfűzzük a hazautat, majd leképezzük az utat és a deltákat, amiket a többi komponens használ majd.
+## Optimalizációk
+- O(1) lookup a távolságokra
+- GPU instancing a mezőkre
+- Camera Culling a térképen
+- GPU instancing a dekoratív részecskékre
+
+
+## Teszt esetek
+
+Pár egyszerű teszt eset található néhány érdekesebb szituációra a `test cases/` mappában.
+A fájlok a szabálynak megfelelően 50x50-es méretű térképeket tartalmaznak, kezdő pozíciókkal, csv formátumban.
