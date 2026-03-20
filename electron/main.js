@@ -1,7 +1,13 @@
 const { app, BrowserWindow } = require('electron/main');
-const path = require('node:path');
+const { session } = require('electron');
+const path = require('path');
+const os = require('os');
 const { execSync } = require('child_process');
 const express = require('express');
+
+app.setPath('userData', path.join(os.tmpdir(), 'vadasz-temp'));
+
+app.commandLine.appendSwitch('disable-http-cache');
 
 const nodejsApp = express();
 
@@ -25,6 +31,7 @@ function createWindowWithPort(port) {
       devTools: false,
       nodeIntegration: false,
       contextIsolation: true,
+      partition: 'temporary',
       backgroundThrottling: false,
       sandbox: true
     },
@@ -44,7 +51,9 @@ function createWindowWithPort(port) {
 
 app.commandLine.appendSwitch('--force_high_performance_gpu');
 
-app.whenReady().then(() => createServer((port) => {
+app.whenReady().then(() => createServer(async(port) => {
+  await session.defaultSession.clearCache();
+  await session.defaultSession.clearStorageData();
   try {
     if (process.platform === 'win32') {
       const pid = process.pid;

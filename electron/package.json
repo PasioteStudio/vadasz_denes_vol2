@@ -34,6 +34,13 @@
       "releaseType": "release",
       "repo": "vadasz_denes_vol2"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "installerIcon": "./favicon.ico",
+      "installerHeaderIcon": "./favicon.ico"
+    },
     "asar": true
   }
 }
