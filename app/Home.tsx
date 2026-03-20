@@ -18,6 +18,7 @@ import {
 import { generateFlavoredMap, getStartingPoint } from "@/util/map"
 import { deepCopy } from "@/util/math"
 import LoadingScreen from "@/components/loading/LoadingScreen"
+import RuntimeDisplayer from "@/components/gui/RuntimeDisplayer"
 
 export default function Home({
   timeLimit,
@@ -48,6 +49,7 @@ export default function Home({
   const [deltas, setDeltas] = useState<Delta[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [path, setPath] = useState<Position[][]>([])
+  const [runTime, setRuntime] = useState(0);
 
   const [rover, setRover] = useState<RoverT>({
     energy: 100,
@@ -155,7 +157,7 @@ export default function Home({
     worker.onmessage = event => {
       if (event.data.type === "makePathResult") {
         const end = Date.now()
-        console.log("Futási idő (ms): ", end - start)
+        setRuntime(end - start);
 
         const result = event.data.result
         setPath(result.path)
@@ -201,6 +203,7 @@ export default function Home({
       >
         <Renderer />
         <GUI />
+        <RuntimeDisplayer runtime={runTime} />
         <LoadingScreen isLoading={isLoading} />
       </MapTimeLineContext.Provider>
     </CycleContext.Provider>
