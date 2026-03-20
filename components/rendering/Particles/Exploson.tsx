@@ -58,13 +58,19 @@ export class Explosion {
       "position",
       new THREE.BufferAttribute(positions, 3)
     )
+    this.geometry.computeBoundingSphere()
 
     //material és pontok létrehozása
     this.material = new THREE.PointsMaterial({
-          color: new THREE.Color(1, 0, 0),
-          size: size
-        })
+      color: new THREE.Color(1, 0, 0),
+      size,
+      sizeAttenuation: false,
+      depthTest: false,
+      transparent: true,
+      opacity: 1
+    })
     this.points = new THREE.Points(this.geometry, this.material)
+    this.points.frustumCulled = false
     scene.add(this.points)
   }
 

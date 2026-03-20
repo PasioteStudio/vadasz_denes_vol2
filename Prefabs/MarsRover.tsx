@@ -1,14 +1,15 @@
 "use client"
 
 import * as THREE from "three"
-import { useRef, useEffect } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useGLTF } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
+import { useFrame, useThree } from "@react-three/fiber"
 import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/lib/constants"
 import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts"
 import { RoverDustParticle } from "@/components/rendering/Particles/RoverDustParticle"
+import { Explosion } from "@/components/rendering/Particles/Exploson"
 
 // ez sajnos ilyen...
 type GLTFResult = GLTF & {
@@ -58,6 +59,7 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const cycle = useCycle()
   const timeline = useTimeline()
   const {toggleInventoryOpen} = useUIHelper();
+  const { scene } = useThree()
 
   const position = useRef(new THREE.Vector3())
   const rotationY = useRef(0)
@@ -65,6 +67,22 @@ export function MarsRover({ ...props }: MarsRoverProps) {
   const tickDuration = useRef(0)
 
   const subticks = useRef<Subtick[]>([])
+
+  const explosionRef = useRef<Explosion | null>(null)
+  const explosionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const hasAutoExplodedRef = useRef(false)
+  const roverHiddenRef = useRef(false)
+
+  const shouldAutoExplode = useMemo(() => {
+    if (timeline.deltas.length <= 1) return false
+    const first = timeline.deltas[0]
+    return (
+      first?.moves?.length > 0 &&
+      first.moves.every(m => m.mode === "wait")
+    )
+  }, [timeline.deltas])
 
   const { nodes, materials } =
     useGLTF("/Modells/marsrover.glb") as unknown as GLTFResult
@@ -176,11 +194,81 @@ export function MarsRover({ ...props }: MarsRoverProps) {
     )
   }, [cycle.currentTick, timeline.deltas, cycle.direction, cycle.player.speed])
 
+  // robbanás
+  useEffect(() => {
+    hasAutoExplodedRef.current = false
+    roverHiddenRef.current = false
+
+    if (explosionTimeoutRef.current) {
+      clearTimeout(explosionTimeoutRef.current)
+      explosionTimeoutRef.current = null
+    }
+
+    if (explosionRef.current) {
+      scene.remove(explosionRef.current.points)
+      explosionRef.current = null
+    }
+
+    if (group.current) group.current.visible = true
+  }, [timeline.deltas, scene])
+
+  useEffect(() => {
+    if (!shouldAutoExplode) return
+    if (hasAutoExplodedRef.current) return
+    if (explosionTimeoutRef.current) return
+
+    explosionTimeoutRef.current = setTimeout(() => {
+      if (!shouldAutoExplode || hasAutoExplodedRef.current) return
+      hasAutoExplodedRef.current = true
+
+      const worldPos =
+        group.current?.getWorldPosition(new THREE.Vector3()) ??
+        toWorld(timeline.rover.position.x, timeline.rover.position.y)
+      const offset: [number, number, number] = [
+        worldPos?.x ?? 0,
+        (worldPos?.y ?? 0) + 0.5,
+        worldPos?.z ?? 0
+      ]
+
+      if (explosionRef.current) {
+        scene.remove(explosionRef.current.points)
+        explosionRef.current = null
+      }
+
+      explosionRef.current = new Explosion(
+        scene,
+        4000,
+        30,
+        offset,
+        0,
+        0.6,
+        0.3
+      )
+
+      roverHiddenRef.current = true
+      if (group.current) group.current.visible = false
+    }, 3000)
+
+    return () => {
+      if (explosionTimeoutRef.current) {
+        clearTimeout(explosionTimeoutRef.current)
+        explosionTimeoutRef.current = null
+      }
+    }
+  }, [shouldAutoExplode, scene])
+
   // Minden frame a jelenleg aktuális Subtick sorozatot hajtja végre.
   // FONTOS: a cycle.t változó a Rover animáció fázisához igazodik. 
   // Ettől függ például a <DayNightDirectionalLight /> mozgása is (a lerp része legalább is).
   // 0 <= t <= 1
   useFrame((_, delta) => {
+    if (explosionRef.current) {
+      explosionRef.current.update(delta)
+      if (explosionRef.current.life <= 0) {
+        explosionRef.current = null
+      }
+    }
+
     if (!subticks.current.length) return
 
     elapsed.current += delta * 1000
