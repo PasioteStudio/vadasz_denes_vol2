@@ -3,20 +3,17 @@ import { MarsRover } from '@/Prefabs/MarsRover';
 import { Position } from '@/types/RoverContextTypes';
 import { useKeyboard } from '@/util/controlls';
 import { PerspectiveCamera as PerspectiveCameraComponent } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import InventoryPopup from '../gui/InventoryPopup';
 import { TILE_GAP } from './TileRenderer';
 import { PerspectiveCamera } from 'three';
 import DayNightDirectionalLights from './DayNightDirectonalLight';
 import MapRenderer from './MapRenderer';
-import Sky from './Sky';
 import { PathDisplayer } from './PathDisplayer';
 import { MainParticle } from './Particles/MainParticles';
 import { clampNum } from '@/util/math';
 import { BottomPlane } from '@/Prefabs/BottomPlane';
 import { lerp } from 'three/src/math/MathUtils.js';
-import * as THREE from "three"
 import { BackgroundSky } from './BackgroundSky';
 
 const CAM_HEIGHT = 60;
@@ -86,7 +83,7 @@ export const Renderer = () => {
       const targetX = rover.position.x * GAP;
       const targetY = rover.position.y * GAP + 110;
 
-      const speedFactor = (Math.abs(targetX-current.x) > RANGE_SPEED_FACTOR) && (Math.abs(targetY-current.y) > RANGE_SPEED_FACTOR) ? FAST_SPEED_FACTOR : SMOOTH_SPEED_FACTOR
+      const speedFactor = (Math.abs(targetX-current.x) > RANGE_SPEED_FACTOR) && (Math.abs(targetY-current.y) > RANGE_SPEED_FACTOR) ? FAST_SPEED_FACTOR : SMOOTH_SPEED_FACTOR;
 
       const next = {
         x: lerp(current.x, targetX, t.current * speedFactor),

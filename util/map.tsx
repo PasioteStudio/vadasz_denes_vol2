@@ -119,7 +119,7 @@ export const generateFlavoredMap = (map: Tile[][]): [boolean, Tile, Tile|null][]
  * @returns {Tile} `Tile` - Részletes mező
  */
 export const randomTileFrom = (t: Tile): Tile => { 
-  let range: [number, number] = [0, 0];
+  let range: [number, number];
 
   switch (t) {
     case Tile.Start: 

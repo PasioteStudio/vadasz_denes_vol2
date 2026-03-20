@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const TIPS = [
     "A Marson található legmagasabb hegy a Mount Everest háromszorosa.",

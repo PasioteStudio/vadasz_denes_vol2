@@ -8,7 +8,6 @@ import type { ThreeElements } from "@react-three/fiber"
 import type { GLTF } from "three-stdlib"
 import { TILE_GAP } from "@/lib/constants"
 import { useCycle, useTimeline, useUIHelper } from "@/lib/contexts"
-import { RoverDustParticle } from "@/components/rendering/Particles/RoverDustParticle"
 import { Explosion } from "@/components/rendering/Particles/Exploson"
 
 // ez sajnos ilyen...
