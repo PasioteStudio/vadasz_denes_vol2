@@ -46,7 +46,32 @@ A projekt NextJS-t használ, így a fejlesztői környezet futtatása a követke
     npm run dev
     ```
 
+Az alkalmazás fejlesztői környezetben való használata a localhost:3000 címen történik a böngészőben.
 A lefejlesztett alkalmazást .exe fájl formájában a FINAL mappában találják. A fordításhoz Electron-t használtunk.
+## Használat
+Megnyitáskor a kezkdőképernyő fogad minket, ahol választhatunk az alap térkép használata, véletlenszerű generálása és saját térkép feltöltése között. Ha kiválasztottunk egy lehetőséget, alul a jobbra nyíllal átléphetünk az idő megadására. Miután megadtuk az időmennyiséget, elérhetővé válik az Indítás gomb.
+
+Ezt megnyomva egy töltőképernyőt láthatunk, ami után megjelenik a térkép és az algoritmus töltési ideje. Ezt az ablakot bezárva több vizuális elem fogad minket. Menjünk ezen végig.
+
+**Akkumulátor:** A bal felső sarokban láthatjuk a töltöttségi szintet. Az egeret fölé tartva leolvashatjuk a pontos mennyiséget.
+
+**Jelenlegi tevékenység:** A bal alsó sarokban láthatunk információt a jelenlegi tevékenységről.
+
+**Térkép exportálása:** A jelenlegi tevékenység mellett van egy gomb, ami felettébb hasznos a véletlenszerű térképek kiírására. CSV fájl a végeredmény. A térkép kezdeti állapotát tartalmazza.
+
+**Jelenlegi napállás:** Jobb felül láthatjuk, hogy jelenleg hol járunk a nap és a "hold" ciklusában. 
+
+**Napló:** A jobb alsó sarokban láthatjuk az eltelt idő függvényében a naplófájlokat. Ha az egeret e fölé visszük, többet látunk. A képernyő alján középen jelennek meg a legfrissebb naplósorok. 
+
+**Leltár:** A naplótól közvetlenül balra található a leltár. Ezt vagy a térképen lévő rovert kattintva megnyílik a jelenlegi leltár és az ércek.
+
+**Lejátszó:** A képernyő alján középen található a lejátszó. Megállított állapotban lehet egyesével lépkedni fél órás intervallumokban a billentyűzet nyilait vagy a gombokat használva. Elintítani/megállítani a középső lejátszás/megállítás gombbal vagy a space billentyűvel lehet. Gyorsabb lejátszáshoz használjuk a dupla nyíl gombokat.
+
+**Rover követése:** A lejátszótól közvetlenül balra található a "snap to rover" gomb, amelyre kattintással vagy a Q billentyű megnyomásával automatikusan követhetjük a rover útját lejátszás közben. Ha ez nincs bekapcsolva, akkor a WASD gombokkal lehet mozogni a térképen.
+
+**Megtett útvonal:** A térképen megjelenő vonal kékkel jelzi a még nem bejárt útvonalat és sárgával a már megtett részt.
+
+**Egyéb:** A kamera látóterét a görgővel tudjuk szabályozni.
 ## Projekt struktúra
 A kezdőképernyő és az adatok megadása után a projekt működése három részre osztható.
 
