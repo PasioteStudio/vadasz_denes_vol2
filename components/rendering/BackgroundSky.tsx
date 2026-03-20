@@ -9,10 +9,15 @@ export function BackgroundSky() {
 const colors = [
   new THREE.Color("#b3472a"), 
   new THREE.Color("#c28b3c"),
+  new THREE.Color("#a8733a"),
+  new THREE.Color("#a8733a"),
+  new THREE.Color("#a8733a"), 
   new THREE.Color("#a8733a"), 
   new THREE.Color("#5a3b2a"), 
+  new THREE.Color("#1a1d2e"),
   new THREE.Color("#1a1d2e"), 
-  new THREE.Color("#b3472a"), 
+  new THREE.Color("#1a1d2e"), 
+   new THREE.Color("#b3472a"), 
 ];
 
   function getSkyColor(t: number) {
