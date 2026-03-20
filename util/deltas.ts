@@ -33,7 +33,7 @@ export const processInventoryChanges = (startInv: Item[], delta: InventoryChange
     let newInv = [...startInv];
     deltas.forEach(d => {
         if ((d.mode == "add" && direction == 1)
-            || (d.mode == "remove" && direction == -1)) { // add item
+            || (d.mode == "remove" && direction == -1)) {
 
             const entry = newInv.find(i => i.ore == d.ore);
             if (entry) {
@@ -50,7 +50,7 @@ export const processInventoryChanges = (startInv: Item[], delta: InventoryChange
             ]
 
         } else if ((d.mode == "remove" && direction == 1)
-            || (d.mode == "add" && direction == -1)) {// remove item
+            || (d.mode == "add" && direction == -1)) {
 
             const entry = newInv.find(i => i.ore == d.ore);
             if (entry && entry.amount == d.amount) {
