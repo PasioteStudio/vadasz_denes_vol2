@@ -11,14 +11,22 @@ Csapattagok:
 
 
 ## Fejlesztői környezet
-- **Programnyelv:** TypeScript
-- **Version control:** Git & GitHub
-- **Szerkesztő:** VS Code
-- **Környezet:** NextJS + React + R3F + ThreeJS 
-- **Futtathatóvá tétel**: Electron
-- **Mentális állapot:** kimerült, de büszke 
-- **Kapcsolattartás módja:** Discord
-- **Konfliktuskezelés:** _Ököljog_
+**Programnyelv:** TypeScript
+
+**Version control:** Git & GitHub
+
+**Szerkesztő:** VS Code
+
+**Környezet:** NextJS + React + R3F + ThreeJS 
+
+**Futtathatóvá tétel**: Electron
+
+**Mentális állapot:** kimerült, de büszke 
+
+**Kapcsolattartás módja:** Discord
+
+**Konfliktuskezelés:** _Ököljog_
+
 ## Projekt struktúra
 A kezdőképernyő és az adatok megadása után a projekt működése három részre osztható.
 
